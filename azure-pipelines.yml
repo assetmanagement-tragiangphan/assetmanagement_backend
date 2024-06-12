@@ -21,4 +21,14 @@ steps:
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
 
-
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Visual Studio Enterprise Subscription – MPN - Rookies (37e5689f-a071-42d1-b1d0-12aef94b2585)-1015'
+    appType: 'webAppLinux'
+    WebAppName: 'ThanhLongBinhThuan'
+    deployToSlotOrASE: true
+    ResourceGroupName: 'rookiesjava01'
+    SlotName: 'production'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    RuntimeStack: 'JAVA|17-java17'
