@@ -46,6 +46,8 @@ public class User extends BaseEntity implements Auditable {
     private List<Assignment> assignments;
     @OneToMany(mappedBy = "acceptedBy")
     private List<ReturnRequest> returnRequests;
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
 
     @OneToMany(mappedBy = "auditMetadata.createdBy")
     private List<Asset> createdAssets;

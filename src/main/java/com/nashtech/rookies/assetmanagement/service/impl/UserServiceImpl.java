@@ -10,6 +10,8 @@ import com.nashtech.rookies.assetmanagement.util.GenderConstant;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,5 +43,13 @@ public class UserServiceImpl implements UserService {
                 .data(userMapper.entityToDto(user))
                 .message("Create user successfully.")
                 .build();
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        var user = userRepository.findByUsernameAndStatus(username, StatusConstant.ACTIVE)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
+
+        return userMapper.entityToUserDetailsDto(user);
     }
 }
