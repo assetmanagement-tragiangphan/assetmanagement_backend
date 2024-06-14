@@ -1,0 +1,8 @@
+package com.nashtech.rookies.assetmanagement.util;
+
+public enum StatusConstant {
+    ACTIVE, INACTIVE,
+    AVAILABLE, NOT_AVAILABLE, ASSIGNED, WAITING_FOR_RECYCLING, RECYCLED,
+    ACCEPTED, WAITING_FOR_ACCEPTANCE, DECLINED,
+    COMPLETED, WAITING_FOR_RETURNING
+}

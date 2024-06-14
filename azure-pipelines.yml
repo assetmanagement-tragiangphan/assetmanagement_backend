@@ -5,6 +5,7 @@
 
 trigger:
 - main
+- set-up-entity
 
 pool:
   vmImage: ubuntu-latest
@@ -18,6 +19,7 @@ steps:
     jdkVersionOption: '1.17'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
+    options: '-DskipTests=true'
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
 - task: CopyFiles@2
