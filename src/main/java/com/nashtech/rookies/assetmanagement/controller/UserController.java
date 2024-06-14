@@ -5,11 +5,13 @@ import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.service.UserService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -18,8 +20,14 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<ResponseDto<List<UserDto>>> getAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getAll());
+    public ResponseEntity<Object> getAll(Pageable pageable) {
+        var users = userService.getAll(pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(users);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDto<UserDto>> getUserById(@PathVariable("id") Integer id) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(id));
     }
 
     @PostMapping

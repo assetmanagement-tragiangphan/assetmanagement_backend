@@ -39,4 +39,22 @@ public class GlobalExceptionHandler {
                         .build()
         );
     }
+
+    @ExceptionHandler({ResourceNotFoundException.class})
+    protected ResponseEntity<ResponseDto<Void>> handleResourceNotFoundException(ResourceNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ResponseDto.<Void>builder()
+                        .message(exception.getMessage())
+                        .build()
+        );
+    }
+
+    @ExceptionHandler({ResourceAlreadyExistException.class})
+    protected ResponseEntity<ResponseDto<Void>> handleResourceAlreadyExistException(ResourceAlreadyExistException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                ResponseDto.<Void>builder()
+                        .message(exception.getMessage())
+                        .build()
+        );
+    }
 }

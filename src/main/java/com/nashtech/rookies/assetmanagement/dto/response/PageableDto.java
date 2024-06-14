@@ -11,4 +11,5 @@ public class PageableDto<T> {
     private T content;
     private Integer currentPage;
     private Integer totalPage;
+    private Long totalElements;
 }

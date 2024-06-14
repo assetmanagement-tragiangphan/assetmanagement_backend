@@ -2,7 +2,10 @@ package com.nashtech.rookies.assetmanagement.service.impl;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
 import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
+import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
+import com.nashtech.rookies.assetmanagement.entity.User;
+import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.UserService;
@@ -12,9 +15,13 @@ import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.jaxb.SpringDataJaxb.PageDto;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -23,11 +30,38 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    public Page<User> getAllEntities(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+
     @Override
-    public ResponseDto<List<UserDto>> getAll() {
-        return ResponseDto.<List<UserDto>>builder()
-                .data(userMapper.entitiesToDtos(userRepository.findAll()))
+    public ResponseDto<PageableDto<List<UserDto>>> getAll(Pageable pageable) {
+
+        var userDtos = this.getAllEntities(pageable).map(userMapper::entityToDto);
+
+        PageableDto<List<UserDto>> usersPageDto = PageableDto.<List<UserDto>>builder()
+                .content(userDtos.getContent())
+                .currentPage(userDtos.getNumber())
+                .totalPage(userDtos.getTotalPages())
+                .totalElements(userDtos.getTotalElements())
+                .build();
+        return ResponseDto.<PageableDto<List<UserDto>>>builder()
+                .data(usersPageDto)
                 .message("Get all users successfully.")
+                .build();
+    }
+
+    public User getUserEntityById(Integer id) {
+        return userRepository.findById(id)
+                            .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+    }
+
+    @Override
+    public ResponseDto<UserDto> getUserById(Integer id) {
+        var user = this.getUserEntityById(id);
+        return ResponseDto.<UserDto>builder()
+                .data(userMapper.entityToDto(user))
+                .message("Get user by id successfully.")
                 .build();
     }
 
