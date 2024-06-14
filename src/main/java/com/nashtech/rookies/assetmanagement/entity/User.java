@@ -35,7 +35,6 @@ public class User extends BaseEntity implements Auditable {
     private LocalDate joinedDate;
     private LocalDate dateOfBirth;
     private Boolean isChangePassword;
-
     @Embedded
     private AuditMetadata auditMetadata;
 
