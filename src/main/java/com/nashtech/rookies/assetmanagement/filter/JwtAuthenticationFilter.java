@@ -3,6 +3,7 @@ package com.nashtech.rookies.assetmanagement.filter;
 import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
 import com.nashtech.rookies.assetmanagement.service.JwtService;
 import com.nashtech.rookies.assetmanagement.service.UserService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

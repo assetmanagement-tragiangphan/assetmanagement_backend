@@ -2,6 +2,7 @@ package com.nashtech.rookies.assetmanagement.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,6 +35,14 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             response.getWriter().write(objectMapper.writeValueAsString(
                     ResponseDto.<Void>builder()
                             .message("You don't have permission to perform this action.")
+                            .build()
+            ));
+        } catch (ExpiredJwtException e) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.getWriter().write(objectMapper.writeValueAsString(
+                    ResponseDto.<Void>builder()
+                            .message("JWT already expired.")
                             .build()
             ));
         } catch (Exception e) {

@@ -3,6 +3,7 @@ package com.nashtech.rookies.assetmanagement.mapper;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
 import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
+import com.nashtech.rookies.assetmanagement.dto.response.LoginResponse;
 import com.nashtech.rookies.assetmanagement.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,6 +16,7 @@ public interface UserMapper {
     UserDto entityToDto(User user);
     @Mapping(target = "roleName", source = "user.role.name")
     UserDetailsDto entityToUserDetailsDto(User user);
+    LoginResponse entityToLoginResponse(User user);
     @Mapping(target = "roleId", source = "user.role.id")
     List<UserDto> entitiesToDtos(List<User> users);
     @Mapping(target = "role.id", source = "request.roleId")

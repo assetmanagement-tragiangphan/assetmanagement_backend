@@ -1,7 +1,9 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
+import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
 import com.nashtech.rookies.assetmanagement.dto.request.AuthenticationRequest;
+import com.nashtech.rookies.assetmanagement.dto.response.LoginResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Token;
 import com.nashtech.rookies.assetmanagement.entity.User;
@@ -32,7 +34,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserMapper userMapper;
 
     @Override
-    public ResponseDto<String> authenticate(AuthenticationRequest request) {
+    public ResponseDto<LoginResponse> authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -51,8 +53,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         revokeAllUserToken(user);
         saveUserToken(user, accessToken);
 
-        return ResponseDto.<String>builder()
-                .data(accessToken)
+        var res = userMapper.entityToLoginResponse(user);
+        res.setToken(accessToken);
+
+        return ResponseDto.<LoginResponse>builder()
+                .data(res)
                 .message("User login successfully.")
                 .build();
     }

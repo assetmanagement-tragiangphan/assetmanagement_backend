@@ -1,7 +1,9 @@
 package com.nashtech.rookies.assetmanagement.controller;
 
+import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
 import com.nashtech.rookies.assetmanagement.dto.request.AuthenticationRequest;
+import com.nashtech.rookies.assetmanagement.dto.response.LoginResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.service.AuthenticationService;
 import jakarta.validation.Valid;
@@ -28,15 +30,19 @@ public class AuthenticationController {
 
 
     @PostMapping("/signIn")
-    public ResponseEntity<ResponseDto<String>> signIn(@RequestBody @Valid AuthenticationRequest request) {
+    public ResponseEntity<ResponseDto<LoginResponse>> signIn(@RequestBody @Valid AuthenticationRequest request) {
         var resData = authenticationService.authenticate(request);
         final ResponseCookie responseCookie = ResponseCookie
-                .from(cookieName, resData.getData())
+                .from(cookieName, resData.getData().getToken())
                 .httpOnly(true)
                 .path("/")
                 .maxAge(jwtExpiration)
                 .sameSite("Lax")
                 .build();
+
+        var dto = resData.getData();
+        dto.setToken(null);
+        resData.setData(dto);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
