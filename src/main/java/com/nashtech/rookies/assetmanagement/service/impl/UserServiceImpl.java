@@ -7,6 +7,7 @@ import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.exception.InvalidDateException;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.entity.User;
+import com.nashtech.rookies.assetmanagement.entity.User_;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
@@ -25,8 +26,10 @@ import java.time.Period;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.jaxb.SpringDataJaxb.PageDto;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -44,7 +47,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseDto<PageableDto<List<UserDto>>> getAll(Pageable pageable) {
 
-        var userDtos = this.getAllEntities(pageable).map(userMapper::entityToDto);
+        PageRequest pageRequest = (PageRequest) pageable;
+        if (pageRequest.getSort().equals(Sort.unsorted())) {
+            pageRequest = pageRequest.withSort(Direction.ASC, User_.FIRST_NAME);
+        }
+
+        var userDtos = this.getAllEntities(pageRequest).map(userMapper::entityToDto);
 
         PageableDto<List<UserDto>> usersPageDto = PageableDto.<List<UserDto>>builder()
                 .content(userDtos.getContent())
