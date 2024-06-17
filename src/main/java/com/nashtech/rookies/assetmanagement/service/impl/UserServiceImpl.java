@@ -108,17 +108,15 @@ public class UserServiceImpl implements UserService {
         if (!isValidAge(request.getDateOfBirth()))
             throw new InvalidDateException("User is under 18. Please select a different date");
         if (request.getJoinedDate().isBefore(request.getDateOfBirth()))
-            throw new RuntimeException("Joined date is not later than Date of Birth. Please select a different date");
+            throw new InvalidDateException("Joined date is not later than Date of Birth. Please select a different date");
         if (isWeekend(request.getJoinedDate()))
-            throw new RuntimeException("joined date is Saturday or Sunday. Please select a different date");
+            throw new InvalidDateException("joined date is Saturday or Sunday. Please select a different date");
         //Update
-        user.setRole(role);
-        user.setJoinedDate(request.getJoinedDate());
-        user.setDateOfBirth(request.getDateOfBirth());
-        user.setGender(GenderConstant.valueOf(request.getGender()));
-        var updatedUser = userRepository.save(user);
+        User updatedUser = userMapper.updateUserRequestToEntity(user, request);
+        updatedUser.setRole(role);
+        var returnUser = userRepository.save(updatedUser);
         return ResponseDto.<UserDto>builder()
-                .data(userMapper.entityToDto(updatedUser))
+                .data(userMapper.entityToDto(returnUser))
                 .message("Update user successfully")
                 .build();
     }
