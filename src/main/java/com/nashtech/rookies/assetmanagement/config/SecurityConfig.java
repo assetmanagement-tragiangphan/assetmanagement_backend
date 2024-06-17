@@ -3,6 +3,7 @@ package com.nashtech.rookies.assetmanagement.config;
 import com.nashtech.rookies.assetmanagement.filter.ExceptionHandlerFilter;
 import com.nashtech.rookies.assetmanagement.filter.JwtAuthenticationFilter;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,8 +53,7 @@ public class SecurityConfig {
 
     @Value("#{'${application.cors.originPatterns}'.split(',')}")
     private List<String> originPatterns;
-    @Value("${application.token.cookie-name}")
-    private String cookieName;
+    private final CookieProperties cookieProperties;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -86,8 +86,17 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .addLogoutHandler(logoutHandler)
-                        .deleteCookies(cookieName)
-                        .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            SecurityContextHolder.clearContext();
+                            Cookie cookie = new Cookie(cookieProperties.getName(), null);
+                            cookie.setMaxAge(0);
+                            cookie.setPath(cookieProperties.getPath());
+                            cookie.setSecure(cookieProperties.getSecure());
+                            response.addCookie(cookie);
+                            String cookieHeader = response.getHeader("Set-Cookie");
+                            cookieHeader+= "; SameSite=" + cookieProperties.getSameSite();
+                            response.setHeader("Set-Cookie", cookieHeader);
+                        })
                 )
         ;
 

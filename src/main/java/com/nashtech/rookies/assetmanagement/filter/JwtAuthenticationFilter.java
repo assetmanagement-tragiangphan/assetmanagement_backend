@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenRepository tokenRepository;
     private final UserService userService;
 
-    @Value("${application.token.cookie-name}")
+    @Value("${application.cookie.name}")
     private String cookieName;
 
 

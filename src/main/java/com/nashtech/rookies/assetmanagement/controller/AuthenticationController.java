@@ -1,5 +1,6 @@
 package com.nashtech.rookies.assetmanagement.controller;
 
+import com.nashtech.rookies.assetmanagement.config.CookieProperties;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
 import com.nashtech.rookies.assetmanagement.dto.request.AuthenticationRequest;
@@ -22,22 +23,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
-
-    @Value("${application.token.cookie-name}")
-    private String cookieName;
-    @Value("${application.security.jwt.expiration}")
-    private long jwtExpiration;
-
+    private final CookieProperties cookieProperties;
 
     @PostMapping("/signIn")
     public ResponseEntity<ResponseDto<LoginResponse>> signIn(@RequestBody @Valid AuthenticationRequest request) {
         var resData = authenticationService.authenticate(request);
         final ResponseCookie responseCookie = ResponseCookie
-                .from(cookieName, resData.getData().getToken())
-                .httpOnly(true)
-                .path("/")
-                .maxAge(jwtExpiration)
-                .sameSite("Lax")
+                .from(cookieProperties.getName(), resData.getData().getToken())
+                .httpOnly(cookieProperties.getHttpOnly())
+                .path(cookieProperties.getPath())
+                .maxAge(cookieProperties.getMaxAge())
+                .sameSite(cookieProperties.getSameSite())
+                .secure(cookieProperties.getSecure())
                 .build();
 
         var dto = resData.getData();

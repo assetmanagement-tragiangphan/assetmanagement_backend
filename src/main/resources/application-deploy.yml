@@ -22,18 +22,11 @@ application:
       refresh-token:
         expiration: 604800000 #one week
   cors:
-    originPatterns: http://127.0.0.1:5173*,http://localhost:5173*
+    originPatterns: https://thankful-field-0c1fd520f.5.azurestaticapps.net*
   cookie:
     name: asset-management-server
     max-age: 604800 #one week
     path: /
-    same-site: Lax
+    same-site: None
     http-only: true
-    secure: false
-
-
-logging:
-  level:
-    org:
-      springframework:
-        security: TRACE
+    secure: true

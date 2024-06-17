@@ -22,7 +22,7 @@ public class LogoutServiceImpl implements LogoutHandler {
 
     private final ObjectMapper objectMapper;
     private final TokenRepository tokenRepository;
-    @Value("${application.token.cookie-name}")
+    @Value("${application.cookie.name}")
     private String cookieName;
 
     @Override

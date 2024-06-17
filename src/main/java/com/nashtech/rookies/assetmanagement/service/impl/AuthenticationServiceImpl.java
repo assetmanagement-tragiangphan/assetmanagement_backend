@@ -27,8 +27,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
@@ -48,7 +46,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         var accessToken = jwtService.generateToken(userDetailsDto);
         //TODO: not returning refresh token
-        var refreshToken = jwtService.generateRefreshToken(userDetailsDto);
+//        var refreshToken = jwtService.generateRefreshToken(userDetailsDto);
 
         revokeAllUserToken(user);
         saveUserToken(user, accessToken);
