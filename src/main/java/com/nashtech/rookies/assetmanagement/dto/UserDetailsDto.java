@@ -1,5 +1,6 @@
 package com.nashtech.rookies.assetmanagement.dto;
 
+import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +20,7 @@ public class UserDetailsDto implements UserDetails {
     private RoleConstant roleName;
     private String username;
     private String password;
-
+    private LocationConstant location;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

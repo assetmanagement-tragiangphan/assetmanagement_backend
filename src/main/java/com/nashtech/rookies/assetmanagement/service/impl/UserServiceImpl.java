@@ -1,8 +1,10 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
+import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
 import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
+import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.exception.InvalidDateException;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
@@ -13,6 +15,7 @@ import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.UserService;
+import com.nashtech.rookies.assetmanagement.specifications.UserSpecification;
 import com.nashtech.rookies.assetmanagement.util.GenderConstant;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
@@ -30,6 +33,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,19 +44,19 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     private final int AGE = 18;
-    public Page<User> getAllEntities(Pageable pageable) {
-        return userRepository.findAll(pageable);
-    }
 
     @Override
-    public ResponseDto<PageableDto<List<UserDto>>> getAll(Pageable pageable) {
+    public ResponseDto<PageableDto<List<UserDto>>> getAll(UserGetRequest requestParams, Pageable pageable, UserDetailsDto requestUser) {
+
+        LocationConstant requestUserLocation = requestUser.getLocation();
+        Specification<User> spec = UserSpecification.userListFilter(requestParams.getSearch(), requestParams.getTypes(), requestUserLocation);
 
         PageRequest pageRequest = (PageRequest) pageable;
         if (pageRequest.getSort().equals(Sort.unsorted())) {
             pageRequest = pageRequest.withSort(Direction.ASC, User_.FIRST_NAME);
         }
 
-        var userDtos = this.getAllEntities(pageRequest).map(userMapper::entityToDto);
+        var userDtos = userRepository.findAll(spec, pageRequest).map(userMapper::entityToDto);
 
         PageableDto<List<UserDto>> usersPageDto = PageableDto.<List<UserDto>>builder()
                 .content(userDtos.getContent())
@@ -108,15 +112,17 @@ public class UserServiceImpl implements UserService {
         if (!isValidAge(request.getDateOfBirth()))
             throw new InvalidDateException("User is under 18. Please select a different date");
         if (request.getJoinedDate().isBefore(request.getDateOfBirth()))
-            throw new InvalidDateException("Joined date is not later than Date of Birth. Please select a different date");
+            throw new RuntimeException("Joined date is not later than Date of Birth. Please select a different date");
         if (isWeekend(request.getJoinedDate()))
-            throw new InvalidDateException("joined date is Saturday or Sunday. Please select a different date");
+            throw new RuntimeException("joined date is Saturday or Sunday. Please select a different date");
         //Update
-        User updatedUser = userMapper.updateUserRequestToEntity(user, request);
-        updatedUser.setRole(role);
-        var returnUser = userRepository.save(updatedUser);
+        user.setRole(role);
+        user.setJoinedDate(request.getJoinedDate());
+        user.setDateOfBirth(request.getDateOfBirth());
+        user.setGender(GenderConstant.valueOf(request.getGender()));
+        var updatedUser = userRepository.save(user);
         return ResponseDto.<UserDto>builder()
-                .data(userMapper.entityToDto(returnUser))
+                .data(userMapper.entityToDto(updatedUser))
                 .message("Update user successfully")
                 .build();
     }

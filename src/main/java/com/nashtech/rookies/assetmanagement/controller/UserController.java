@@ -1,16 +1,20 @@
 package com.nashtech.rookies.assetmanagement.controller;
 
+import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
 import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
+import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.service.UserService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,8 +25,9 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<Object> getAll(Pageable pageable) {
-        var users = userService.getAll(pageable);
+    public ResponseEntity<Object> getAll(@Valid UserGetRequest requestParams,Pageable pageable, Authentication authentication) {
+        UserDetailsDto requestUser = (UserDetailsDto)authentication.getPrincipal();
+        var users = userService.getAll(requestParams, pageable, requestUser);
         return ResponseEntity.status(HttpStatus.OK).body(users);
     }
 
