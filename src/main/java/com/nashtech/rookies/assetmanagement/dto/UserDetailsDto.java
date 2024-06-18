@@ -2,8 +2,12 @@ package com.nashtech.rookies.assetmanagement.dto;
 
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,6 +19,8 @@ import java.util.Collection;
 @Builder
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDetailsDto implements UserDetails {
     private Integer id;
     private RoleConstant roleName;
