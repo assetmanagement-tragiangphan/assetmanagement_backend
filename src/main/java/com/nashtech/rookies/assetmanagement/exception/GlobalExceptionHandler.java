@@ -2,15 +2,29 @@ package com.nashtech.rookies.assetmanagement.exception;
 
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ResponseDto<Void>> handleException(MethodArgumentNotValidException ex) {
+        var errors = ex.getBindingResult().getAllErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ResponseDto.<Void>builder()
+                        .message(errors.get(0))   //get first error message
+                        .build()
+        );
+    }
+
     @ExceptionHandler(InvalidUserCredentialException.class)
     public ResponseEntity<ResponseDto<Void>> handleInvalidUserCredentialException(InvalidUserCredentialException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -25,6 +39,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 ResponseDto.<Void>builder()
                         .message("Invalid username or password.")
+                        .build()
+        );
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    protected ResponseEntity<ResponseDto<Void>> handleBadRequestException(BadRequestException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ResponseDto.<Void>builder()
+                        .message(exception.getMessage())
                         .build()
         );
     }

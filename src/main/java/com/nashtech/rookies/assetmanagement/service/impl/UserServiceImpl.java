@@ -2,6 +2,7 @@ package com.nashtech.rookies.assetmanagement.service.impl;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
+import com.nashtech.rookies.assetmanagement.dto.request.ChangePasswordRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
@@ -10,6 +11,7 @@ import com.nashtech.rookies.assetmanagement.exception.InvalidDateException;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.entity.User;
 import com.nashtech.rookies.assetmanagement.entity.User_;
+import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
@@ -33,6 +35,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
     private final int AGE = 18;
 
     @Override
@@ -105,6 +109,7 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.entityToUserDetailsDto(user);
     }
+
     public ResponseDto<UserDto> updateUser(UpdateUserRequest request, Integer userId) {
         //Validate
         var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
@@ -124,6 +129,30 @@ public class UserServiceImpl implements UserService {
         return ResponseDto.<UserDto>builder()
                 .data(userMapper.entityToDto(updatedUser))
                 .message("Update user successfully")
+                .build();
+    }
+
+    @Override
+    public ResponseDto<Void> changePassword(Integer userId, ChangePasswordRequest request) {
+        var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+        if (request.getOldPassword() == null) {
+            if (user.getIsChangePassword()) {
+                throw new BadRequestException("You must provide your current password.");
+            }
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            user.setIsChangePassword(true);
+            userRepository.save(user);
+        } else {
+            if (passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRepository.save(user);
+            } else {
+                throw new BadRequestException("Password is incorrect.");
+            }
+        }
+
+        return ResponseDto.<Void>builder()
+                .message("Change password successfully.")
                 .build();
     }
 

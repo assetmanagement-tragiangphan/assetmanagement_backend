@@ -2,12 +2,12 @@ package com.nashtech.rookies.assetmanagement.controller;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
+import com.nashtech.rookies.assetmanagement.dto.request.ChangePasswordRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.service.UserService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -44,6 +44,12 @@ public class UserController {
     @PutMapping("{id}")
     public ResponseEntity<ResponseDto<UserDto>> editUser(@RequestBody UpdateUserRequest request, @PathVariable(name = "id") Integer userId) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(request, userId));
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<ResponseDto<Void>> changePassword(@RequestBody @Valid ChangePasswordRequest request, Authentication authentication) {
+        var userId = ((UserDetailsDto) authentication.getPrincipal()).getId();
+        return ResponseEntity.status(HttpStatus.OK).body(userService.changePassword(userId, request));
     }
 
 
