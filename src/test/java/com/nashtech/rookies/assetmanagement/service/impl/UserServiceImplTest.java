@@ -2,6 +2,7 @@ package com.nashtech.rookies.assetmanagement.service.impl;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
+import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
@@ -30,6 +31,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -49,6 +52,8 @@ public class UserServiceImplTest {
 
     private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
     private UserServiceImpl userService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     List<User> users;
     UserGetRequest userGetRequest;
@@ -56,7 +61,7 @@ public class UserServiceImplTest {
 
     @BeforeEach
     public void reset_mock() throws Exception {
-        userService = new UserServiceImpl(userRepository, userMapper, roleRepository);
+        userService = new UserServiceImpl(userRepository, userMapper, roleRepository, passwordEncoder);
 
         User user1 = User.builder().id(1).staffCode("staffCode1").firstName("firstName1").lastName("lastName1")
                 .username("username1").password("password1").build();
@@ -261,4 +266,5 @@ public class UserServiceImplTest {
 
         assertThrows(InvalidDateException.class, () -> userService.updateUser(dto,1));
     }
+    
 }

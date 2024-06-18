@@ -20,15 +20,24 @@ import com.nashtech.rookies.assetmanagement.service.UserService;
 import com.nashtech.rookies.assetmanagement.specifications.UserSpecification;
 import com.nashtech.rookies.assetmanagement.util.GenderConstant;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
+import com.nashtech.rookies.assetmanagement.util.PrefixConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +46,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -89,17 +99,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseDto<UserDto> saveUser(CreateUserRequest request) {
-        var mappedUser = userMapper.createUserRequestToEntity(request);
-        mappedUser.setGender(GenderConstant.MALE);
-        mappedUser.setLocation(LocationConstant.HCM);
-        mappedUser.setStatus(StatusConstant.ACTIVE);
-        var user = userRepository.save(mappedUser);
+    public ResponseDto<UserDto> saveUser(CreateUserRequest request, UserDetailsDto requestUser) {
 
+        var role = roleRepository.findById(request.getRoleId()).orElseThrow(() -> new ResourceNotFoundException("Role not found."));
+        if (!isValidAge(request.getDateOfBirth()))
+            throw new InvalidDateException("User is under 18. Please select a different date");
+        if (request.getJoinedDate().isBefore(request.getDateOfBirth()))
+            throw new InvalidDateException("Joined date is not later than Date of Birth. Please select a different date");
+        if (isWeekend(request.getJoinedDate()))
+            throw new InvalidDateException("joined date is Saturday or Sunday. Please select a different date");
+
+        String username = genUsername(request);
+        int duplicateNum = userRepository.findByUsernameStartsWith(username).size();
+        var mappedUser = userMapper.createUserRequestToEntity(request);
+        mappedUser.setUsername(duplicateNum > 0 ? username + duplicateNum : username);
+        mappedUser.setRole(role);
+        mappedUser.setLocation(requestUser.getLocation());
+
+        String tempPassword = mappedUser.getUsername()+"@"+mappedUser.getDateOfBirth().format(DateTimeFormatter.ofPattern("ddMMyyyy"));
+        mappedUser.setPassword(passwordEncoder.encode(tempPassword));
+        mappedUser.setIsChangePassword(false);
+        mappedUser = userRepository.save(mappedUser);
+        mappedUser.setStatus(StatusConstant.ACTIVE);
+        NumberFormat nf = new DecimalFormat("0000");
+        mappedUser.setStaffCode(PrefixConstant.SD.toString()+nf.format(mappedUser.getId()));
+        var user = userRepository.save(mappedUser);
         return ResponseDto.<UserDto>builder()
                 .data(userMapper.entityToDto(user))
                 .message("Create user successfully.")
                 .build();
+    }
+
+    private String genUsername(CreateUserRequest request) {
+        List<String> firstName = Arrays.stream(request.getLastName().split(" ")).toList();
+        return request.getFirstName().toLowerCase()+firstName.stream().map(s -> s.substring(0, 1)) // Extract the first character of each string
+                .collect(Collectors.joining()).toLowerCase();
     }
 
     @Override
@@ -117,15 +151,13 @@ public class UserServiceImpl implements UserService {
         if (!isValidAge(request.getDateOfBirth()))
             throw new InvalidDateException("User is under 18. Please select a different date");
         if (request.getJoinedDate().isBefore(request.getDateOfBirth()))
-            throw new RuntimeException("Joined date is not later than Date of Birth. Please select a different date");
+            throw new InvalidDateException("Joined date is not later than Date of Birth. Please select a different date");
         if (isWeekend(request.getJoinedDate()))
-            throw new RuntimeException("joined date is Saturday or Sunday. Please select a different date");
+            throw new InvalidDateException("joined date is Saturday or Sunday. Please select a different date");
         //Update
-        user.setRole(role);
-        user.setJoinedDate(request.getJoinedDate());
-        user.setDateOfBirth(request.getDateOfBirth());
-        user.setGender(GenderConstant.valueOf(request.getGender()));
-        var updatedUser = userRepository.save(user);
+        User updatedUser = userMapper.updateUserRequestToEntity(user, request);
+        updatedUser.setRole(role);
+        var returnUser = userRepository.save(updatedUser);
         return ResponseDto.<UserDto>builder()
                 .data(userMapper.entityToDto(updatedUser))
                 .message("Update user successfully")

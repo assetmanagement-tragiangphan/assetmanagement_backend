@@ -15,7 +15,7 @@ import java.util.List;
 public interface UserService extends UserDetailsService {
     ResponseDto<PageableDto<List<UserDto>>> getAll(UserGetRequest params, Pageable pageable, UserDetailsDto requestUser);
     ResponseDto<UserDto> getUserById(Integer id);
-    ResponseDto<UserDto> saveUser(CreateUserRequest request);
+    ResponseDto<UserDto> saveUser(CreateUserRequest request, UserDetailsDto requestUser);
     ResponseDto<UserDto> updateUser(UpdateUserRequest request, Integer userId);
     ResponseDto<Void> changePassword(Integer userId, ChangePasswordRequest request);
 

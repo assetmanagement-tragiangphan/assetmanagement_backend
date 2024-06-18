@@ -8,6 +8,8 @@ import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.service.UserService;
+
+import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -37,8 +39,9 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseDto<UserDto>> saveUser(@RequestBody CreateUserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveUser(request));
+    public ResponseEntity<ResponseDto<UserDto>> saveUser(@RequestBody CreateUserRequest request, Authentication authentication) {
+        UserDetailsDto requestUser = (UserDetailsDto)authentication.getPrincipal();
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveUser(request, requestUser));
     }
 
     @PutMapping("{id}")
