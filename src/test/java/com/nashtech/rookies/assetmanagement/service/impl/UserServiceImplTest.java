@@ -22,7 +22,11 @@ import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.util.GenderConstant;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
+import com.nashtech.rookies.assetmanagement.util.StatusConstant;
+
 import io.jsonwebtoken.lang.Assert;
+import jakarta.persistence.Id;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +53,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,8 +81,10 @@ public class UserServiceImplTest {
     public void reset_mock() throws Exception {
         userService = new UserServiceImpl(userRepository, userMapper, roleRepository, passwordEncoder, tokenRepository);
 
+        Token token = Token.builder().id(1).token("token1").build();
+
         User user1 = User.builder().id(1).staffCode("staffCode1").firstName("firstName1").lastName("lastName1")
-                .username("username1").password("password1").build();
+                .username("username1").password("password1").tokens(List.of(token)).status(StatusConstant.ACTIVE).build();
         User user2 = User.builder().id(2).staffCode("staffCode2").firstName("firstName2").lastName("lastName2")
                 .username("username2").password("password2").build();
         User user3 = User.builder().id(3).staffCode("staffCode3").firstName("firstName3").lastName("lastName3")
@@ -116,7 +124,7 @@ public class UserServiceImplTest {
     void testGetUserEntityById_whenExistUser_thenReturnUser() {
         // Arrange
         Integer id = 1;
-        when(userRepository.findById(id)).thenReturn(Optional.of(users.get(0)));
+        when(userRepository.findByIdAndStatus(any(Integer.class), any(StatusConstant.class))).thenReturn(Optional.of(users.get(0)));
         // Act
         User result = userService.getUserEntityById(id);
 
@@ -126,24 +134,24 @@ public class UserServiceImplTest {
         assertEquals(users.get(0).getFirstName(), result.getFirstName());
         assertEquals(users.get(0).getLastName(), result.getLastName());
 
-        verify(userRepository, times(1)).findById(id);
+        verify(userRepository, times(1)).findByIdAndStatus(any(Integer.class), any(StatusConstant.class));
     }
 
     @Test
     void testGetUserEntityById_whenNotExistUser_thenThrowNotFoundException() {
         // Arrange
         Integer id = 1;
-        when(userRepository.findById(id)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndStatus(any(Integer.class), any(StatusConstant.class))).thenReturn(Optional.empty());
         // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> userService.getUserEntityById(id));
-        verify(userRepository, times(1)).findById(id);
+        verify(userRepository, times(1)).findByIdAndStatus(any(Integer.class), any(StatusConstant.class));
     }
 
     @Test
     void testGetUserById_whenExistUser_thenReturnResponseDtoUserDto() {
         // Arrange
         Integer id = 1;
-        when(userRepository.findById(id)).thenReturn(Optional.of(users.get(0)));
+        when(userRepository.findByIdAndStatus(any(Integer.class), any(StatusConstant.class))).thenReturn(Optional.of(users.get(0)));
 
         // Act
         ResponseDto<UserDto> result = userService.getUserById(id);
@@ -154,7 +162,7 @@ public class UserServiceImplTest {
         assertEquals(result.getData().getFirstName(), users.get(0).getFirstName());
         assertEquals(result.getData().getLastName(), users.get(0).getLastName());
 
-        verify(userRepository, times(1)).findById(id);
+        verify(userRepository, times(1)).findByIdAndStatus(any(Integer.class), any(StatusConstant.class));
     }
 
     @Test
@@ -532,6 +540,31 @@ public class UserServiceImplTest {
         assertThat(ex.getMessage()).isEqualTo("You must provide your current password.");
     }
 
+
+    @Test 
+    void testDisableUser_whenUserIdIsValid_thenReturnResponseDtoSucess() {
+        var user = users.get(0);
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        when(userRepository.findByIdAndStatus(1, StatusConstant.ACTIVE)).thenReturn(Optional.of(user));
+        when(userRepository.save(userCaptor.capture())).thenReturn(user);
+        
+        var result = userService.disableUser(1);
+        var updatedUser = userCaptor.getValue();
+
+        assertEquals(updatedUser.getStatus(), StatusConstant.INACTIVE);
+        assertEquals(result.getMessage(), "Disable user successfully.");
+        verify(userRepository, times(1)).findByIdAndStatus(1, StatusConstant.ACTIVE);
+        verify(tokenRepository, times(1)).deleteAll(any(List.class));
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void testDisableUser_whenUserIdNotExist_thenThrowResourceNotFoundException() {
+        when(userRepository.findByIdAndStatus(1, StatusConstant.ACTIVE)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> userService.disableUser(1));
+        verify(userRepository, times(1)).findByIdAndStatus(1, StatusConstant.ACTIVE);
+    }
+    
 }
 
 
