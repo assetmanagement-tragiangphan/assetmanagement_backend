@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import com.nashtech.rookies.assetmanagement.entity.User;
 import com.nashtech.rookies.assetmanagement.entity.User_;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
+import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 
 public class UserSpecification {
     public static Specification<User> hasLocation (LocationConstant location) {
@@ -31,11 +32,14 @@ public class UserSpecification {
         return (root, query, builder) -> root.get(User_.ROLE).get("id").in(roleIds);
     }
 
+    public static Specification<User> hasStatus (StatusConstant status) {
+        return (root, query, builder) -> builder.equal(root.get(User_.STATUS), status);
+    }
+
     public static Specification<User> userListFilter (String search, List<Integer> roleIds, LocationConstant location) {
-        Specification<User> spec = Specification.where(null);
+        Specification<User> spec = Specification.where(hasStatus(StatusConstant.ACTIVE));
         if (search != null) {
-            spec = spec.and(likeName(search));
-            spec = spec.or(likeStaffCode(search));
+            spec = spec.and(likeName(search).or(likeStaffCode(search)));
         }
         if (roleIds != null) {
             spec = spec.and(hasRole(roleIds));

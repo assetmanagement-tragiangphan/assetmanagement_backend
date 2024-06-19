@@ -1,11 +1,14 @@
 package com.nashtech.rookies.assetmanagement.exception;
 
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
+
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,11 +28,20 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(InvalidUserCredentialException.class)
-    public ResponseEntity<ResponseDto<Void>> handleInvalidUserCredentialException(InvalidUserCredentialException ex) {
+    @ExceptionHandler({InvalidUserCredentialException.class, UsernameNotFoundException.class})
+    public ResponseEntity<ResponseDto<Void>> handleInvalidUserCredentialException(Exception ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 ResponseDto.<Void>builder()
                         .message(ex.getMessage())
+                        .build()
+        );
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ResponseDto<Void>> handleExpiredJwtException(ExpiredJwtException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                ResponseDto.<Void>builder()
+                        .message("JWT already expired.")
                         .build()
         );
     }

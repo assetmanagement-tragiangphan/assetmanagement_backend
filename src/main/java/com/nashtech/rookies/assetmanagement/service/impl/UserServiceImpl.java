@@ -15,6 +15,7 @@ import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
+import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.UserService;
 import com.nashtech.rookies.assetmanagement.specifications.UserSpecification;
@@ -57,6 +58,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TokenRepository tokenRepository;
     private final int AGE = 18;
 
     @Override
@@ -85,7 +87,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public User getUserEntityById(Integer id) {
-        return userRepository.findById(id)
+        return userRepository.findByIdAndStatus(id, StatusConstant.ACTIVE)
                             .orElseThrow(() -> new ResourceNotFoundException("User not found."));
     }
 
@@ -197,6 +199,19 @@ public class UserServiceImpl implements UserService {
     private boolean isWeekend(LocalDate joinedDate) {
         DayOfWeek dayOfWeek = joinedDate.getDayOfWeek();
         return dayOfWeek == DayOfWeek.SUNDAY || dayOfWeek == DayOfWeek.SATURDAY;
+    }
+
+    public ResponseDto<Void> disableUser (Integer userId) {
+        var user = this.getUserEntityById(userId);
+        user.setStatus(StatusConstant.INACTIVE);
+        var tokens = user.getTokens();
+        if (tokens != null) {
+            tokenRepository.deleteAll(tokens);
+        }
+        userRepository.save(user);
+        return ResponseDto.<Void>builder()
+                .message("Disable user successfully.")
+                .build();
     }
 
 }

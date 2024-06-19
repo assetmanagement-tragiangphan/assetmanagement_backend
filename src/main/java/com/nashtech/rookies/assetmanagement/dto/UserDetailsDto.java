@@ -2,6 +2,7 @@ package com.nashtech.rookies.assetmanagement.dto;
 
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
+import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,7 @@ public class UserDetailsDto implements UserDetails {
     private String username;
     private String password;
     private LocationConstant location;
+    private StatusConstant status;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -43,5 +45,10 @@ public class UserDetailsDto implements UserDetails {
     @Override
     public String getUsername() {
         return this.username;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.status == StatusConstant.ACTIVE;
     }
 }
