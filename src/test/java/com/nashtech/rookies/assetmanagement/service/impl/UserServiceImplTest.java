@@ -13,6 +13,7 @@ import com.nashtech.rookies.assetmanagement.exception.InvalidDateException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
+import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.util.GenderConstant;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
@@ -50,6 +51,9 @@ public class UserServiceImplTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private TokenRepository tokenRepository;
+
     private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
     private UserServiceImpl userService;
     @Autowired
@@ -61,7 +65,7 @@ public class UserServiceImplTest {
 
     @BeforeEach
     public void reset_mock() throws Exception {
-        userService = new UserServiceImpl(userRepository, userMapper, roleRepository, passwordEncoder);
+        userService = new UserServiceImpl(userRepository, userMapper, roleRepository, passwordEncoder, tokenRepository);
 
         User user1 = User.builder().id(1).staffCode("staffCode1").firstName("firstName1").lastName("lastName1")
                 .username("username1").password("password1").build();
