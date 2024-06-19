@@ -2,14 +2,18 @@ package com.nashtech.rookies.assetmanagement.service.impl;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
+import com.nashtech.rookies.assetmanagement.dto.request.ChangePasswordRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Role;
+import com.nashtech.rookies.assetmanagement.entity.Token;
 import com.nashtech.rookies.assetmanagement.entity.User;
+import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.InvalidDateException;
+import com.nashtech.rookies.assetmanagement.exception.InvalidUserCredentialException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
@@ -23,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -56,12 +62,13 @@ public class UserServiceImplTest {
 
     private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
     private UserServiceImpl userService;
-    @Autowired
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     List<User> users;
     UserGetRequest userGetRequest;
     UserDetailsDto userDetailsDto;
+    ChangePasswordRequest changePasswordRequest;
 
     @BeforeEach
     public void reset_mock() throws Exception {
@@ -270,5 +277,158 @@ public class UserServiceImplTest {
 
         assertThrows(InvalidDateException.class, () -> userService.updateUser(dto,1));
     }
-    
+
+    @Test
+    public void testChangePassword_whenValidInput_thenSuccess() {
+        changePasswordRequest = ChangePasswordRequest.builder()
+                .newPassword("New Password")
+                .oldPassword("Old Password")
+                .build();
+        int userId = 1;
+        var user = User.builder()
+                .id(1)
+                .password("Encoded Password")
+                .build();
+
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("New Password", "Encoded Password"))
+                .thenReturn(false);
+        when(passwordEncoder.matches("Old Password", "Encoded Password"))
+                .thenReturn(true);
+        when(passwordEncoder.encode("New Password"))
+                .thenReturn("New Encoded Password");
+        when(userRepository.save(any(User.class)))
+                .thenReturn(user);
+
+        var resData = userService.changePassword(userId, changePasswordRequest);
+
+        assertThat(resData.getMessage()).isEqualTo("Change password successfully.");
+        assertThat(resData.getData()).isNull();
+
+        ArgumentCaptor<User> captorUser = ArgumentCaptor.forClass(User.class);
+        verify(userRepository, times(1)).save(captorUser.capture());
+        assertThat(captorUser.getValue().getPassword()).isEqualTo("New Encoded Password");
+    }
+
+    @Test
+    public void testChangePassword_whenFirstTimeLogin_thenSuccess() {
+        changePasswordRequest = ChangePasswordRequest.builder()
+                .newPassword("New Password")
+                .oldPassword("")
+                .build();
+        int userId = 1;
+        var user = User.builder()
+                .id(1)
+                .password("Encoded Password")
+                .isChangePassword(false)
+                .build();
+
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("New Password", "Encoded Password"))
+                .thenReturn(false);
+        when(passwordEncoder.encode("New Password"))
+                .thenReturn("New Encoded Password");
+        when(userRepository.save(any(User.class)))
+                .thenReturn(user);
+
+        var resData = userService.changePassword(userId, changePasswordRequest);
+
+        assertThat(resData.getMessage()).isEqualTo("Change password successfully.");
+        assertThat(resData.getData()).isNull();
+
+        ArgumentCaptor<User> captorUser = ArgumentCaptor.forClass(User.class);
+        verify(userRepository, times(1)).save(captorUser.capture());
+        assertThat(captorUser.getValue().getPassword()).isEqualTo("New Encoded Password");
+        assertThat(captorUser.getValue().getIsChangePassword()).isTrue();
+    }
+
+    @Test
+    public void testChangePassword_whenInvalidUserId_thenResourceNotFoundException() {
+        changePasswordRequest = ChangePasswordRequest.builder()
+                .newPassword("New Password")
+                .oldPassword("Old Password")
+                .build();
+        int userId = 1;
+        var user = User.builder()
+                .id(1)
+                .password("Encoded Password")
+                .build();
+
+        when(userRepository.findById(1)).thenReturn(Optional.empty());
+
+        var ex = assertThrows(ResourceNotFoundException.class, () ->
+                userService.changePassword(userId, changePasswordRequest));
+
+        assertThat(ex.getMessage()).isEqualTo("User not found.");
+    }
+
+    @Test
+    public void testChangePassword_whenChangeSamePassword_thenBadRequestException() {
+        changePasswordRequest = ChangePasswordRequest.builder()
+                .newPassword("New Password")
+                .oldPassword("Old Password")
+                .build();
+        int userId = 1;
+        var user = User.builder()
+                .id(1)
+                .password("Encoded Password")
+                .build();
+
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("New Password", "Encoded Password"))
+                .thenReturn(true);
+
+        var ex = assertThrows(BadRequestException.class, () ->
+                userService.changePassword(userId, changePasswordRequest));
+
+        assertThat(ex.getMessage()).isEqualTo("New password must be different from current password.");
+    }
+
+    @Test
+    public void testChangePassword_whenProvideInvalidPassword_thenBadRequestException() {
+        changePasswordRequest = ChangePasswordRequest.builder()
+                .newPassword("New Password")
+                .oldPassword("Old Password")
+                .build();
+        int userId = 1;
+        var user = User.builder()
+                .id(1)
+                .password("Encoded Password")
+                .build();
+
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("New Password", "Encoded Password"))
+                .thenReturn(false);
+        when(passwordEncoder.matches("Old Password", "Encoded Password"))
+                .thenReturn(false);
+
+        var ex = assertThrows(BadRequestException.class, () ->
+                userService.changePassword(userId, changePasswordRequest));
+
+        assertThat(ex.getMessage()).isEqualTo("Password is incorrect.");
+    }
+
+    @Test
+    public void testChangePassword_whenEmptyOldPassword_thenBadRequestException() {
+        changePasswordRequest = ChangePasswordRequest.builder()
+                .newPassword("New Password")
+                .oldPassword("")
+                .build();
+        int userId = 1;
+        var user = User.builder()
+                .id(1)
+                .password("Encoded Password")
+                .isChangePassword(true)
+                .build();
+
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("New Password", "Encoded Password"))
+                .thenReturn(false);
+
+        var ex = assertThrows(BadRequestException.class, () ->
+                userService.changePassword(userId, changePasswordRequest));
+
+        assertThat(ex.getMessage()).isEqualTo("You must provide your current password.");
+    }
+
 }

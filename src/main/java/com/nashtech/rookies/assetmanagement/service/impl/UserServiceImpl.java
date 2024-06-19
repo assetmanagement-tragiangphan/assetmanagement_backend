@@ -169,7 +169,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseDto<Void> changePassword(Integer userId, ChangePasswordRequest request) {
         var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
-        if (request.getOldPassword() == null) {
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new BadRequestException("New password must be different from current password.");
+        }
+
+        if ("".equals(request.getOldPassword())) {
             if (user.getIsChangePassword()) {
                 throw new BadRequestException("You must provide your current password.");
             }

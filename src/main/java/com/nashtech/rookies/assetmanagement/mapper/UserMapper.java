@@ -18,6 +18,7 @@ public interface UserMapper {
     UserDto entityToDto(User user);
     @Mapping(target = "roleName", source = "user.role.name")
     UserDetailsDto entityToUserDetailsDto(User user);
+    @Mapping(target = "roleId", source = "user.role.id")
     LoginResponse entityToLoginResponse(User user);
     @Mapping(target = "roleId", source = "user.role.id")
     List<UserDto> entitiesToDtos(List<User> users);

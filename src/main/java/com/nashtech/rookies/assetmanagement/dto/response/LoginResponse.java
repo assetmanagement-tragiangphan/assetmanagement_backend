@@ -8,10 +8,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LoginResponse {
+    private Integer roleId;
     private String username;
     private String firstName;
     private String lastName;
     private Boolean isChangePassword;
     private String token;
+    private String location;
 
 }
