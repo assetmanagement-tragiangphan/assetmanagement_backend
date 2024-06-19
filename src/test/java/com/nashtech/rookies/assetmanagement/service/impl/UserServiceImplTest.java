@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -279,6 +280,106 @@ public class UserServiceImplTest {
     }
 
     @Test
+    public void testCreateUser_whenRequestIsValid_thenReturnCreatedUser() {
+        UserDetailsDto admin = UserDetailsDto.builder()
+                .roleName(RoleConstant.valueOf("ADMIN"))
+                .location(LocationConstant.HCM)
+                .build();
+
+        CreateUserRequest sampleRequest = CreateUserRequest.builder()
+                .roleId(1)
+                .gender(GenderConstant.MALE)
+                .joinedDate(LocalDate.parse("2024-04-22"))
+                .dateOfBirth(LocalDate.parse("2002-05-19"))
+                .firstName("Nguyen")
+                .lastName("Pham Sy")
+                .build();
+
+        User sampleUser = userMapper.createUserRequestToEntity(sampleRequest);
+        sampleUser.setId(1);
+
+        Role sampleRole = new Role();
+        sampleRole.setId(1);
+        when(roleRepository.findById(anyInt())).thenReturn(Optional.of(sampleRole));
+        when(userRepository.save(any(User.class))).thenReturn(sampleUser);
+        when(userRepository.findByUsernameStartsWith(anyString())).thenReturn(new ArrayList<User>());
+        when(passwordEncoder.encode(anyString())).thenReturn("password");
+        var actual = userService.saveUser(sampleRequest,admin);
+
+        assertNotNull(actual.getData());
+        assertEquals(actual.getData().getStaffCode(),"SD0001");
+    }
+
+    @Test
+    public void testCreateUser_whenDobIsInvalid_thenThrows() {
+        UserDetailsDto admin = UserDetailsDto.builder()
+                .roleName(RoleConstant.valueOf("ADMIN"))
+                .location(LocationConstant.HCM)
+                .build();
+        CreateUserRequest sampleRequest = CreateUserRequest.builder()
+                .roleId(1)
+                .gender(GenderConstant.MALE)
+                .joinedDate(LocalDate.parse("2024-04-22"))
+                .dateOfBirth(LocalDate.parse("2022-05-19")) //under 18
+                .firstName("Nguyen")
+                .lastName("Pham Sy")
+                .build();
+        User sampleUser = userMapper.createUserRequestToEntity(sampleRequest);
+        sampleUser.setId(1);
+
+        Role sampleRole = new Role();
+        sampleRole.setId(1);
+        when(roleRepository.findById(1)).thenReturn(Optional.of(sampleRole));
+
+        assertThrows(InvalidDateException.class, () -> userService.saveUser(sampleRequest,admin));
+    }
+
+    @Test
+    public void testCreateUser_whenJoinedDateBeforeDob_thenThrows() {
+        UserDetailsDto admin = UserDetailsDto.builder()
+                .roleName(RoleConstant.valueOf("ADMIN"))
+                .location(LocationConstant.HCM)
+                .build();
+        CreateUserRequest sampleRequest = CreateUserRequest.builder()
+                .roleId(1)
+                .gender(GenderConstant.MALE)
+                .joinedDate(LocalDate.parse("2001-06-16"))
+                .dateOfBirth(LocalDate.parse("2002-01-01"))
+                .firstName("Nguyen")
+                .lastName("Pham Sy")
+                .build();
+        User sampleUser = userMapper.createUserRequestToEntity(sampleRequest);
+        sampleUser.setId(1);
+
+        Role sampleRole = new Role();
+        sampleRole.setId(1);
+        when(roleRepository.findById(1)).thenReturn(Optional.of(sampleRole));
+        assertThrows(InvalidDateException.class, () -> userService.saveUser(sampleRequest,admin));
+    }
+
+    @Test
+    public void testCreateUser_whenDobIsWeekend_thenThrows() {
+        UserDetailsDto admin = UserDetailsDto.builder()
+                .roleName(RoleConstant.valueOf("ADMIN"))
+                .location(LocationConstant.HCM)
+                .build();
+        CreateUserRequest sampleRequest = CreateUserRequest.builder()
+                .roleId(1)
+                .gender(GenderConstant.MALE)
+                .joinedDate(LocalDate.parse("2024-06-16"))
+                .dateOfBirth(LocalDate.parse("2002-05-19"))
+                .firstName("Nguyen")
+                .lastName("Pham Sy")
+                .build();
+        User sampleUser = userMapper.createUserRequestToEntity(sampleRequest);
+        sampleUser.setId(1);
+
+        Role sampleRole = new Role();
+        sampleRole.setId(1);
+        when(roleRepository.findById(1)).thenReturn(Optional.of(sampleRole));
+        assertThrows(InvalidDateException.class, () -> userService.saveUser(sampleRequest, admin));
+    }
+    @Test
     public void testChangePassword_whenValidInput_thenSuccess() {
         changePasswordRequest = ChangePasswordRequest.builder()
                 .newPassword("New Password")
@@ -432,3 +533,10 @@ public class UserServiceImplTest {
     }
 
 }
+
+
+
+
+
+
+
