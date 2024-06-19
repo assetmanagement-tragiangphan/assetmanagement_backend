@@ -37,6 +37,15 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidDateException.class)
+    public ResponseEntity<ResponseDto<Void>> handleInvalidDateException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ResponseDto.<Void>builder()
+                        .message(ex.getMessage())
+                        .build()
+        );
+    }
+
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ResponseDto<Void>> handleExpiredJwtException(ExpiredJwtException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(

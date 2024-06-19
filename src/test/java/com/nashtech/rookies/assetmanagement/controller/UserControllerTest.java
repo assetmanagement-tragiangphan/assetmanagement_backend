@@ -3,12 +3,14 @@ package com.nashtech.rookies.assetmanagement.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
+import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.ChangePasswordRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.User;
+import com.nashtech.rookies.assetmanagement.exception.InvalidDateException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.service.UserService;
@@ -186,8 +188,10 @@ public class UserControllerTest {
         // Perform the GET request and verify the result
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)));
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(jsonPath("$.message", Matchers.is("User not found")));
     }
+
 
     @Test
     public void testChangePassword_whenRequestUserRoleAdmin_thenSuccess() throws Exception{
@@ -249,5 +253,67 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", Matchers.is("User not found")));
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testCreateUser_whenRequestIsValid_thenReturnUser() throws Exception {
+        CreateUserRequest sampleRequest = CreateUserRequest.builder()
+                .roleId(1)
+                .gender(GenderConstant.MALE)
+                .joinedDate(LocalDate.parse("2024-04-22"))
+                .dateOfBirth(LocalDate.parse("2002-05-19"))
+                .firstName("Nguyen")
+                .lastName("Pham Sy")
+                .build();
+        var sampleResponse = ResponseDto.<UserDto>builder()
+                .data(userMapper.entityToDto(getUser()))
+                .message("Get user by id successfully")
+                .build();
+        given(userService.saveUser(any(CreateUserRequest.class), any(UserDetailsDto.class))).willReturn(sampleResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto))
+                .content(objectMapper.writeValueAsString(sampleRequest)))
+                .andExpect(jsonPath("$.data.id", Matchers.is(1)));
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testCreateUser_whenInvalidDate_thenThrow() throws Exception {
+        CreateUserRequest sampleRequest = CreateUserRequest.builder()
+                .roleId(1)
+                .gender(GenderConstant.MALE)
+                .joinedDate(LocalDate.parse("2024-04-22"))
+                .dateOfBirth(LocalDate.parse("2002-05-19"))
+                .firstName("Nguyen")
+                .lastName("Pham Sy")
+                .build();
+        given(userService.saveUser(any(CreateUserRequest.class), any(UserDetailsDto.class))).willThrow(new InvalidDateException("Exception Message"));
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(user(userDetailsDto))
+                        .content(objectMapper.writeValueAsString(sampleRequest)))
+                .andExpect(jsonPath("$.message", Matchers.is("Exception Message")));
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testCreateUser_whenInvalidRole_thenThrow() throws Exception {
+        CreateUserRequest sampleRequest = CreateUserRequest.builder()
+                .roleId(1)
+                .gender(GenderConstant.MALE)
+                .joinedDate(LocalDate.parse("2024-04-22"))
+                .dateOfBirth(LocalDate.parse("2002-05-19"))
+                .firstName("Nguyen")
+                .lastName("Pham Sy")
+                .build();
+        given(userService.saveUser(any(CreateUserRequest.class), any(UserDetailsDto.class))).willThrow(new ResourceNotFoundException("Exception Message"));
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(user(userDetailsDto))
+                        .content(objectMapper.writeValueAsString(sampleRequest)))
+                .andExpect(jsonPath("$.message", Matchers.is("Exception Message")));
     }
 }
