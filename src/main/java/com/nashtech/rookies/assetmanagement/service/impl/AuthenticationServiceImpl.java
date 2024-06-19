@@ -40,7 +40,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 )
         );
         var user = userRepository.findByUsernameAndStatus(request.getUsername(), StatusConstant.ACTIVE)
-                .orElseThrow(() -> new InvalidUserCredentialException("Invalid username or password."));
+                .orElseThrow(() -> new InvalidUserCredentialException("Username or password is incorrect. Please try again."));
 
         var userDetailsDto = userMapper.entityToUserDetailsDto(user);
 

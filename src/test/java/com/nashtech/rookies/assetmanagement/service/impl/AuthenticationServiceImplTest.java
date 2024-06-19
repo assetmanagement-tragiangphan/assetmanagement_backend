@@ -94,6 +94,6 @@ class AuthenticationServiceImplTest {
         var ex = assertThrows(InvalidUserCredentialException.class, () ->
                 authenticationService.authenticate(request));
 
-        assertThat(ex.getMessage()).isEqualTo("Invalid username or password.");
+        assertThat(ex.getMessage()).isEqualTo("Username or password is incorrect. Please try again.");
     }
 }

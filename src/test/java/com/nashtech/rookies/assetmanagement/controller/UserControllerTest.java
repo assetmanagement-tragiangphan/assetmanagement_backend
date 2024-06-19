@@ -3,6 +3,7 @@ package com.nashtech.rookies.assetmanagement.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
+import com.nashtech.rookies.assetmanagement.dto.request.ChangePasswordRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
@@ -63,6 +64,7 @@ public class UserControllerTest {
 
     List<UserDto> userDtoList;
     UserDetailsDto userDetailsDto;
+    ChangePasswordRequest changePasswordRequest;
 
     private User getUser() {
         User user = new User();
@@ -188,6 +190,42 @@ public class UserControllerTest {
     }
 
     @Test
+    public void testChangePassword_whenRequestUserRoleAdmin_thenSuccess() throws Exception{
+        changePasswordRequest = ChangePasswordRequest.builder()
+                .newPassword("thanh0412")
+                .oldPassword("Old Password")
+                .build();
+
+        when(userService.changePassword(anyInt(), any(ChangePasswordRequest.class))).thenReturn(
+                ResponseDto.<Void>builder()
+                        .message("Change password successfully.")
+                        .build());
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/password")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(user(userDetailsDto))
+                        .content(objectMapper.writeValueAsString(changePasswordRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testChangePassword_whenInvalidPasswordFormat_thenSuccess() throws Exception{
+        changePasswordRequest = ChangePasswordRequest.builder()
+                .newPassword("New Password")
+                .oldPassword("Old Password")
+                .build();
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/password")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(user(userDetailsDto))
+                        .content(objectMapper.writeValueAsString(changePasswordRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest());
+    }
+
     @WithMockUser(username = "test", roles = "ADMIN")
     public void testDisableUser_whenUserIdIsValid_thenReturnResponseDtoSucess() throws Exception {
         var sampleResponse = ResponseDto.<Void>builder()

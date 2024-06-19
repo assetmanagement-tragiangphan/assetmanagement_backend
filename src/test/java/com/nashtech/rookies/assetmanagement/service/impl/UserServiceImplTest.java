@@ -387,6 +387,7 @@ public class UserServiceImplTest {
         when(roleRepository.findById(1)).thenReturn(Optional.of(sampleRole));
         assertThrows(InvalidDateException.class, () -> userService.saveUser(sampleRequest, admin));
     }
+
     @Test
     public void testChangePassword_whenValidInput_thenSuccess() {
         changePasswordRequest = ChangePasswordRequest.builder()
@@ -490,7 +491,7 @@ public class UserServiceImplTest {
         var ex = assertThrows(BadRequestException.class, () ->
                 userService.changePassword(userId, changePasswordRequest));
 
-        assertThat(ex.getMessage()).isEqualTo("New password must be different from current password.");
+        assertThat(ex.getMessage()).isEqualTo("The new password must not be the same as the old password.");
     }
 
     @Test
@@ -539,7 +540,6 @@ public class UserServiceImplTest {
 
         assertThat(ex.getMessage()).isEqualTo("You must provide your current password.");
     }
-
 
     @Test 
     void testDisableUser_whenUserIdIsValid_thenReturnResponseDtoSucess() {
