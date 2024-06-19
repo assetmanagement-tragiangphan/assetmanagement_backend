@@ -187,5 +187,29 @@ public class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)));
     }
 
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testDisableUser_whenUserIdIsValid_thenReturnResponseDtoSucess() throws Exception {
+        var sampleResponse = ResponseDto.<Void>builder()
+                .message("Disable user successfully")
+                .build();
 
+        when(userService.disableUser(anyInt())).thenReturn(sampleResponse);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/1/disable")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message", Matchers.is("Disable user successfully")));
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testDisableUser_whenUserIdInvalid_thenReturnStatusNotFound() throws Exception {
+        when(userService.disableUser(anyInt())).thenThrow(new ResourceNotFoundException("User not found"));
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/1/disable")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", Matchers.is("User not found")));
+    }
 }
