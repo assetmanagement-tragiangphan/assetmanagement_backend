@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ResponseDto<Void>> handleBadCredentialsException(BadCredentialsException exception) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 ResponseDto.<Void>builder()
-                        .message("Invalid username or password.")
+                        .message("Username or password is incorrect. Please try again.")
                         .build()
         );
     }
