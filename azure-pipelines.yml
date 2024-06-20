@@ -41,7 +41,7 @@ steps:
   inputs:
     azureSubscription: 'Visual Studio Enterprise Subscription – MPN - Rookies (37e5689f-a071-42d1-b1d0-12aef94b2585)-1015'
     appType: 'webAppLinux'
-    appName: 'ThanhLongBinhThuan'
+    appName: 'BackEnd'
     deployToSlotOrASE: true
     resourceGroupName: 'rookiesjava01'
     slotName: 'production'

@@ -62,14 +62,15 @@ public class SecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOriginPatterns(originPatterns);
-                        config.setAllowedMethods(Collections.singletonList("*"));
+                        config.setAllowedOriginPatterns(List.of("*"));
+                        config.setAllowedMethods(List.of("*"));
                         config.setAllowCredentials(true);
-                        config.setAllowedHeaders(Collections.singletonList("*"));
-                        config.setExposedHeaders(List.of("Authorization"));
+                        config.setAllowedHeaders(List.of("*"));
+                        config.setExposedHeaders(List.of("*"));
                         config.setMaxAge(3600L);
                         return config;
                     }
+
                 }))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> req
