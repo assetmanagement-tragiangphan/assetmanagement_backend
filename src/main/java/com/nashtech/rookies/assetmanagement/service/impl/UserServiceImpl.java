@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
     public ResponseDto<PageableDto<List<UserDto>>> getAll(UserGetRequest requestParams, Pageable pageable, UserDetailsDto requestUser) {
 
         LocationConstant requestUserLocation = requestUser.getLocation();
-        Specification<User> spec = UserSpecification.userListFilter(requestParams.getSearch(), requestParams.getTypes(), requestUserLocation);
+        Specification<User> spec = UserSpecification.userListFilter(requestParams.getSearch(), requestParams.getTypes(), requestUserLocation, requestUser.getId());
 
         PageRequest pageRequest = (PageRequest) pageable;
         if (pageRequest.getSort().equals(Sort.unsorted())) {
@@ -97,6 +97,16 @@ public class UserServiceImpl implements UserService {
         return ResponseDto.<UserDto>builder()
                 .data(userMapper.entityToDto(user))
                 .message("Get user by id successfully.")
+                .build();
+    }
+
+    @Override
+    public ResponseDto<UserDto> getUserByStaffCode(String staffCode) {
+        var user = userRepository.findByStaffCodeAndStatus(staffCode, StatusConstant.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+        return ResponseDto.<UserDto>builder()
+                .data(userMapper.entityToDto(user))
+                .message("Get user by staff code successfully.")
                 .build();
     }
 

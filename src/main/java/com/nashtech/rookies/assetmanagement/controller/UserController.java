@@ -33,9 +33,9 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(users);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseDto<UserDto>> getUserById(@PathVariable("id") Integer id) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(id));
+    @GetMapping("/{staffCode}")
+    public ResponseEntity<ResponseDto<UserDto>> getUserByStaffCode(@PathVariable("staffCode") String staffCode) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getUserByStaffCode(staffCode));
     }
 
     @PostMapping

@@ -36,8 +36,12 @@ public class UserSpecification {
         return (root, query, builder) -> builder.equal(root.get(User_.STATUS), status);
     }
 
-    public static Specification<User> userListFilter (String search, List<Integer> roleIds, LocationConstant location) {
-        Specification<User> spec = Specification.where(hasStatus(StatusConstant.ACTIVE));
+    public static Specification<User> notHasUserId (Integer excludeUserId) {
+        return (root, query, builder) -> builder.notEqual(root.get(User_.ID), excludeUserId);
+    }
+
+    public static Specification<User> userListFilter (String search, List<Integer> roleIds, LocationConstant location, Integer excludeUserId) {
+        Specification<User> spec = Specification.where(hasStatus(StatusConstant.ACTIVE).and(notHasUserId(excludeUserId)));
         if (search != null) {
             spec = spec.and(likeName(search).or(likeStaffCode(search)));
         }

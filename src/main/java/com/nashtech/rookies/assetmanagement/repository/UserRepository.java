@@ -15,5 +15,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer>, JpaSpecificationExecutor<User> {
     Optional<User> findByUsernameAndStatus(String username, StatusConstant status);
     Optional<User> findByIdAndStatus(Integer id, StatusConstant status);
+    Optional<User> findByStaffCodeAndStatus(String staffCode, StatusConstant status);
     List<User> findByUsernameStartsWith(String username);
 }
