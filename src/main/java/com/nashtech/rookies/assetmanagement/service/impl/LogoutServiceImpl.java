@@ -31,9 +31,6 @@ public class LogoutServiceImpl implements LogoutHandler {
         var tokenCookie = extractTokenFromCookie(request);
 
         String jwt;
-        if ((tokenHeader == null || !tokenHeader.startsWith("Bearer ")) && tokenCookie == null) {
-            generateExceptionResponse(response);
-        }
 
         //prioritize token in header
         if (tokenHeader != null) {
@@ -46,21 +43,6 @@ public class LogoutServiceImpl implements LogoutHandler {
                 .orElse(null);
         if (storedToken != null) {
             tokenRepository.delete(storedToken);
-        } else {
-            generateExceptionResponse(response);
-        }
-    }
-
-    private void generateExceptionResponse(HttpServletResponse response) {
-        response.setStatus(HttpStatus.BAD_REQUEST.value());
-        response.setContentType("application/json");
-        try {
-            response.getWriter().write(objectMapper.writeValueAsString(
-                    ResponseDto.<Void>builder()
-                            .message("Invalid logout request.")
-                            .build()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

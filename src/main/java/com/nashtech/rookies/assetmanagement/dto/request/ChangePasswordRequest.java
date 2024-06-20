@@ -1,13 +1,13 @@
 package com.nashtech.rookies.assetmanagement.dto.request;
 
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Builder
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChangePasswordRequest {
     private String oldPassword;
     @Pattern(regexp = "^(?=.*[a-zA-Z\\S])(?=.*\\d)[a-zA-Z\\d\\S]{8,}$",

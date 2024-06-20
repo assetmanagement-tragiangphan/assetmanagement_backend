@@ -8,17 +8,22 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ExceptionHandlerFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper;
 
@@ -30,22 +35,25 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } catch (AccessDeniedException e) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
+            log.error("Error occurred: {}", e.getMessage());
+            var authenticationInstance = SecurityContextHolder.getContext().getAuthentication();
+            log.info(authenticationInstance.toString());
+            if (authenticationInstance instanceof AnonymousAuthenticationToken) {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
+            } else {
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+            }
+
             response.setContentType("application/json");
             response.getWriter().write(objectMapper.writeValueAsString(
                     ResponseDto.<Void>builder()
                             .message("You don't have permission to perform this action.")
                             .build()
             ));
-        } catch (ExpiredJwtException e) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.setContentType("application/json");
-            response.getWriter().write(objectMapper.writeValueAsString(
-                    ResponseDto.<Void>builder()
-                            .message("JWT already expired.")
-                            .build()
-            ));
         } catch (Exception e) {
+            log.error("Error occurred: {}", e.getMessage());
+
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.setContentType("application/json");
             response.getWriter().write(objectMapper.writeValueAsString(

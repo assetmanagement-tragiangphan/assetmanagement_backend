@@ -52,11 +52,11 @@ public class JwtServiceImpl implements JwtService {
         return buildToken(new HashMap<>(), userDetails, refreshTokenExpiration);
     }
 
-    @Override
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String userName = extractUsername(token);
-        return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
+//    @Override
+//    public boolean isTokenValid(String token, UserDetails userDetails) {
+//        final String userName = extractUsername(token);
+//        return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
+//    }
 
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
@@ -76,7 +76,8 @@ public class JwtServiceImpl implements JwtService {
                 .compact();
     }
 
-    private boolean isTokenExpired(String token) {
+    @Override
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
