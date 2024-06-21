@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
         mappedUser = userRepository.save(mappedUser);
         mappedUser.setStatus(StatusConstant.ACTIVE);
         NumberFormat nf = new DecimalFormat("0000");
-        mappedUser.setStaffCode(PrefixConstant.SD.toString()+nf.format(mappedUser.getId()));
+        mappedUser.setStaffCode(request.getPrefix().toString()+nf.format(mappedUser.getId()));
         var user = userRepository.save(mappedUser);
         return ResponseDto.<UserDto>builder()
                 .data(userMapper.entityToDto(user))
@@ -156,9 +156,9 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToUserDetailsDto(user);
     }
 
-    public ResponseDto<UserDto> updateUser(UpdateUserRequest request, Integer userId) {
+    public ResponseDto<UserDto> updateUser(UpdateUserRequest request, String staffCode) {
         //Validate
-        var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+        var user = userRepository.findByStaffCodeAndStatus(staffCode,StatusConstant.ACTIVE).orElseThrow(() -> new ResourceNotFoundException("User not found."));
         var role = roleRepository.findById(request.getType()).orElseThrow(() -> new ResourceNotFoundException("Role not found."));
         if (!isValidAge(request.getDateOfBirth()))
             throw new InvalidDateException("User is under 18. Please select a different date");
@@ -171,7 +171,7 @@ public class UserServiceImpl implements UserService {
         updatedUser.setRole(role);
         var returnUser = userRepository.save(updatedUser);
         return ResponseDto.<UserDto>builder()
-                .data(userMapper.entityToDto(updatedUser))
+                .data(userMapper.entityToDto(returnUser))
                 .message("Update user successfully")
                 .build();
     }

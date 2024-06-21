@@ -19,10 +19,7 @@ import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
 import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
-import com.nashtech.rookies.assetmanagement.util.GenderConstant;
-import com.nashtech.rookies.assetmanagement.util.LocationConstant;
-import com.nashtech.rookies.assetmanagement.util.RoleConstant;
-import com.nashtech.rookies.assetmanagement.util.StatusConstant;
+import com.nashtech.rookies.assetmanagement.util.*;
 
 import io.jsonwebtoken.lang.Assert;
 import jakarta.persistence.Id;
@@ -191,7 +188,7 @@ public class UserServiceImplTest {
     public void testUpdateUser_whenUserIdIsValid_thenReturnUser() {
         Role sampleRole = getRole(1,RoleConstant.ADMIN);
         User sampleUser = getUser(1,2, RoleConstant.STAFF, GenderConstant.MALE, "2024-01-01", "2001-01-01");
-        when(userRepository.findById(1)).thenReturn(Optional.of(sampleUser));
+        when(userRepository.findByStaffCodeAndStatus(anyString(), eq(StatusConstant.ACTIVE))).thenReturn(Optional.of(sampleUser));
         when(roleRepository.findById(1)).thenReturn(Optional.of(sampleRole));
         when(userRepository.save(any(User.class))).thenReturn(sampleUser);
 
@@ -202,11 +199,11 @@ public class UserServiceImplTest {
                 .type(1)
                 .build();
 
-        var actual = userService.updateUser(dto, 1);
+        var actual = userService.updateUser(dto, "ABCDE");
 
         Assert.notNull(actual.getData());
         verify(roleRepository).findById(1);
-        verify(userRepository).findById(1);
+        verify(userRepository).findByStaffCodeAndStatus(anyString(), eq(StatusConstant.ACTIVE));
         assertEquals(actual.getData().getJoinedDate().toString(),"2024-12-12");
         assertEquals(actual.getData().getDateOfBirth().toString(),"2002-01-01");
         assertEquals(actual.getData().getGender(), "FEMALE");
@@ -221,8 +218,8 @@ public class UserServiceImplTest {
                 .gender(String.valueOf(GenderConstant.FEMALE))
                 .type(1)
                 .build();
-        when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> userService.updateUser(dto, 1));
+        when(userRepository.findByStaffCodeAndStatus(anyString(),eq(StatusConstant.ACTIVE))).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> userService.updateUser(dto, "SD0001"));
     }
 
     @Test
@@ -234,9 +231,9 @@ public class UserServiceImplTest {
                 .gender(String.valueOf(GenderConstant.FEMALE))
                 .type(1)
                 .build();
-        when(userRepository.findById(anyInt())).thenReturn(Optional.ofNullable(sampleUser));
+        when(userRepository.findByStaffCodeAndStatus(anyString(), eq(StatusConstant.ACTIVE))).thenReturn(Optional.ofNullable(sampleUser));
         when(roleRepository.findById(anyInt())).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> userService.updateUser(dto, 1));
+        assertThrows(ResourceNotFoundException.class, () -> userService.updateUser(dto, "SD0001"));
     }
 
     @Test
@@ -249,10 +246,10 @@ public class UserServiceImplTest {
                 .gender(String.valueOf(GenderConstant.FEMALE))
                 .type(1)
                 .build();
-        when(userRepository.findById(1)).thenReturn(Optional.of(sampleUser));
+        when(userRepository.findByStaffCodeAndStatus(anyString(), eq(StatusConstant.ACTIVE))).thenReturn(Optional.of(sampleUser));
         when(roleRepository.findById(1)).thenReturn(Optional.of(sampleRole));
 
-        assertThrows(InvalidDateException.class, () -> userService.updateUser(dto,1));
+        assertThrows(InvalidDateException.class, () -> userService.updateUser(dto,"SD0001"));
     }
 
     @Test
@@ -265,10 +262,10 @@ public class UserServiceImplTest {
                 .gender(String.valueOf(GenderConstant.FEMALE))
                 .type(1)
                 .build();
-        when(userRepository.findById(1)).thenReturn(Optional.of(sampleUser));
+        when(userRepository.findByStaffCodeAndStatus(anyString(), eq(StatusConstant.ACTIVE))).thenReturn(Optional.of(sampleUser));
         when(roleRepository.findById(1)).thenReturn(Optional.of(sampleRole));
 
-        assertThrows(InvalidDateException.class, () -> userService.updateUser(dto,1));
+        assertThrows(InvalidDateException.class, () -> userService.updateUser(dto,"SD0001"));
     }
 
     @Test
@@ -281,10 +278,10 @@ public class UserServiceImplTest {
                 .gender(String.valueOf(GenderConstant.FEMALE))
                 .type(1)
                 .build();
-        when(userRepository.findById(1)).thenReturn(Optional.of(sampleUser));
+        when(userRepository.findByStaffCodeAndStatus(anyString(),eq(StatusConstant.ACTIVE))).thenReturn(Optional.of(sampleUser));
         when(roleRepository.findById(1)).thenReturn(Optional.of(sampleRole));
 
-        assertThrows(InvalidDateException.class, () -> userService.updateUser(dto,1));
+        assertThrows(InvalidDateException.class, () -> userService.updateUser(dto,"SD0001"));
     }
 
     @Test
@@ -299,6 +296,8 @@ public class UserServiceImplTest {
                 .gender(GenderConstant.MALE)
                 .joinedDate(LocalDate.parse("2024-04-22"))
                 .dateOfBirth(LocalDate.parse("2002-05-19"))
+                .location(LocationConstant.HN)
+                .prefix(PrefixConstant.SPD)
                 .firstName("Nguyen")
                 .lastName("Pham Sy")
                 .build();
@@ -315,7 +314,8 @@ public class UserServiceImplTest {
         var actual = userService.saveUser(sampleRequest,admin);
 
         assertNotNull(actual.getData());
-        assertEquals(actual.getData().getStaffCode(),"SD0001");
+        assertEquals(actual.getData().getStaffCode(),"SPD0001");
+        assertEquals(actual.getData().getLocation(),"HN");
     }
 
     @Test

@@ -44,9 +44,9 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveUser(request, requestUser));
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<ResponseDto<UserDto>> editUser(@RequestBody UpdateUserRequest request, @PathVariable(name = "id") Integer userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(request, userId));
+    @PutMapping("{staffCode}")
+    public ResponseEntity<ResponseDto<UserDto>> editUser(@RequestBody UpdateUserRequest request, @PathVariable(name = "staffCode") String staffCode) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(request, staffCode));
     }
 
     @PatchMapping("/password")

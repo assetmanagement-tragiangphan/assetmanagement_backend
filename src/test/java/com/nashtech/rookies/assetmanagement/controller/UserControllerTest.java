@@ -16,6 +16,7 @@ import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.service.UserService;
 import com.nashtech.rookies.assetmanagement.util.GenderConstant;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
+import com.nashtech.rookies.assetmanagement.util.PrefixConstant;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 
 import org.hamcrest.Matchers;
@@ -42,8 +43,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doReturn;
@@ -71,6 +71,7 @@ public class UserControllerTest {
     private User getUser() {
         User user = new User();
         user.setId(1);
+        user.setLocation(LocationConstant.HCM);
         user.setGender(GenderConstant.MALE);
         user.setFirstName("test");
         return user;
@@ -163,8 +164,8 @@ public class UserControllerTest {
                 .gender(String.valueOf(GenderConstant.MALE))
                 .build();
 
-        doReturn(sampleResponse).when(userService).updateUser(any(UpdateUserRequest.class),anyInt());
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/users/1")
+        doReturn(sampleResponse).when(userService).updateUser(any(UpdateUserRequest.class),anyString());
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/users/SD0001")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))).andReturn();
 
@@ -183,10 +184,10 @@ public class UserControllerTest {
                 .gender(String.valueOf(GenderConstant.MALE))
                 .build();
         // Ensure that the mock is set up to throw an exception
-        given(userService.updateUser(any(UpdateUserRequest.class),anyInt())).willThrow(new ResourceNotFoundException("User not found"));
+        given(userService.updateUser(any(UpdateUserRequest.class),anyString())).willThrow(new ResourceNotFoundException("User not found"));
 
         // Perform the GET request and verify the result
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/users/1")
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/users/SD0001")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(jsonPath("$.message", Matchers.is("User not found")));
@@ -263,6 +264,8 @@ public class UserControllerTest {
                 .gender(GenderConstant.MALE)
                 .joinedDate(LocalDate.parse("2024-04-22"))
                 .dateOfBirth(LocalDate.parse("2002-05-19"))
+                .prefix(PrefixConstant.SD)
+                .location(LocationConstant.HCM)
                 .firstName("Nguyen")
                 .lastName("Pham Sy")
                 .build();
@@ -276,7 +279,8 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(user(userDetailsDto))
                 .content(objectMapper.writeValueAsString(sampleRequest)))
-                .andExpect(jsonPath("$.data.id", Matchers.is(1)));
+                .andExpect(jsonPath("$.data.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.data.location", Matchers.is("HCM")));
     }
 
     @Test
