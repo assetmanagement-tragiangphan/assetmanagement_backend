@@ -55,11 +55,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 //@WebMvcTest(controllers = UserController.class)
 @AutoConfigureMockMvc
 @SpringBootTest
-@TestPropertySource(properties = {
-        "DB_PASSWORD=boi10102001",
-        "DB_URL=jdbc:postgresql://localhost:5432/assetManagement",
-        "DB_USERNAME=postgres"
-})
 public class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -128,6 +123,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
     public void testGetUserByStaffCode_WhenUserIdIsValid_thenReturnUser() throws Exception {
         String staffCode = "SD001";
         var sampleResponse = ResponseDto.<UserDto>builder()
@@ -144,6 +140,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
     public void testGetUserByStaffCode_WhenUserIdNotExist_thenThrowResourceNotFoundException() throws Exception {
         String staffCode = "SD001";
 
