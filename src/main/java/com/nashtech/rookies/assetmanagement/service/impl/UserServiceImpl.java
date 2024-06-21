@@ -91,6 +91,11 @@ public class UserServiceImpl implements UserService {
                             .orElseThrow(() -> new ResourceNotFoundException("User not found."));
     }
 
+    public User getUserEntityByStaffCode(String staffCode) {
+        return userRepository.findByStaffCodeAndStatus(staffCode, StatusConstant.ACTIVE)
+                            .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+    }
+
     @Override
     public ResponseDto<UserDto> getUserById(Integer id) {
         var user = this.getUserEntityById(id);
@@ -215,8 +220,8 @@ public class UserServiceImpl implements UserService {
         return dayOfWeek == DayOfWeek.SUNDAY || dayOfWeek == DayOfWeek.SATURDAY;
     }
 
-    public ResponseDto<Void> disableUser (Integer userId) {
-        var user = this.getUserEntityById(userId);
+    public ResponseDto<Void> disableUser (String staffCode) {
+        var user = this.getUserEntityByStaffCode(staffCode);
         user.setStatus(StatusConstant.INACTIVE);
         var tokens = user.getTokens();
         if (tokens != null) {

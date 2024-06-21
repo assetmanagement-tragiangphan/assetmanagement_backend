@@ -19,5 +19,5 @@ public interface UserService extends UserDetailsService {
     ResponseDto<UserDto> saveUser(CreateUserRequest request, UserDetailsDto requestUser);
     ResponseDto<UserDto> updateUser(UpdateUserRequest request, String staffCode);
     ResponseDto<Void> changePassword(Integer userId, ChangePasswordRequest request);
-    ResponseDto<Void> disableUser(Integer userId);
+    ResponseDto<Void> disableUser(String staffCode);
 }

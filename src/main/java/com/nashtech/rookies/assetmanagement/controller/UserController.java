@@ -55,8 +55,8 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.changePassword(userId, request));
     }
 
-    @PatchMapping("{id}/disable")
-    public ResponseEntity<ResponseDto<Void>> disableUser(@PathVariable("id") Integer userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.disableUser(userId));
+    @DeleteMapping("{staffCode}")
+    public ResponseEntity<ResponseDto<Void>> disableUser(@PathVariable("staffCode") String staffCode) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.disableUser(staffCode));
     }
 }

@@ -55,6 +55,11 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 //@WebMvcTest(controllers = UserController.class)
 @AutoConfigureMockMvc
 @SpringBootTest
+@TestPropertySource(properties = {
+        "DB_PASSWORD=boi10102001",
+        "DB_URL=jdbc:postgresql://localhost:5432/assetManagement",
+        "DB_USERNAME=postgres"
+})
 public class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -123,28 +128,28 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testGetUserById_WhenUserIdIsValid_thenReturnUser() throws Exception {
-        Integer id = 1;
+    public void testGetUserByStaffCode_WhenUserIdIsValid_thenReturnUser() throws Exception {
+        String staffCode = "SD001";
         var sampleResponse = ResponseDto.<UserDto>builder()
                 .data(userMapper.entityToDto(getUser()))
                 .message("Get user by id successfully")
                 .build();
 
-        when(userService.getUserById(id)).thenReturn(sampleResponse);
+        when(userService.getUserByStaffCode(staffCode)).thenReturn(sampleResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/users/" + id)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/users/" + staffCode)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id", Matchers.is(1)));
     }
 
     @Test
-    public void testGetUserById_WhenUserIdNotExist_thenThrowResourceNotFoundException() throws Exception {
-        Integer id = 1;
+    public void testGetUserByStaffCode_WhenUserIdNotExist_thenThrowResourceNotFoundException() throws Exception {
+        String staffCode = "SD001";
 
-        when(userService.getUserById(id)).thenThrow(new ResourceNotFoundException("User not found"));
+        when(userService.getUserByStaffCode(staffCode)).thenThrow(new ResourceNotFoundException("User not found"));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/users/" + id)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/users/" + staffCode)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", Matchers.is("User not found")));
@@ -231,15 +236,16 @@ public class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
     @WithMockUser(username = "test", roles = "ADMIN")
     public void testDisableUser_whenUserIdIsValid_thenReturnResponseDtoSucess() throws Exception {
         var sampleResponse = ResponseDto.<Void>builder()
                 .message("Disable user successfully")
                 .build();
 
-        when(userService.disableUser(anyInt())).thenReturn(sampleResponse);
+        when(userService.disableUser(any(String.class))).thenReturn(sampleResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/1/disable")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/users/SD001")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", Matchers.is("Disable user successfully")));
@@ -248,9 +254,9 @@ public class UserControllerTest {
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
     public void testDisableUser_whenUserIdInvalid_thenReturnStatusNotFound() throws Exception {
-        when(userService.disableUser(anyInt())).thenThrow(new ResourceNotFoundException("User not found"));
+        when(userService.disableUser(any(String.class))).thenThrow(new ResourceNotFoundException("User not found"));
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/1/disable")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/users/SD001")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", Matchers.is("User not found")));

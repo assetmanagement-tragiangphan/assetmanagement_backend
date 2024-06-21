@@ -544,25 +544,27 @@ public class UserServiceImplTest {
     @Test 
     void testDisableUser_whenUserIdIsValid_thenReturnResponseDtoSucess() {
         var user = users.get(0);
+        String staffCode = user.getStaffCode();
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        when(userRepository.findByIdAndStatus(1, StatusConstant.ACTIVE)).thenReturn(Optional.of(user));
+        when(userRepository.findByStaffCodeAndStatus(staffCode, StatusConstant.ACTIVE)).thenReturn(Optional.of(user));
         when(userRepository.save(userCaptor.capture())).thenReturn(user);
         
-        var result = userService.disableUser(1);
+        var result = userService.disableUser(staffCode);
         var updatedUser = userCaptor.getValue();
 
         assertEquals(updatedUser.getStatus(), StatusConstant.INACTIVE);
         assertEquals(result.getMessage(), "Disable user successfully.");
-        verify(userRepository, times(1)).findByIdAndStatus(1, StatusConstant.ACTIVE);
+        verify(userRepository, times(1)).findByStaffCodeAndStatus(staffCode, StatusConstant.ACTIVE);
         verify(tokenRepository, times(1)).deleteAll(any(List.class));
         verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     void testDisableUser_whenUserIdNotExist_thenThrowResourceNotFoundException() {
-        when(userRepository.findByIdAndStatus(1, StatusConstant.ACTIVE)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> userService.disableUser(1));
-        verify(userRepository, times(1)).findByIdAndStatus(1, StatusConstant.ACTIVE);
+        String staffCode = "staffCode";
+        when(userRepository.findByStaffCodeAndStatus(staffCode, StatusConstant.ACTIVE)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> userService.disableUser(staffCode));
+        verify(userRepository, times(1)).findByStaffCodeAndStatus(staffCode, StatusConstant.ACTIVE);
     }
     
 }
