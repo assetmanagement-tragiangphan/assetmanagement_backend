@@ -1,12 +1,10 @@
 package com.nashtech.rookies.assetmanagement.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.logging.log4j.util.Lazy;
 
 import java.time.LocalDateTime;
 
@@ -19,10 +17,10 @@ public class AuditMetadata {
     private LocalDateTime createdOn;
     @Column(insertable = false)
     private LocalDateTime updatedOn;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "createdBy", updatable = false)
     private User createdBy;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updatedBy", insertable = false)
     private User updatedBy;
 }

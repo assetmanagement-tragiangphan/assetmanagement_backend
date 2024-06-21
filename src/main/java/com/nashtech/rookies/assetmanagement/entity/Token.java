@@ -1,6 +1,7 @@
 package com.nashtech.rookies.assetmanagement.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 public class Token extends BaseEntity {
     private String token;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
     private User user;
 }
