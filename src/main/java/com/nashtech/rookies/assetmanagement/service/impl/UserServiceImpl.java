@@ -131,7 +131,11 @@ public class UserServiceImpl implements UserService {
         var mappedUser = userMapper.createUserRequestToEntity(request);
         mappedUser.setUsername(duplicateNum > 0 ? username + duplicateNum : username);
         mappedUser.setRole(role);
-        mappedUser.setLocation(requestUser.getLocation());
+
+        if (request.getLocation()==null)
+            mappedUser.setLocation(requestUser.getLocation());
+        else
+            mappedUser.setLocation(request.getLocation());
 
         String tempPassword = mappedUser.getUsername()+"@"+mappedUser.getDateOfBirth().format(DateTimeFormatter.ofPattern("ddMMyyyy"));
         mappedUser.setPassword(passwordEncoder.encode(tempPassword));
@@ -139,7 +143,7 @@ public class UserServiceImpl implements UserService {
         mappedUser = userRepository.save(mappedUser);
         mappedUser.setStatus(StatusConstant.ACTIVE);
         NumberFormat nf = new DecimalFormat("0000");
-        mappedUser.setStaffCode(request.getPrefix().toString()+nf.format(mappedUser.getId()));
+        mappedUser.setStaffCode((request.getPrefix()==null ? PrefixConstant.SD.toString() : request.getPrefix().toString()) +nf.format(mappedUser.getId()));
         var user = userRepository.save(mappedUser);
         return ResponseDto.<UserDto>builder()
                 .data(userMapper.entityToDto(user))

@@ -297,7 +297,7 @@ public class UserServiceImplTest {
                 .joinedDate(LocalDate.parse("2024-04-22"))
                 .dateOfBirth(LocalDate.parse("2002-05-19"))
                 .location(LocationConstant.HN)
-                .prefix(PrefixConstant.SPD)
+                .prefix(PrefixConstant.BPS)
                 .firstName("Nguyen")
                 .lastName("Pham Sy")
                 .build();
@@ -314,7 +314,40 @@ public class UserServiceImplTest {
         var actual = userService.saveUser(sampleRequest,admin);
 
         assertNotNull(actual.getData());
-        assertEquals(actual.getData().getStaffCode(),"SPD0001");
+        assertEquals(actual.getData().getStaffCode(),"BPS0001");
+        assertEquals(actual.getData().getLocation(),"HN");
+    }
+
+    @Test
+    public void testCreateAdmin_whenRequestIsValid_thenReturnCreatedUser() {
+        UserDetailsDto admin = UserDetailsDto.builder()
+                .roleName(RoleConstant.valueOf("ADMIN"))
+                .location(LocationConstant.HCM)
+                .build();
+
+        CreateUserRequest sampleRequest = CreateUserRequest.builder()
+                .roleId(1)
+                .gender(GenderConstant.MALE)
+                .joinedDate(LocalDate.parse("2024-04-22"))
+                .dateOfBirth(LocalDate.parse("2002-05-19"))
+                .location(LocationConstant.HN)
+                .firstName("Nguyen")
+                .lastName("Pham Sy")
+                .build();
+
+        User sampleUser = userMapper.createUserRequestToEntity(sampleRequest);
+        sampleUser.setId(1);
+
+        Role sampleRole = new Role();
+        sampleRole.setId(1);
+        when(roleRepository.findById(anyInt())).thenReturn(Optional.of(sampleRole));
+        when(userRepository.save(any(User.class))).thenReturn(sampleUser);
+        when(userRepository.findByUsernameStartsWith(anyString())).thenReturn(new ArrayList<User>());
+        when(passwordEncoder.encode(anyString())).thenReturn("password");
+        var actual = userService.saveUser(sampleRequest,admin);
+
+        assertNotNull(actual.getData());
+        assertEquals(actual.getData().getStaffCode(),"SD0001");
         assertEquals(actual.getData().getLocation(),"HN");
     }
 
@@ -364,6 +397,7 @@ public class UserServiceImplTest {
         when(roleRepository.findById(1)).thenReturn(Optional.of(sampleRole));
         assertThrows(InvalidDateException.class, () -> userService.saveUser(sampleRequest,admin));
     }
+
 
     @Test
     public void testCreateUser_whenDobIsWeekend_thenThrows() {

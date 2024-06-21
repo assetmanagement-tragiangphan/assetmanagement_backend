@@ -1,5 +1,5 @@
 package com.nashtech.rookies.assetmanagement.util;
 
 public enum PrefixConstant {
-    SD, SPD
+    SD, BPS
 }

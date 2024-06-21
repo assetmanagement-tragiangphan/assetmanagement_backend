@@ -7,12 +7,15 @@ import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
+import com.nashtech.rookies.assetmanagement.exception.InvalidDateException;
 import com.nashtech.rookies.assetmanagement.service.UserService;
 
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
+import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +43,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<ResponseDto<UserDto>> saveUser(@RequestBody CreateUserRequest request, Authentication authentication) {
-        UserDetailsDto requestUser = (UserDetailsDto)authentication.getPrincipal();
+        UserDetailsDto requestUser = (UserDetailsDto) authentication.getPrincipal();
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveUser(request, requestUser));
     }
 
