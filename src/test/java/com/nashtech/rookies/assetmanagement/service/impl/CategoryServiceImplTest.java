@@ -1,86 +1,160 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
-import com.nashtech.rookies.assetmanagement.dto.response.CategoryResponse;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CategoryRequest;
+import com.nashtech.rookies.assetmanagement.dto.response.CategoryResponse;
+import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Category;
+import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.mapper.CategoryMapper;
-import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.CategoryRepository;
-import com.nashtech.rookies.assetmanagement.repository.UserRepository;
-import com.nashtech.rookies.assetmanagement.service.CategoryService;
-import com.nashtech.rookies.assetmanagement.util.LocationConstant;
-import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
-class CategoryServiceImplTest {
-    @Mock
-    private CategoryService categoryService;
+public class CategoryServiceImplTest {
+
     @Mock
     private CategoryRepository categoryRepository;
+
     @Mock
     private CategoryMapper categoryMapper;
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private UserMapper userMapper;
+
+    @InjectMocks
+    private CategoryServiceImpl categoryServiceImpl;
+
     private CategoryRequest categoryRequest;
-    private CategoryResponse categoryResponse;
-    private UserDetailsDto userDetailsDto;
-    private List<Category> categories;
+    private UserDetailsDto requestUser;
+    private Category category1;
+    private Category category2;
+    private CategoryResponse categoryResponse1;
+    private CategoryResponse categoryResponse2;
 
     @BeforeEach
-    void setUp() {
-        categoryService = new CategoryServiceImpl(categoryRepository, categoryMapper, userRepository, userMapper);
-        Category category1 = Category.builder()
-                .id(1)
-                .prefix("LA")
-                .name("Laptop")
-                .status(StatusConstant.ACTIVE)
-                .build();
-        Category category2 = Category.builder()
-                .id(2)
-                .prefix("MO")
-                .name("Monitor")
-                .status(StatusConstant.ACTIVE)
-                .build();
-        categories = List.of(category1, category2);
-        userDetailsDto = UserDetailsDto.builder()
-                .id(1)
-                .username("username")
-                .location(LocationConstant.HCM)
-                .roleName(RoleConstant.ADMIN)
-                .build();
-    }
+    public void setUp() {
+        categoryRequest = new CategoryRequest();
+        categoryRequest.setPrefix("CAT");
+        categoryRequest.setName("Category Name");
 
-    @AfterEach
-    void tearDown() {
-    }
+        requestUser = new UserDetailsDto();
 
-    @Test
-    void testSaveCategory_WhenCategoryExists_ThenThrowResourceAlreadyExistException() {
+        category1 = new Category();
+        category1.setId(1);
+        category1.setPrefix("LA");
+        category1.setName("Laptop");
+        category1.setStatus(StatusConstant.ACTIVE);
 
-    }
+        category2 = new Category();
+        category2.setId(2);
+        category2.setPrefix("MO");
+        category2.setName("Monitor");
+        category2.setStatus(StatusConstant.ACTIVE);
 
-    @Test
-    void testSaveCategory_WhenCategoryDoesNotExists_ThenReturnNewCategory() {
+        categoryResponse1 = new CategoryResponse();
+        categoryResponse1.setId(1);
+        categoryResponse1.setPrefix("LA");
+        categoryResponse1.setName("Laptop");
 
+        categoryResponse2 = new CategoryResponse();
+        categoryResponse2.setId(2);
+        categoryResponse2.setPrefix("MO");
+        categoryResponse2.setName("Monitor");
     }
 
     @Test
-    void testGetAllCategory_WhenNotExistAnyCategory_ThenThrowResourceNotFoundException() {
+    public void testSaveCategory_WhenPrefixAndNameNotExists_thenSuccess() {
+        when(categoryRepository.existsByPrefix(categoryRequest.getPrefix())).thenReturn(false);
+        when(categoryRepository.existsByName(categoryRequest.getName())).thenReturn(false);
+        when(categoryRepository.saveAndFlush(any(Category.class))).thenReturn(category1);
+        when(categoryMapper.entityToDto(any(Category.class))).thenReturn(categoryResponse1);
+
+        var response = categoryServiceImpl.saveCategory(categoryRequest, requestUser);
+
+        assertNotNull(response);
+        assertEquals("Create Category successfully.", response.getMessage());
+        assertEquals(categoryResponse1, response.getData());
+
+        verify(categoryRepository).existsByPrefix(categoryRequest.getPrefix());
+        verify(categoryRepository).existsByName(categoryRequest.getName());
+        verify(categoryRepository).saveAndFlush(any(Category.class));
+        verify(categoryMapper).entityToDto(any(Category.class));
     }
 
     @Test
-    void testGetAllCategory_WhenExistCategories_ThenReturnListOfCategory() {
+    public void testSaveCategory_WhenPrefixExists_ThenThrowResourceAlreadyExistException() {
+        when(categoryRepository.existsByPrefix(categoryRequest.getPrefix())).thenReturn(true);
+
+        ResourceAlreadyExistException exception = assertThrows(ResourceAlreadyExistException.class, () ->
+                categoryServiceImpl.saveCategory(categoryRequest, requestUser));
+
+        assertEquals("Prefix is already existed. Please enter a different prefix!", exception.getMessage());
+
+        verify(categoryRepository).existsByPrefix(categoryRequest.getPrefix());
+        verify(categoryRepository, never()).existsByName(categoryRequest.getName());
+        verify(categoryRepository, never()).saveAndFlush(any(Category.class));
+        verify(categoryMapper, never()).entityToDto(any(Category.class));
+    }
+
+    @Test
+    public void testSaveCategory_WhenNameExists_ThenThrowResourceAlreadyExistException() {
+        when(categoryRepository.existsByPrefix(categoryRequest.getPrefix())).thenReturn(false);
+        when(categoryRepository.existsByName(categoryRequest.getName())).thenReturn(true);
+
+        ResourceAlreadyExistException exception = assertThrows(ResourceAlreadyExistException.class, () ->
+                categoryServiceImpl.saveCategory(categoryRequest, requestUser));
+
+        assertEquals("Category is already existed. Please enter a different category!", exception.getMessage());
+
+        verify(categoryRepository).existsByPrefix(categoryRequest.getPrefix());
+        verify(categoryRepository).existsByName(categoryRequest.getName());
+        verify(categoryRepository, never()).saveAndFlush(any(Category.class));
+        verify(categoryMapper, never()).entityToDto(any(Category.class));
+    }
+
+    @Test
+    public void testGetAllCategory_WhenSuccess_ThenReturnListCategory() {
+        List<Category> categoryList = Arrays.asList(category1, category2);
+        when(categoryRepository.findAll()).thenReturn(categoryList);
+        when(categoryMapper.entityToDto(category1)).thenReturn(categoryResponse1);
+        when(categoryMapper.entityToDto(category2)).thenReturn(categoryResponse2);
+
+        ResponseDto<List<CategoryResponse>> response = categoryServiceImpl.getAllCategory(requestUser);
+
+        assertNotNull(response);
+        assertNotNull(response.getData());
+        assertEquals(2, response.getData().size());
+        assertEquals("LA", response.getData().get(0).getPrefix());
+        assertEquals("MO", response.getData().get(1).getPrefix());
+
+        verify(categoryRepository).findAll();
+        verify(categoryMapper).entityToDto(category1);
+        verify(categoryMapper).entityToDto(category2);
+    }
+
+    @Test
+    public void testGetAllCategory_WhenNoCategories_ThenReturnEmptyList() {
+        when(categoryRepository.findAll()).thenReturn(Collections.emptyList());
+
+        ResponseDto<List<CategoryResponse>> response = categoryServiceImpl.getAllCategory(requestUser);
+
+        assertNotNull(response);
+        assertNotNull(response.getData());
+        assertTrue(response.getData().isEmpty());
+
+        verify(categoryRepository).findAll();
+        verify(categoryMapper, never()).entityToDto(any(Category.class));
     }
 }
