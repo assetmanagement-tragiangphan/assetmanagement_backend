@@ -1,4 +1,4 @@
-package com.nashtech.rookies.assetmanagement.dto.request;
+package com.nashtech.rookies.assetmanagement.dto.request.User;
 
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.PrefixConstant;

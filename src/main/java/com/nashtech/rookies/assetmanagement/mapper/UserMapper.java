@@ -2,8 +2,8 @@ package com.nashtech.rookies.assetmanagement.mapper;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
-import com.nashtech.rookies.assetmanagement.dto.request.CreateUserRequest;
-import com.nashtech.rookies.assetmanagement.dto.request.UpdateUserRequest;
+import com.nashtech.rookies.assetmanagement.dto.request.User.CreateUserRequest;
+import com.nashtech.rookies.assetmanagement.dto.request.User.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.LoginResponse;
 import com.nashtech.rookies.assetmanagement.entity.User;
 import org.mapstruct.Mapper;

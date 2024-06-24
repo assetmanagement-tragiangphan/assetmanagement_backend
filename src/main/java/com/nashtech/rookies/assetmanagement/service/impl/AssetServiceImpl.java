@@ -7,7 +7,7 @@ package com.nashtech.rookies.assetmanagement.service.impl;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CreateAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.EditAssetRequest;
-import com.nashtech.rookies.assetmanagement.dto.request.AssetRequestDTO;
+import com.nashtech.rookies.assetmanagement.dto.request.Asset.AssetRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
