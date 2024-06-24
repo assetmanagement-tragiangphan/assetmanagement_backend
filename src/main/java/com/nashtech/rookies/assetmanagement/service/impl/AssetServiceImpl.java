@@ -15,9 +15,12 @@ import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.entity.Category;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssetMapper;
+import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
 import com.nashtech.rookies.assetmanagement.repository.CategoryRepository;
+import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.AssetService;
+import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +28,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 import static com.nashtech.rookies.assetmanagement.specifications.AssestSpecification.filterSpecs;
 
@@ -40,6 +45,8 @@ public class AssetServiceImpl implements AssetService {
     private CategoryRepository categoryRepository;
     private AssetRepository repository;
     private AssetMapper mapper;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     public ResponseDto getAll(AssetRequestDTO requestParams, Pageable pageable, UserDetailsDto requestUser) {
         Specification<Asset> specs = filterSpecs(requestParams.getCategories(), requestParams.getSearch());
@@ -76,10 +83,17 @@ public class AssetServiceImpl implements AssetService {
 
     private String genAssetCode(CreateAssetRequest request) {
         String categoryPrefix = categoryRepository.findCategoryByName(request.getCategoryName()).getPrefix();
-        String lastAssetNumber = !repository.findAll().isEmpty() ? repository.findFirstByOrderByIdDesc().toString().substring(repository.findFirstByOrderByIdDesc().toString().length() - 6) : "000000";
-        int newAssetNumber = Integer.parseInt(lastAssetNumber) + 1;
+
+        Optional<Asset> optionalAsset = repository.findFirstByOrderByIdDesc();
+        int newAssetNumber = optionalAsset.map(asset -> {
+            String lastAssetNumberStr = asset.getAssetCode().substring(asset.getAssetCode().length() - 6);
+            return Integer.parseInt(lastAssetNumberStr) + 1;
+        }).orElse(1);
+
         return categoryPrefix + String.format("%06d", newAssetNumber);
     }
+
+
 
     @Override
     public ResponseDto<AssetResponseDto> editAsset(EditAssetRequest request, UserDetailsDto requestUser) {
@@ -98,6 +112,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
+        var user = userRepository.findByUsernameAndStatus(username, StatusConstant.ACTIVE)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
+
+        return userMapper.entityToUserDetailsDto(user);
     }
 }
