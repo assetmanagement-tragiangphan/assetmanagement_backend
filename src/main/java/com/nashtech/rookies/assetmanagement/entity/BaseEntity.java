@@ -15,9 +15,11 @@ import lombok.experimental.SuperBuilder;
 @Data
 @MappedSuperclass
 public class BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
     @Enumerated(EnumType.STRING)
     private StatusConstant status;
 }
