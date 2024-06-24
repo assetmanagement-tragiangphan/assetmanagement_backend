@@ -1,6 +1,6 @@
 package com.nashtech.rookies.assetmanagement.service;
 
-import com.nashtech.rookies.assetmanagement.dto.CategoryResponse;
+import com.nashtech.rookies.assetmanagement.dto.response.CategoryResponse;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CategoryRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;

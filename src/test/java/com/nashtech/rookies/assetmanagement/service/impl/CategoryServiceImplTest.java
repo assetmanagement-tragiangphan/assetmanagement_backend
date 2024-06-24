@@ -1,6 +1,6 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
-import com.nashtech.rookies.assetmanagement.dto.CategoryResponse;
+import com.nashtech.rookies.assetmanagement.dto.response.CategoryResponse;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CategoryRequest;
 import com.nashtech.rookies.assetmanagement.entity.Category;
@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)

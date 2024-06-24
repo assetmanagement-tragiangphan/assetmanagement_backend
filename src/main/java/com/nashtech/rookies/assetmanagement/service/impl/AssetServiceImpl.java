@@ -6,12 +6,14 @@ package com.nashtech.rookies.assetmanagement.service.impl;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CreateAssetRequest;
+import com.nashtech.rookies.assetmanagement.dto.request.Asset.EditAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.AssetRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.entity.Category;
+import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssetMapper;
 import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
 import com.nashtech.rookies.assetmanagement.repository.CategoryRepository;
@@ -79,6 +81,20 @@ public class AssetServiceImpl implements AssetService {
         return categoryPrefix + String.format("%06d", newAssetNumber);
     }
 
+    @Override
+    public ResponseDto<AssetResponseDto> editAsset(EditAssetRequest request, UserDetailsDto requestUser) {
+        Asset asset = repository.findAssetByAssetCode(request.getAssetCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Asset not exists!"));
+        asset.setName(request.getAssetName());
+        asset.setSpecification(request.getSpecification());
+        asset.setStatus(request.getAssetState());
+        asset.setInstalledDate(request.getInstallDate());
+        asset = repository.saveAndFlush(asset);
+        return ResponseDto.<AssetResponseDto>builder()
+                .data(mapper.entityToDto(asset))
+                .message("Update Asset successfully.")
+                .build();
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

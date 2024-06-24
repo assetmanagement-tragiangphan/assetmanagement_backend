@@ -6,6 +6,7 @@ package com.nashtech.rookies.assetmanagement.service;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CreateAssetRequest;
+import com.nashtech.rookies.assetmanagement.dto.request.Asset.EditAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,4 +26,5 @@ public interface AssetService extends UserDetailsService {
 
 
     ResponseDto<AssetResponseDto> saveAsset(CreateAssetRequest request, UserDetailsDto requestUser);
+    ResponseDto<AssetResponseDto> editAsset(EditAssetRequest request, UserDetailsDto requestUser);
 }
