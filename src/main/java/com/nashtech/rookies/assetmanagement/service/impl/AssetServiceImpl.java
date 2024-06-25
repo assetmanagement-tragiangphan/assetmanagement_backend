@@ -6,33 +6,31 @@ package com.nashtech.rookies.assetmanagement.service.impl;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CreateAssetRequest;
-import com.nashtech.rookies.assetmanagement.dto.request.Asset.EditAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.AssetRequestDTO;
+import com.nashtech.rookies.assetmanagement.dto.request.Asset.EditAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
+import com.nashtech.rookies.assetmanagement.entity.Asset_;
 import com.nashtech.rookies.assetmanagement.entity.Category;
 import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssetMapper;
-import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
 import com.nashtech.rookies.assetmanagement.repository.CategoryRepository;
-import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.AssetService;
-import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static com.nashtech.rookies.assetmanagement.specifications.AssestSpecification.filterSpecs;
+import static com.nashtech.rookies.assetmanagement.specifications.AssetSpecification.filterSpecs;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 /**
  *
@@ -47,11 +45,17 @@ public class AssetServiceImpl implements AssetService {
     private AssetRepository repository;
     private AssetMapper mapper;
 
+    @Override
     public ResponseDto getAll(AssetRequestDTO requestParams, Pageable pageable, UserDetailsDto requestUser) {
-        Specification<Asset> specs = filterSpecs(requestParams.getCategories(), requestParams.getSearch());
-        
-        Page<AssetResponseDto> result = repository.findAll(specs, pageable).map(mapper::entityToDto);
-        
+        Specification<Asset> specs = filterSpecs(requestUser.getLocation(), requestParams.getCategories(), requestParams.getSearch(), requestParams.getStates());
+
+        PageRequest pageRequest = (PageRequest) pageable;
+        if (pageRequest.getSort().equals(Sort.unsorted())) {
+            pageRequest = pageRequest.withSort(Sort.Direction.ASC, Asset_.ASSET_CODE);
+        }
+
+        Page<AssetResponseDto> result = repository.findAll(specs, pageRequest).map(mapper::entityToDto);
+
         PageableDto page = PageableDto.builder()
                 .content(result.getContent())
                 .currentPage(result.getNumber())
@@ -59,6 +63,11 @@ public class AssetServiceImpl implements AssetService {
                 .totalElements(result.getTotalElements())
                 .build();
         return new ResponseDto(page, "Get All Assets Successfully");
+    }
+
+    @Override
+    public ResponseDto getAll() {
+        return new ResponseDto(mapper.entitiesToDtos(repository.findAll()), "Get All Assets Successfully");
     }
 
     @Override

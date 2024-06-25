@@ -6,6 +6,7 @@ package com.nashtech.rookies.assetmanagement.mapper;
 
 import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -20,5 +21,9 @@ public interface AssetMapper {
     @Mapping(target = "state", source = "asset.status")
     @Mapping(target = "category", source = "asset.category.name")
     AssetResponseDto entityToDto(Asset asset);
-    
+        
+    @Mapping(target = "state", source = "asset.status")
+    @Mapping(target = "category", source = "asset.category.name")
+    public List<AssetResponseDto> entitiesToDtos(List<Asset> assets);
+
 }

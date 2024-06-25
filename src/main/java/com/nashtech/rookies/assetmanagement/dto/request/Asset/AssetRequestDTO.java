@@ -4,6 +4,7 @@
  */
 package com.nashtech.rookies.assetmanagement.dto.request.Asset;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 
@@ -16,6 +17,6 @@ import lombok.Data;
 public class AssetRequestDTO {
 
     private String search;
-    private List<Long> states;
+    private List<String> states;
     private List<Long> categories;
 }
