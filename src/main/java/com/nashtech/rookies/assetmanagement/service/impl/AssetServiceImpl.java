@@ -20,6 +20,8 @@ import com.nashtech.rookies.assetmanagement.mapper.AssetMapper;
 import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
 import com.nashtech.rookies.assetmanagement.repository.CategoryRepository;
 import com.nashtech.rookies.assetmanagement.service.AssetService;
+import com.nashtech.rookies.assetmanagement.util.StatusConstant;
+
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
