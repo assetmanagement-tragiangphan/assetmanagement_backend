@@ -22,6 +22,8 @@ import com.nashtech.rookies.assetmanagement.specifications.UserSpecification;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.PrefixConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -218,13 +220,11 @@ public class UserServiceImpl implements UserService {
         return dayOfWeek == DayOfWeek.SUNDAY || dayOfWeek == DayOfWeek.SATURDAY;
     }
 
+    @Transactional
     public ResponseDto<Void> disableUser (String staffCode) {
         var user = this.getUserEntityByStaffCode(staffCode);
         user.setStatus(StatusConstant.INACTIVE);
-        var tokens = user.getTokens();
-        if (tokens != null) {
-            tokenRepository.deleteAll(tokens);
-        }
+        tokenRepository.deleteAllByUserId(user.getId());
         userRepository.save(user);
         return ResponseDto.<Void>builder()
                 .message("Disable user successfully.")
