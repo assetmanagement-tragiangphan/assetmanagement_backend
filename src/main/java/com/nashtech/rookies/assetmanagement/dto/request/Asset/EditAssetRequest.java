@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EditAssetRequest {
-    private String assetCode;
     private String assetName;
     private String specification;
     private LocalDate installDate;

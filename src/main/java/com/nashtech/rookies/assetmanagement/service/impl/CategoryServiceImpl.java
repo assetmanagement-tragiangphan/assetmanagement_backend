@@ -13,6 +13,10 @@ import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.CategoryService;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -25,11 +29,9 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
     @Override
-    public ResponseDto<CategoryResponse> saveCategory(CategoryRequest request, UserDetailsDto requestUser) {
+    public ResponseDto<CategoryResponse> saveCategory(CategoryRequest request) {
         if (categoryRepository.existsByPrefix(request.getPrefix())) {
             throw new ResourceAlreadyExistException("Prefix is already existed. Please enter a different prefix!");
         } else if (categoryRepository.existsByName(request.getName())) {
@@ -48,20 +50,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ResponseDto<List<CategoryResponse>> getAllCategory(UserDetailsDto requestUser) {
-        List<Category> categoryList = categoryRepository.findAll();
+    public ResponseDto<List<CategoryResponse>> getAllCategory() {
+        Sort sort = Sort.by(Sort.Direction.ASC, "auditMetadata.createdOn");
+        Pageable pageable = PageRequest.of(0, categoryRepository.findAll().size(), sort);
+        Page<Category> categories = categoryRepository.findAll(pageable);
         List<CategoryResponse> categoryResponses = new ArrayList<>();
-        categoryList.forEach(category -> categoryResponses.add(categoryMapper.entityToDto(category)));
+        categories.forEach(category -> categoryResponses.add(categoryMapper.entityToDto(category)));
         return ResponseDto.<List<CategoryResponse>>builder()
                 .data(categoryResponses)
                 .build();
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository.findByUsernameAndStatus(username, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
-
-        return userMapper.entityToUserDetailsDto(user);
     }
 }

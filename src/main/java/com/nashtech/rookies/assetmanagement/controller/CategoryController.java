@@ -20,14 +20,12 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping()
-    public ResponseEntity<ResponseDto<CategoryResponse>> createCategory(@RequestBody CategoryRequest request, Authentication authentication) {
-        UserDetailsDto requestUser = (UserDetailsDto)authentication.getPrincipal();
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.saveCategory(request, requestUser));
+    public ResponseEntity<ResponseDto<CategoryResponse>> createCategory(@RequestBody CategoryRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.saveCategory(request));
     }
 
     @GetMapping()
-    public ResponseEntity<ResponseDto<List<CategoryResponse>>> getCategories(Authentication authentication) {
-        UserDetailsDto requestUser = (UserDetailsDto)authentication.getPrincipal();
-        return ResponseEntity.status(HttpStatus.OK).body(categoryService.getAllCategory(requestUser));
+    public ResponseEntity<ResponseDto<List<CategoryResponse>>> getCategories() {
+        return ResponseEntity.status(HttpStatus.OK).body(categoryService.getAllCategory());
     }
 }

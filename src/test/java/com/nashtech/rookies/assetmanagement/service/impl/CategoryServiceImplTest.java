@@ -37,7 +37,6 @@ public class CategoryServiceImplTest {
     private CategoryServiceImpl categoryServiceImpl;
 
     private CategoryRequest categoryRequest;
-    private UserDetailsDto requestUser;
     private Category category1;
     private Category category2;
     private CategoryResponse categoryResponse1;
@@ -48,8 +47,6 @@ public class CategoryServiceImplTest {
         categoryRequest = new CategoryRequest();
         categoryRequest.setPrefix("CAT");
         categoryRequest.setName("Category Name");
-
-        requestUser = new UserDetailsDto();
 
         category1 = new Category();
         category1.setId(1);
@@ -81,7 +78,7 @@ public class CategoryServiceImplTest {
         when(categoryRepository.saveAndFlush(any(Category.class))).thenReturn(category1);
         when(categoryMapper.entityToDto(any(Category.class))).thenReturn(categoryResponse1);
 
-        var response = categoryServiceImpl.saveCategory(categoryRequest, requestUser);
+        var response = categoryServiceImpl.saveCategory(categoryRequest);
 
         assertNotNull(response);
         assertEquals("Create Category successfully.", response.getMessage());
@@ -98,7 +95,7 @@ public class CategoryServiceImplTest {
         when(categoryRepository.existsByPrefix(categoryRequest.getPrefix())).thenReturn(true);
 
         ResourceAlreadyExistException exception = assertThrows(ResourceAlreadyExistException.class, () ->
-                categoryServiceImpl.saveCategory(categoryRequest, requestUser));
+                categoryServiceImpl.saveCategory(categoryRequest));
 
         assertEquals("Prefix is already existed. Please enter a different prefix!", exception.getMessage());
 
@@ -114,7 +111,7 @@ public class CategoryServiceImplTest {
         when(categoryRepository.existsByName(categoryRequest.getName())).thenReturn(true);
 
         ResourceAlreadyExistException exception = assertThrows(ResourceAlreadyExistException.class, () ->
-                categoryServiceImpl.saveCategory(categoryRequest, requestUser));
+                categoryServiceImpl.saveCategory(categoryRequest));
 
         assertEquals("Category is already existed. Please enter a different category!", exception.getMessage());
 
@@ -131,7 +128,7 @@ public class CategoryServiceImplTest {
         when(categoryMapper.entityToDto(category1)).thenReturn(categoryResponse1);
         when(categoryMapper.entityToDto(category2)).thenReturn(categoryResponse2);
 
-        ResponseDto<List<CategoryResponse>> response = categoryServiceImpl.getAllCategory(requestUser);
+        ResponseDto<List<CategoryResponse>> response = categoryServiceImpl.getAllCategory();
 
         assertNotNull(response);
         assertNotNull(response.getData());
@@ -148,7 +145,7 @@ public class CategoryServiceImplTest {
     public void testGetAllCategory_WhenNoCategories_ThenReturnEmptyList() {
         when(categoryRepository.findAll()).thenReturn(Collections.emptyList());
 
-        ResponseDto<List<CategoryResponse>> response = categoryServiceImpl.getAllCategory(requestUser);
+        ResponseDto<List<CategoryResponse>> response = categoryServiceImpl.getAllCategory();
 
         assertNotNull(response);
         assertNotNull(response.getData());

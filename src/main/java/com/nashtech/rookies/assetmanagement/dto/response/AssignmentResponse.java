@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AssignmentResponse {
+    private Integer id;
     private String assetCode;
     private String assetName;
     private String assignBy;

@@ -19,5 +19,6 @@ public interface AssignmentMapper {
     @Mapping(target = "assignTo", source = "assignment.assignee.username")
     @Mapping(target = "assignedDate", source = "assignment.assignedDate")
     @Mapping(target = "status", source = "assignment.status")
+    @Mapping(target = "id", source = "assignment.id")
     AssignmentResponse entityToDto(Assignment assignment, UserDetailsDto requestUser);
 }

@@ -13,6 +13,7 @@ import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.entity.Category;
+import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssetMapper;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
@@ -92,17 +93,21 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public ResponseDto<AssetResponseDto> editAsset(EditAssetRequest request) {
-        Asset asset = repository.findAssetByAssetCode(request.getAssetCode())
-                .orElseThrow(() -> new ResourceNotFoundException("Asset not exists!"));
-        asset.setName(request.getAssetName());
-        asset.setSpecification(request.getSpecification());
-        asset.setStatus(request.getAssetState());
-        asset.setInstalledDate(request.getInstallDate());
-        asset = repository.saveAndFlush(asset);
-        return ResponseDto.<AssetResponseDto>builder()
-                .data(mapper.entityToDto(asset))
-                .message("Update Asset successfully.")
-                .build();
+    public ResponseDto<AssetResponseDto> editAsset(String assetCode, EditAssetRequest request) {
+        if (repository.existsByAssetCode(assetCode)) {
+            Asset asset = repository.findByAssetCodeAndStatus(assetCode, StatusConstant.AVAILABLE)
+                    .orElseThrow(() -> new ResourceAlreadyExistException("Asset is not available to edit!"));
+            asset.setName(request.getAssetName());
+            asset.setSpecification(request.getSpecification());
+            asset.setStatus(request.getAssetState());
+            asset.setInstalledDate(request.getInstallDate());
+            asset = repository.saveAndFlush(asset);
+            return ResponseDto.<AssetResponseDto>builder()
+                    .data(mapper.entityToDto(asset))
+                    .message("Update Asset successfully.")
+                    .build();
+        } else {
+            throw new ResourceNotFoundException("Asset does not exists!");
+        }
     }
 }

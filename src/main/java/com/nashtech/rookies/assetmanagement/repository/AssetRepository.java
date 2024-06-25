@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface AssetRepository extends JpaRepository<Asset, Integer>, JpaSpecificationExecutor<Asset> {
     boolean existsByAssetCode(String assetCode);
     Optional<Asset> findAssetByAssetCode(String assetCode);
-    Optional<Asset> findAssetByAssetCodeAndStatus(String assetCode, StatusConstant statusConstant);
+    boolean existsByAssetCodeAndStatus(String assetCode, StatusConstant statusConstant);
+    Optional<Asset> findByAssetCodeAndStatus(String assetCode, StatusConstant statusConstant);
     Optional<Asset> findFirstByOrderByIdDesc();
 }

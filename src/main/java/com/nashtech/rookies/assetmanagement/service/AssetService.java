@@ -26,5 +26,5 @@ public interface AssetService {
 
 
     ResponseDto<AssetResponseDto> saveAsset(CreateAssetRequest request, UserDetailsDto requestUser);
-    ResponseDto<AssetResponseDto> editAsset(EditAssetRequest request);
+    ResponseDto<AssetResponseDto> editAsset(String assetCode, EditAssetRequest request);
 }

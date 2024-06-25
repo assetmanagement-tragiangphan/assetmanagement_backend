@@ -41,8 +41,8 @@ public class AssetController {
         return ResponseEntity.status(HttpStatus.CREATED).body(assetService.saveAsset(request, requestUser));
     }
 
-    @PatchMapping()
-    public ResponseEntity<ResponseDto<AssetResponseDto>> editAsset(@RequestBody EditAssetRequest request) {
-        return ResponseEntity.status(HttpStatus.OK).body(assetService.editAsset(request));
+    @PatchMapping("/{assetCode}")
+    public ResponseEntity<ResponseDto<AssetResponseDto>> editAsset(@PathVariable("assetCode") String assetCode, @RequestBody EditAssetRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(assetService.editAsset(assetCode, request));
     }
 }
