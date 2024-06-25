@@ -106,11 +106,6 @@ public class AssetServiceImplTest {
                 .installDate(LocalDate.now())
                 .build();
 
-        UserDetailsDto requestUser = UserDetailsDto.builder()
-                .roleName(RoleConstant.valueOf("ADMIN"))
-                .location(LocationConstant.HCM)
-                .build();
-
         Category category = new Category();
         category.setPrefix("LA");
 
@@ -122,7 +117,7 @@ public class AssetServiceImplTest {
 
         when(assetMapper.entityToDto(any(Asset.class))).thenReturn(responseDto);
 
-        ResponseDto<AssetResponseDto> response = assetService.editAsset(request, requestUser);
+        ResponseDto<AssetResponseDto> response = assetService.editAsset(request);
 
         assertNotNull(response);
         assertEquals("Update Asset successfully.", response.getMessage());
@@ -135,15 +130,10 @@ public class AssetServiceImplTest {
         EditAssetRequest request = new EditAssetRequest();
         request.setAssetCode("LA00001");
 
-        UserDetailsDto requestUser = UserDetailsDto.builder()
-                .roleName(RoleConstant.valueOf("ADMIN"))
-                .location(LocationConstant.HCM)
-                .build();
-
         when(assetRepository.findAssetByAssetCode(anyString())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> {
-            assetService.editAsset(request, requestUser);
+            assetService.editAsset(request);
         });
 
         verify(assetRepository, times(1)).findAssetByAssetCode(anyString());

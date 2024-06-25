@@ -42,8 +42,7 @@ public class AssetController {
     }
 
     @PatchMapping()
-    public ResponseEntity<ResponseDto<AssetResponseDto>> editAsset(@RequestBody EditAssetRequest request, Authentication authentication) {
-        UserDetailsDto requestUser = (UserDetailsDto)authentication.getPrincipal();
-        return ResponseEntity.status(HttpStatus.OK).body(assetService.editAsset(request, requestUser));
+    public ResponseEntity<ResponseDto<AssetResponseDto>> editAsset(@RequestBody EditAssetRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(assetService.editAsset(request));
     }
 }

@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  *
  * @author HP
  */
-public interface AssetService extends UserDetailsService {
+public interface AssetService {
 
 
 
@@ -26,5 +26,5 @@ public interface AssetService extends UserDetailsService {
 
 
     ResponseDto<AssetResponseDto> saveAsset(CreateAssetRequest request, UserDetailsDto requestUser);
-    ResponseDto<AssetResponseDto> editAsset(EditAssetRequest request, UserDetailsDto requestUser);
+    ResponseDto<AssetResponseDto> editAsset(EditAssetRequest request);
 }

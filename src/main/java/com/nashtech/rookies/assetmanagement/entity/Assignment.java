@@ -20,15 +20,16 @@ import java.time.LocalDate;
 @EntityListeners(AuditListener.class)
 public class Assignment extends BaseEntity implements Auditable {
     private LocalDate assignedDate;
+    private String note;
 
     @Embedded
     private AuditMetadata auditMetadata;
 
     @ManyToOne
-    @JoinColumn(name = "assetId")
+    @JoinColumn(name = "asset_id")
     private Asset asset;
     @ManyToOne
-    @JoinColumn(name = "assigneeId")
+    @JoinColumn(name = "assignee_id")
     private User assignee;
     @OneToOne(mappedBy = "assignment")
     private ReturnRequest returnRequest;

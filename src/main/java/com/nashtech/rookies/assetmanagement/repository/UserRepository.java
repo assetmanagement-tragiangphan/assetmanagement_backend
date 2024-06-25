@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer>, JpaSpecificationExecutor<User> {
+    Optional<User> findByStaffCode(String staffCode);
     Optional<User> findByUsernameAndStatus(String username, StatusConstant status);
     Optional<User> findByIdAndStatus(Integer id, StatusConstant status);
     Optional<User> findByStaffCodeAndStatus(String staffCode, StatusConstant status);

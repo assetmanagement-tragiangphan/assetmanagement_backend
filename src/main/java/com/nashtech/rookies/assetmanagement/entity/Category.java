@@ -2,10 +2,7 @@ package com.nashtech.rookies.assetmanagement.entity;
 
 import com.nashtech.rookies.assetmanagement.audit.AuditListener;
 import com.nashtech.rookies.assetmanagement.audit.Auditable;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,7 +19,10 @@ import java.util.List;
 @Entity
 @EntityListeners(AuditListener.class)
 public class Category extends BaseEntity implements Auditable {
+    @Column(unique = true)
     private String name;
+
+    @Column(unique = true)
     private String prefix;
 
     @Embedded

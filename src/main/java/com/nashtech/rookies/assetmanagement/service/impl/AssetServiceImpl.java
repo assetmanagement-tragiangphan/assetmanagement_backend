@@ -45,8 +45,6 @@ public class AssetServiceImpl implements AssetService {
     private CategoryRepository categoryRepository;
     private AssetRepository repository;
     private AssetMapper mapper;
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
     public ResponseDto getAll(AssetRequestDTO requestParams, Pageable pageable, UserDetailsDto requestUser) {
         Specification<Asset> specs = filterSpecs(requestParams.getCategories(), requestParams.getSearch());
@@ -93,10 +91,8 @@ public class AssetServiceImpl implements AssetService {
         return categoryPrefix + String.format("%06d", newAssetNumber);
     }
 
-
-
     @Override
-    public ResponseDto<AssetResponseDto> editAsset(EditAssetRequest request, UserDetailsDto requestUser) {
+    public ResponseDto<AssetResponseDto> editAsset(EditAssetRequest request) {
         Asset asset = repository.findAssetByAssetCode(request.getAssetCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Asset not exists!"));
         asset.setName(request.getAssetName());
@@ -108,13 +104,5 @@ public class AssetServiceImpl implements AssetService {
                 .data(mapper.entityToDto(asset))
                 .message("Update Asset successfully.")
                 .build();
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository.findByUsernameAndStatus(username, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
-
-        return userMapper.entityToUserDetailsDto(user);
     }
 }
