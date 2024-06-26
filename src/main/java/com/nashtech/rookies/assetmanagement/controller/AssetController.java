@@ -37,10 +37,16 @@ public class AssetController {
         ResponseDto assets = assetService.getAll(requestParams, pageable, requestUser);
         return ResponseEntity.ok().body(assets);
     }
-    
+
     @GetMapping("/")
     public ResponseEntity getAll() {
         ResponseDto assets = assetService.getAll();
+        return ResponseEntity.ok().body(assets);
+    }
+
+    @GetMapping("/{assetCode}")
+    public ResponseEntity getOne(@PathVariable("assetCode") String assetCode) {
+        ResponseDto assets = assetService.getOne(assetCode);
         return ResponseEntity.ok().body(assets);
     }
 

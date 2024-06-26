@@ -1,5 +1,6 @@
 package com.nashtech.rookies.assetmanagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.nashtech.rookies.assetmanagement.audit.AuditListener;
 import com.nashtech.rookies.assetmanagement.audit.Auditable;
 import jakarta.persistence.*;
@@ -29,5 +30,6 @@ public class Category extends BaseEntity implements Auditable {
     private AuditMetadata auditMetadata;
 
     @OneToMany(mappedBy = "category")
+    @JsonBackReference
     private List<Asset> assets;
 }

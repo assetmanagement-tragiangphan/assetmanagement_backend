@@ -21,7 +21,6 @@ import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
 import com.nashtech.rookies.assetmanagement.repository.CategoryRepository;
 import com.nashtech.rookies.assetmanagement.service.AssetService;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
-
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +31,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.nashtech.rookies.assetmanagement.specifications.AssetSpecification.filterSpecs;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -67,8 +65,13 @@ public class AssetServiceImpl implements AssetService {
                 .build();
         return new ResponseDto(page, "Get All Assets Successfully");
     }
+    
+    public ResponseDto getOne(String requestParams) {
+        Asset result = repository.findAssetByAssetCode(requestParams).orElseThrow(() -> new ResourceNotFoundException("Asset does not exists!"));
+        return new ResponseDto(mapper.entityToDto(result), "Get All Assets Successfully");
+    }
+    
 
-    @Override
     public ResponseDto getAll() {
         return new ResponseDto(mapper.entitiesToDtos(repository.findAll()), "Get All Assets Successfully");
     }
@@ -104,7 +107,6 @@ public class AssetServiceImpl implements AssetService {
         return categoryPrefix + String.format("%06d", newAssetNumber);
     }
 
-    @Override
     public ResponseDto<AssetResponseDto> editAsset(String assetCode, EditAssetRequest request) {
         Asset asset = repository.findAssetByAssetCode(assetCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Asset does not exists!"));
@@ -122,4 +124,5 @@ public class AssetServiceImpl implements AssetService {
                 .build();
 
     }
+
 }

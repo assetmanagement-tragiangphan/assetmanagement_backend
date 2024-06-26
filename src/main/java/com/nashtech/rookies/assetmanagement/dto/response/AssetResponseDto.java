@@ -23,7 +23,8 @@ public class AssetResponseDto {
     private String name;
     private String category;
     private String state;
-//    private String installedDate;
-//    private String location;
-//    private String specification;
+    private String installedDate;
+    private String location;
+    private String specification;
+
 }

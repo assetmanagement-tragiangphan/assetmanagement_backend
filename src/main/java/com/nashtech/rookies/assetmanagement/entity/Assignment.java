@@ -1,5 +1,6 @@
 package com.nashtech.rookies.assetmanagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.nashtech.rookies.assetmanagement.audit.AuditListener;
 import com.nashtech.rookies.assetmanagement.audit.Auditable;
 import jakarta.persistence.*;
@@ -27,6 +28,7 @@ public class Assignment extends BaseEntity implements Auditable {
 
     @ManyToOne
     @JoinColumn(name = "asset_id")
+    @JsonManagedReference
     private Asset asset;
     @ManyToOne
     @JoinColumn(name = "assignee_id")

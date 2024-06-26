@@ -44,7 +44,7 @@ public class AssetSpecification {
             if (name == null) {
                 return builder.conjunction();
             }
-            return builder.like(root.get(Asset_.NAME), "%" + name + "%");
+            return builder.like(builder.lower(root.get(Asset_.NAME)), "%" + name.toLowerCase() + "%");
         };
     }
 
