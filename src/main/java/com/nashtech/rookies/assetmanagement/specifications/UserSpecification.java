@@ -16,11 +16,13 @@ public class UserSpecification {
 
     public static Specification<User> likeName (String name) {
         return (root, query, builder) -> builder.like(
-            builder.concat(
-                builder.concat(root.get(User_.FIRST_NAME), " " ),
-                root.get(User_.LAST_NAME)
+            builder.lower(
+                builder.concat(
+                    builder.concat(root.get(User_.FIRST_NAME), " " ),
+                    root.get(User_.LAST_NAME)
+                )
             ),
-            "%" + name + "%"
+            "%" + name.toLowerCase() + "%"
         );
     }
 
