@@ -38,12 +38,6 @@ public class AssetController {
         return ResponseEntity.ok().body(assets);
     }
 
-    @GetMapping("/")
-    public ResponseEntity getAll() {
-        ResponseDto assets = assetService.getAll();
-        return ResponseEntity.ok().body(assets);
-    }
-
     @GetMapping("/{assetCode}")
     public ResponseEntity getOne(@PathVariable("assetCode") String assetCode) {
         ResponseDto assets = assetService.getOne(assetCode);
@@ -59,5 +53,10 @@ public class AssetController {
     @PatchMapping("/{assetCode}")
     public ResponseEntity<ResponseDto<AssetResponseDto>> editAsset(@PathVariable("assetCode") String assetCode, @RequestBody EditAssetRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(assetService.editAsset(assetCode, request));
+    }
+
+    @DeleteMapping("/{assetCode}")
+    public ResponseEntity deleteAsset(@PathVariable("assetCode") String assetCode) {
+        return ResponseEntity.status(HttpStatus.OK).body(assetService.deleteAsset(assetCode));
     }
 }

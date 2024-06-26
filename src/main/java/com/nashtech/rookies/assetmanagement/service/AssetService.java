@@ -11,7 +11,6 @@ import com.nashtech.rookies.assetmanagement.dto.request.Asset.EditAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
  *
@@ -20,8 +19,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 public interface AssetService {
 
     ResponseDto getAll(AssetRequestDTO requestParams, Pageable pageable, UserDetailsDto requestUser);
-    ResponseDto getAll();
     ResponseDto getOne(String requestParams);
     ResponseDto<AssetResponseDto> saveAsset(CreateAssetRequest request, UserDetailsDto requestUser);
     ResponseDto<AssetResponseDto> editAsset(String assetCode, EditAssetRequest request);
+    ResponseDto deleteAsset(String assetCode);
 }

@@ -14,10 +14,12 @@ import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.entity.Asset_;
 import com.nashtech.rookies.assetmanagement.entity.Category;
+import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssetMapper;
 import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
+import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.CategoryRepository;
 import com.nashtech.rookies.assetmanagement.service.AssetService;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
@@ -46,6 +48,7 @@ public class AssetServiceImpl implements AssetService {
     private CategoryRepository categoryRepository;
     private AssetRepository repository;
     private AssetMapper mapper;
+    private AssignmentRepository assignmentRepository;
 
     @Override
     public ResponseDto getAll(AssetRequestDTO requestParams, Pageable pageable, UserDetailsDto requestUser) {
@@ -66,15 +69,11 @@ public class AssetServiceImpl implements AssetService {
                 .build();
         return new ResponseDto(page, "Get All Assets Successfully");
     }
-    
+
+    @Override
     public ResponseDto getOne(String requestParams) {
         Asset result = repository.findAssetByAssetCode(requestParams).orElseThrow(() -> new ResourceNotFoundException("Asset does not exists!"));
         return new ResponseDto(mapper.entityToDto(result), "Get All Assets Successfully");
-    }
-    
-
-    public ResponseDto getAll() {
-        return new ResponseDto(mapper.entitiesToDtos(repository.findAll()), "Get All Assets Successfully");
     }
 
     @Override
@@ -124,6 +123,23 @@ public class AssetServiceImpl implements AssetService {
                 .message("Update Asset successfully.")
                 .build();
 
+    }
+
+    @Override
+    public ResponseDto deleteAsset(String assetCode) {
+        Asset asset = repository.findAssetByAssetCode(assetCode).orElseThrow(() -> new ResourceNotFoundException("Asset does not exists!"));
+        int assetId = asset.getId();
+        if(asset.getStatus().equals(StatusConstant.ASSIGNED)){
+            throw new BadRequestException("Cannot delete the asset because it's being assigned");
+        }
+        if(assignmentRepository.existsByAssetId(assetId)){
+            throw new BadRequestException("Cannot delete the asset because it belongs to one or more historical assignments");
+        }
+        repository.delete(asset);
+        return ResponseDto.builder()
+                .data(null)
+                .message("Delete Asset Successfully.")
+                .build();
     }
 
 }

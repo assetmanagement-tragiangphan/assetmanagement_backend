@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface AssignmentRepository extends JpaRepository<Assignment, Integer> {
-    boolean existsById(Integer id);
     Optional<Assignment> findByIdAndStatusEquals(Integer id, StatusConstant status);
+    boolean existsByAssetId(Integer assetId);
 }
