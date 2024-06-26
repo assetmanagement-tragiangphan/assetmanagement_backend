@@ -10,7 +10,7 @@ import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.entity.Category;
-import com.nashtech.rookies.assetmanagement.entity.User;
+import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssetMapper;
