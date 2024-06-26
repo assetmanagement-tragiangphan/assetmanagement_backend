@@ -1,12 +1,16 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
+import com.nashtech.rookies.assetmanagement.dto.UserDto;
+import com.nashtech.rookies.assetmanagement.dto.request.Asset.AssetRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CreateAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.EditAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
+import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.entity.Category;
+import com.nashtech.rookies.assetmanagement.entity.User;
 import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssetMapper;
@@ -20,8 +24,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,6 +61,10 @@ class AssetServiceImplTest {
     private UserDetailsDto userDetailsDto;
     private CreateAssetRequest createAssetRequest;
     private EditAssetRequest editAssetRequest;
+    private AssetRequestDTO assetRequestDTO;
+
+    private List<Asset> assets;
+    private List<AssetResponseDto> assetResponseDtos;
 
     @BeforeEach
     void setUp() {
@@ -65,6 +80,14 @@ class AssetServiceImplTest {
         asset.setStatus(StatusConstant.AVAILABLE);
         asset.setInstalledDate(LocalDate.now());
 
+        Asset asset2 = new Asset();
+        asset2.setAssetCode("EL000002");
+        asset2.setName("Desktop");
+        asset2.setCategory(category);
+        asset2.setSpecification("Specs");
+        asset2.setStatus(StatusConstant.AVAILABLE);
+        asset2.setInstalledDate(LocalDate.now());
+
         assignedAsset = new Asset();
         assignedAsset.setAssetCode("EL000001");
         assignedAsset.setName("Laptop");
@@ -72,6 +95,11 @@ class AssetServiceImplTest {
         assignedAsset.setSpecification("Specs");
         assignedAsset.setStatus(StatusConstant.ASSIGNED);
         assignedAsset.setInstalledDate(LocalDate.now());
+
+        assets = List.of(asset, asset2, assignedAsset);
+
+        assetRequestDTO = new AssetRequestDTO();
+        assetRequestDTO.setSearch("Laptop");
 
         userDetailsDto = UserDetailsDto.builder()
                 .location(LocationConstant.HCM)
@@ -91,6 +119,83 @@ class AssetServiceImplTest {
                 .installDate(LocalDate.now())
                 .assetState(StatusConstant.AVAILABLE)
                 .build();
+
+        AssetResponseDto assetResponseDto = new AssetResponseDto();
+        assetResponseDto.setAssetCode("EL000001");
+        assetResponseDto.setName("Laptop");
+        assetResponseDto.setCategory("Electronics");
+        assetResponseDto.setSpecification("Specs");
+        
+        AssetResponseDto assetResponseDto2 = new AssetResponseDto();
+        assetResponseDto2.setAssetCode("EL000002");
+        assetResponseDto2.setName("Desktop");
+
+        AssetResponseDto assetResponseDto3 = new AssetResponseDto();
+        assetResponseDto3.setAssetCode("EL000003");
+        assetResponseDto3.setName("Mouse");
+
+        assetResponseDtos = List.of(assetResponseDto, assetResponseDto2, assetResponseDto3);
+    }
+
+    @Test
+    void testGetAll_whenInputPageable_thenReturnResponseDtoPageAssetResponseDto(){
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 3, Sort.unsorted());
+        Page<Asset> page = new PageImpl<>(assets, pageable, assets.size());
+        
+        when(assetRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(assetMapper.entityToDto(any(Asset.class))).thenReturn(new AssetResponseDto());
+
+        // Act
+        ResponseDto<PageableDto<List<AssetResponseDto>>> result = assetService.getAll(assetRequestDTO, pageable, userDetailsDto);
+
+        // Assert
+        assertEquals(result.getData().getTotalElements(), 3);
+        assertEquals(result.getData().getContent().size(), 3);
+        assertEquals(result.getMessage(), "Get All Assets Successfully");
+
+        verify(assetRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
+    }
+
+    @Test
+    void testGetAll_whenNoArgs_thenReturnResponseDtoListAssetResponseDto(){
+        // Arrange
+        when(assetRepository.findAll()).thenReturn(assets);
+        when(assetMapper.entitiesToDtos(any(List.class))).thenReturn(assetResponseDtos);
+
+        // Act
+        ResponseDto<List<AssetResponseDto>> result = assetService.getAll();
+
+        // Assert
+        assertEquals(result.getData().size(), 3);
+        assertEquals(result.getMessage(), "Get All Assets Successfully");
+
+        verify(assetRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testGetOneAsset_whenExistAsset_thenReturnResponseDtoAsset() {
+        // Arrange
+        String assetCode = "EL000001";
+        when(assetRepository.findAssetByAssetCode(any(String.class))).thenReturn(Optional.of(asset));
+        when(assetMapper.entityToDto(any(Asset.class))).thenReturn(new AssetResponseDto());
+        // Act
+        ResponseDto<AssetResponseDto> result = assetService.getOne(assetCode);
+
+        // Assert
+        assertEquals(result.getMessage(), "Get All Assets Successfully");
+
+        verify(assetRepository, times(1)).findAssetByAssetCode(any(String.class));
+    }
+
+    @Test
+    void testGetUserEntityById_whenNotExistUser_thenThrowNotFoundException() {
+        // Arrange
+        String assetCode = "EL000001";
+        when(assetRepository.findAssetByAssetCode(any(String.class))).thenReturn(Optional.empty());
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> assetService.getOne(assetCode));
+        verify(assetRepository, times(1)).findAssetByAssetCode(any(String.class));
     }
 
     @Test
