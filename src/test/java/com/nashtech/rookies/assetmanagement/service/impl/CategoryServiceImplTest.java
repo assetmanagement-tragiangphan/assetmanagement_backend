@@ -1,6 +1,5 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
-import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CategoryRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.CategoryResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
@@ -17,9 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

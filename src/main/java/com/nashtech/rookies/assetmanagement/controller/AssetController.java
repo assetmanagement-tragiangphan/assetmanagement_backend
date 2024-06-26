@@ -57,6 +57,6 @@ public class AssetController {
 
     @DeleteMapping("/{assetCode}")
     public ResponseEntity deleteAsset(@PathVariable("assetCode") String assetCode) {
-        return ResponseEntity.status(HttpStatus.OK).body(assetService.deleteAsset(assetCode));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(assetService.deleteAsset(assetCode));
     }
 }

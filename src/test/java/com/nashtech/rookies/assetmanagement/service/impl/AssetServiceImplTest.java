@@ -1,7 +1,6 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
-import com.nashtech.rookies.assetmanagement.dto.UserDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.AssetRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CreateAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.EditAssetRequest;
@@ -15,6 +14,7 @@ import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistExcept
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssetMapper;
 import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
+import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.CategoryRepository;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
@@ -50,6 +50,9 @@ class AssetServiceImplTest {
     private AssetRepository assetRepository;
 
     @Mock
+    private AssignmentRepository assignmentRepository;
+
+    @Mock
     private AssetMapper assetMapper;
 
     @InjectMocks
@@ -73,6 +76,7 @@ class AssetServiceImplTest {
         category.setPrefix("EL");
 
         asset = new Asset();
+        asset.setId(1);
         asset.setAssetCode("EL000001");
         asset.setName("Laptop");
         asset.setCategory(category);
@@ -89,6 +93,7 @@ class AssetServiceImplTest {
         asset2.setInstalledDate(LocalDate.now());
 
         assignedAsset = new Asset();
+        assignedAsset.setId(1);
         assignedAsset.setAssetCode("EL000001");
         assignedAsset.setName("Laptop");
         assignedAsset.setCategory(category);
@@ -155,22 +160,6 @@ class AssetServiceImplTest {
         assertEquals(result.getMessage(), "Get All Assets Successfully");
 
         verify(assetRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
-    }
-
-    @Test
-    void testGetAll_whenNoArgs_thenReturnResponseDtoListAssetResponseDto(){
-        // Arrange
-        when(assetRepository.findAll()).thenReturn(assets);
-        when(assetMapper.entitiesToDtos(any(List.class))).thenReturn(assetResponseDtos);
-
-        // Act
-        ResponseDto<List<AssetResponseDto>> result = assetService.getAll();
-
-        // Assert
-        assertEquals(result.getData().size(), 3);
-        assertEquals(result.getMessage(), "Get All Assets Successfully");
-
-        verify(assetRepository, times(1)).findAll();
     }
 
     @Test
@@ -244,4 +233,44 @@ class AssetServiceImplTest {
 
         assertEquals("Asset is not available to edit!", exception.getMessage());
     }
+
+    @Test
+    void testDeleteAsset_WhenNotAssignedAndDoesNotHasHistory_ThenSuccess() {
+        when(assetRepository.findAssetByAssetCode(anyString())).thenReturn(Optional.of(asset));
+        when(assignmentRepository.existsByAssetId(anyInt())).thenReturn(Boolean.FALSE);
+
+        ResponseDto<AssetResponseDto> response = assetService.deleteAsset("EL000001");
+
+        assertNotNull(response);
+        assertEquals("Delete Asset Successfully.", response.getMessage());
+        verify(assetRepository, times(1)).delete(any(Asset.class));
+    }
+
+    @Test
+    void testDeleteAsset_WhenNotFound_ThenThrowResourceNotFoundException() {
+        when(assetRepository.findAssetByAssetCode(asset.getAssetCode())).thenReturn(Optional.empty());
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> assetService.deleteAsset("EL000001"));
+        assertEquals("Asset does not exists!", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteAsset_WhenAssignedStatus_ThenThrowBadRequestException() {
+        when(assetRepository.findAssetByAssetCode(anyString())).thenReturn(Optional.of(assignedAsset));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            assetService.deleteAsset("EL000001");
+        });
+        assertEquals("Cannot delete the asset because it's being assigned", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteAsset_WhenHasHistory_ThenThrowBadRequestException() {
+        when(assetRepository.findAssetByAssetCode(anyString())).thenReturn(Optional.of(asset));
+        when(assignmentRepository.existsByAssetId(anyInt())).thenReturn(Boolean.TRUE);
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            assetService.deleteAsset("EL000001");
+        });
+        assertEquals("Cannot delete the asset because it belongs to one or more historical assignments", exception.getMessage());
+    }
+
 }

@@ -8,6 +8,7 @@ import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.entity.Category;
+import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.service.AssetService;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
@@ -109,13 +110,12 @@ public class AssetControllerTest {
         when(assetService.saveAsset(createAssetRequest, userDetailsDto)).thenReturn(responseDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/assets")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .with(user(userDetailsDto))
-                        .content(objectMapper.writeValueAsString(createAssetRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto))
+                .content(objectMapper.writeValueAsString(createAssetRequest)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Create Asset successfully.")));
-
 
         // Verify service method invocation
         verify(assetService, times(1))
@@ -136,13 +136,56 @@ public class AssetControllerTest {
         when(assetService.editAsset(anyString(), any(EditAssetRequest.class))).thenReturn(responseDto);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/assets/{assetCode}", assetCode)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(editAssetRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(editAssetRequest)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Update Asset successfully.")));
 
         // Verify service method invocation
         verify(assetService, times(1)).editAsset(anyString(), any(EditAssetRequest.class));
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testDeleteAsset_WhenValidInput_ThenSuccess() throws Exception {
+        String assetCode = "EL000001";
+        ResponseDto responseDto = ResponseDto.builder()
+                .data(null)
+                .message("Delete Asset Successfully.")
+                .build();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        when(assetService.deleteAsset(anyString())).thenReturn(responseDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/assets/{assetCode}", assetCode)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto)))
+                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data", Matchers.nullValue()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Delete Asset Successfully.")));
+        // Verify service method invocation
+        verify(assetService, times(1))
+                .deleteAsset(anyString());
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testDeleteAsset_WhenAssignedOrHasHistory_ThenThrowBadRequestException() throws Exception {
+        String assetCode = "EL000001";
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        when(assetService.deleteAsset(anyString())).thenThrow(BadRequestException.class);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/assets/{assetCode}", assetCode)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        
+        // Verify service method invocation
+        verify(assetService, times(1))
+                .deleteAsset(anyString());
     }
 }
