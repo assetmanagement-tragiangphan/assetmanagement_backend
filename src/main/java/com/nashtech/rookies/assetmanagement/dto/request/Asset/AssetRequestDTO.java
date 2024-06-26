@@ -6,7 +6,11 @@ package com.nashtech.rookies.assetmanagement.dto.request.Asset;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -14,6 +18,9 @@ import lombok.Data;
  * @author Tamina
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class AssetRequestDTO {
 
     private String search;
