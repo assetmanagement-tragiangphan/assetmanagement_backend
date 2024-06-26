@@ -198,7 +198,7 @@ public class UserControllerTest {
     @Test
     public void testChangePassword_whenRequestUserRoleAdmin_thenSuccess() throws Exception{
         changePasswordRequest = ChangePasswordRequest.builder()
-                .newPassword("thanh0412")
+                .newPassword("Duy@10102001")
                 .oldPassword("Old Password")
                 .build();
 

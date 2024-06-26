@@ -44,10 +44,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -585,7 +585,7 @@ public class UserServiceImplTest {
         assertEquals(updatedUser.getStatus(), StatusConstant.INACTIVE);
         assertEquals(result.getMessage(), "Disable user successfully.");
         verify(userRepository, times(1)).findByStaffCodeAndStatus(staffCode, StatusConstant.ACTIVE);
-        verify(tokenRepository, times(1)).deleteAll(any(List.class));
+        verify(tokenRepository, times(1)).deleteAllByUserId(anyInt());
         verify(userRepository, times(1)).save(any(User.class));
     }
 
