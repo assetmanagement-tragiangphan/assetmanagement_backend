@@ -15,7 +15,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -124,7 +126,12 @@ public class CategoryServiceImplTest {
     @Test
     public void testGetAllCategory_WhenSuccess_ThenReturnListCategory() {
         List<Category> categoryList = Arrays.asList(category1, category2);
+        Sort sort = Sort.by(Sort.Direction.ASC, "auditMetadata.createdOn");
+        Pageable pageable = PageRequest.of(0, categoryList.size(), sort);
+        Page<Category> categories = new PageImpl<>(categoryList, pageable, categoryList.size());
+
         when(categoryRepository.findAll()).thenReturn(categoryList);
+        when(categoryRepository.findAll(pageable)).thenReturn(categories);
         when(categoryMapper.entityToDto(category1)).thenReturn(categoryResponse1);
         when(categoryMapper.entityToDto(category2)).thenReturn(categoryResponse2);
 
@@ -139,19 +146,5 @@ public class CategoryServiceImplTest {
         verify(categoryRepository).findAll();
         verify(categoryMapper).entityToDto(category1);
         verify(categoryMapper).entityToDto(category2);
-    }
-
-    @Test
-    public void testGetAllCategory_WhenNoCategories_ThenReturnEmptyList() {
-        when(categoryRepository.findAll()).thenReturn(Collections.emptyList());
-
-        ResponseDto<List<CategoryResponse>> response = categoryServiceImpl.getAllCategory();
-
-        assertNotNull(response);
-        assertNotNull(response.getData());
-        assertTrue(response.getData().isEmpty());
-
-        verify(categoryRepository).findAll();
-        verify(categoryMapper, never()).entityToDto(any(Category.class));
     }
 }

@@ -14,6 +14,6 @@ import java.time.LocalDate;
 public class CreateAssignmentRequest {
     private String staffCode;
     private String assetCode;
-    private LocalDate assignDate;
+    private LocalDate assignedDate;
     private String note;
 }

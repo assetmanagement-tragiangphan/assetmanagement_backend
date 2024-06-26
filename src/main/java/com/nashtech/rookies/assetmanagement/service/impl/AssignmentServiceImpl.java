@@ -33,7 +33,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             Asset asset = assetRepository.findByAssetCodeAndStatus(request.getAssetCode(), StatusConstant.AVAILABLE).orElseThrow(() -> new ResourceAlreadyExistException("Asset Not Available to assign"));
             User assignee = userRepository.findByStaffCode(request.getStaffCode()).orElseThrow(() -> new ResourceNotFoundException("Assignee Not Found"));
             Assignment assignment = new Assignment();
-            assignment.setAssignedDate(request.getAssignDate());
+            assignment.setAssignedDate(request.getAssignedDate());
             assignment.setNote(request.getNote());
             assignment.setAsset(asset);
             assignment.setAssignee(assignee);

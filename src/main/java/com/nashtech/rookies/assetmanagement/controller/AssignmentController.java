@@ -27,6 +27,6 @@ public class AssignmentController {
     @PatchMapping("/{id}")
     public ResponseEntity<ResponseDto<AssignmentResponse>> editAssigment(@PathVariable("id") Integer id, EditAssignmentRequest request, Authentication authentication) {
         UserDetailsDto requestUser = (UserDetailsDto)authentication.getPrincipal();
-        return ResponseEntity.status(HttpStatus.CREATED).body(assignmentService.editAssignment(id, request, requestUser));
+        return ResponseEntity.status(HttpStatus.OK).body(assignmentService.editAssignment(id, request, requestUser));
     }
 }

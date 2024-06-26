@@ -91,7 +91,7 @@ public class AssignmentServiceImplTest {
         createRequest = CreateAssignmentRequest.builder()
                 .assetCode("LA000001")
                 .staffCode(assignee.getStaffCode())
-                .assignDate(LocalDate.now())
+                .assignedDate(LocalDate.now())
                 .note("Test assignment")
                 .build();
 

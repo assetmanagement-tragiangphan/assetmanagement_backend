@@ -43,10 +43,13 @@ public class CategoryControllerTest {
     private CategoryService categoryService;
 
     private UserDetailsDto userDetailsDto;
+    private CategoryResponse categoryResponse;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        categoryResponse = new CategoryResponse(1, "CN", "CategoryName");
 
         userDetailsDto = UserDetailsDto.builder()
                 .roleName(RoleConstant.ADMIN)
@@ -59,7 +62,6 @@ public class CategoryControllerTest {
     public void testCreateCategory_WhenValidInput_ThenReturnCategoryAndMessageSuccess() throws Exception {
         CategoryRequest request = new CategoryRequest("CategoryName", "CN");
 
-        CategoryResponse categoryResponse = new CategoryResponse(1, "CN", "CategoryName");
         ResponseDto<CategoryResponse> responseDto = ResponseDto.<CategoryResponse>builder()
                 .data(categoryResponse)
                 .message("Create Category successfully.")
@@ -81,7 +83,6 @@ public class CategoryControllerTest {
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
     public void testGetCategories_WhenCategoryExists_ThenReturnCategoryList() throws Exception {
-        CategoryResponse categoryResponse = new CategoryResponse(1, "CN", "CategoryName");
         ResponseDto<List<CategoryResponse>> responseDto = ResponseDto.<List<CategoryResponse>>builder()
                 .data(Collections.singletonList(categoryResponse))
                 .build();
