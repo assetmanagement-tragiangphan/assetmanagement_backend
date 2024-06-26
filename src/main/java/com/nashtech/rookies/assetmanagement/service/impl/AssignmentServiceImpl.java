@@ -66,7 +66,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 assetRepository.saveAndFlush(asset);
                 return ResponseDto.<AssignmentResponse>builder()
                         .data(mapper.entityToDto(assignment, requestUser))
-                        .message("Assignment create successfully.")
+                        .message("Assignment update successfully.")
                         .build();
             } else {
                 if (assetRepository.existsByAssetCodeAndStatus(request.getAssetCode(), StatusConstant.ASSIGNED)) {
@@ -81,7 +81,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                     assetRepository.saveAndFlush(asset);
                     return ResponseDto.<AssignmentResponse>builder()
                             .data(mapper.entityToDto(assignment, requestUser))
-                            .message("Assignment create successfully.")
+                            .message("Assignment update successfully.")
                             .build();
                 }
             }

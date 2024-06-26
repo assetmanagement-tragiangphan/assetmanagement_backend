@@ -45,7 +45,7 @@ public class CategoryServiceImplTest {
     @BeforeEach
     public void setUp() {
         categoryRequest = new CategoryRequest();
-        categoryRequest.setPrefix("CAT");
+        categoryRequest.setPrefix("CA");
         categoryRequest.setName("Category Name");
 
         category1 = new Category();

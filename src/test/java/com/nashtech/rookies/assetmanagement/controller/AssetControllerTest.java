@@ -6,32 +6,38 @@ import com.nashtech.rookies.assetmanagement.dto.request.Asset.CreateAssetRequest
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.EditAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
+import com.nashtech.rookies.assetmanagement.entity.Asset;
+import com.nashtech.rookies.assetmanagement.entity.Category;
 import com.nashtech.rookies.assetmanagement.service.AssetService;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
+import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDate;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AssetController.class)
-class AssetControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+public class AssetControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,71 +48,101 @@ class AssetControllerTest {
     @MockBean
     private Authentication authentication;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private SecurityContext securityContext;
+
     private UserDetailsDto userDetailsDto;
+    private CreateAssetRequest createAssetRequest;
+    private EditAssetRequest editAssetRequest;
 
     @BeforeEach
     void setUp() {
-        userDetailsDto = new UserDetailsDto();
-        userDetailsDto.setLocation(LocationConstant.HCM);
+        MockitoAnnotations.openMocks(this);
 
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
+        Category category = new Category();
+        category.setName("Electronics");
+        category.setPrefix("EL");
 
-        when(authentication.getPrincipal()).thenReturn(userDetailsDto);
+        Asset asset = new Asset();
+        asset.setAssetCode("EL000001");
+        asset.setName("Laptop");
+        asset.setCategory(category);
+        asset.setSpecification("Specs");
+        asset.setStatus(StatusConstant.AVAILABLE);
+        asset.setInstalledDate(LocalDate.now());
+
+        userDetailsDto = UserDetailsDto.builder()
+                .roleName(RoleConstant.ADMIN)
+                .location(LocationConstant.HCM)
+                .build();
+
+        createAssetRequest = CreateAssetRequest.builder()
+                .assetName("Laptop")
+                .categoryName("Electronics")
+                .specification("Specs")
+                .installDate(LocalDate.now())
+                .assetState(StatusConstant.AVAILABLE)
+                .build();
+
+        editAssetRequest = EditAssetRequest.builder()
+                .assetName("Desktop")
+                .specification("Specs Updated")
+                .installDate(LocalDate.now())
+                .assetState(StatusConstant.AVAILABLE)
+                .build();
     }
 
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
-    void createAsset_ShouldReturnCreatedStatus() throws Exception {
-        // Arrange
-        CreateAssetRequest request = new CreateAssetRequest();
-        request.setCategoryName("Electronics");
-        request.setAssetName("Laptop");
-        request.setSpecification("Intel i5");
-        request.setAssetState(StatusConstant.AVAILABLE);
-        request.setInstallDate(LocalDate.parse("2024-06-24"));
-
+    public void testCreateAsset_WhenValidInput_ThenReturnAssetAndMessageSuccess() throws Exception {
         AssetResponseDto assetResponseDto = new AssetResponseDto();
         ResponseDto<AssetResponseDto> responseDto = ResponseDto.<AssetResponseDto>builder()
                 .data(assetResponseDto)
                 .message("Create Asset successfully.")
                 .build();
 
-        when(assetService.saveAsset(request, userDetailsDto)).thenReturn(responseDto);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        when(assetService.saveAsset(createAssetRequest, userDetailsDto)).thenReturn(responseDto);
 
-        // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/assets")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(user(userDetailsDto))
-                        .content(new ObjectMapper().writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("Create Asset successfully."));
+                        .content(objectMapper.writeValueAsString(createAssetRequest)))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Create Asset successfully.")));
+
+
+        // Verify service method invocation
+        verify(assetService, times(1))
+                .saveAsset(any(CreateAssetRequest.class), any(UserDetailsDto.class));
     }
 
     @Test
-    void editAsset_ShouldReturnOkStatus() throws Exception {
-        // Arrange
+    @WithMockUser
+    public void testEditAsset_WhenValidInput_ThenReturnAssetAndMessageSuccess() throws Exception {
+        String assetCode = "EL000001";
         EditAssetRequest request = new EditAssetRequest();
-        request.setAssetCode("EL000001");
-        request.setAssetName("Updated Laptop");
-        request.setSpecification("Intel i7");
-        request.setAssetState(StatusConstant.ASSIGNED);
-        request.setInstallDate(LocalDate.parse("2024-06-24"));
-
         AssetResponseDto assetResponseDto = new AssetResponseDto();
         ResponseDto<AssetResponseDto> responseDto = ResponseDto.<AssetResponseDto>builder()
                 .data(assetResponseDto)
                 .message("Update Asset successfully.")
                 .build();
 
-        when(assetService.editAsset(request)).thenReturn(responseDto);
+        when(assetService.editAsset(anyString(), any(EditAssetRequest.class))).thenReturn(responseDto);
 
-        // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/assets")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/assets/{assetCode}", assetCode)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Update Asset successfully."));
+                        .content(objectMapper.writeValueAsString(editAssetRequest)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Update Asset successfully.")));
+
+        // Verify service method invocation
+        verify(assetService, times(1)).editAsset(anyString(), any(EditAssetRequest.class));
     }
 }

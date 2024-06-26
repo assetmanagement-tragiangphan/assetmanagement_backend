@@ -28,14 +28,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.nashtech.rookies.assetmanagement.specifications.AssetSpecification.filterSpecs;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 /**
- *
  * @author HP
  * @author Tamina
  */
@@ -105,20 +106,20 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ResponseDto<AssetResponseDto> editAsset(String assetCode, EditAssetRequest request) {
-        if (repository.existsByAssetCode(assetCode)) {
-            Asset asset = repository.findByAssetCodeAndStatus(assetCode, StatusConstant.AVAILABLE)
-                    .orElseThrow(() -> new ResourceAlreadyExistException("Asset is not available to edit!"));
-            asset.setName(request.getAssetName());
-            asset.setSpecification(request.getSpecification());
-            asset.setStatus(request.getAssetState());
-            asset.setInstalledDate(request.getInstallDate());
-            asset = repository.saveAndFlush(asset);
-            return ResponseDto.<AssetResponseDto>builder()
-                    .data(mapper.entityToDto(asset))
-                    .message("Update Asset successfully.")
-                    .build();
-        } else {
-            throw new ResourceNotFoundException("Asset does not exists!");
+        Asset asset = repository.findAssetByAssetCode(assetCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Asset does not exists!"));
+        if (Objects.requireNonNull(asset.getStatus()) == StatusConstant.ASSIGNED) {
+            throw new ResourceAlreadyExistException("Asset is not available to edit!");
         }
+        asset.setName(request.getAssetName());
+        asset.setSpecification(request.getSpecification());
+        asset.setStatus(request.getAssetState());
+        asset.setInstalledDate(request.getInstallDate());
+        asset = repository.saveAndFlush(asset);
+        return ResponseDto.<AssetResponseDto>builder()
+                .data(mapper.entityToDto(asset))
+                .message("Update Asset successfully.")
+                .build();
+
     }
 }

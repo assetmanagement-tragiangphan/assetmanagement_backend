@@ -7,29 +7,30 @@ import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.entity.Category;
+import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssetMapper;
-import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
 import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
 import com.nashtech.rookies.assetmanagement.repository.CategoryRepository;
-import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
-import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-public class AssetServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class AssetServiceImplTest {
 
     @Mock
     private CategoryRepository categoryRepository;
@@ -43,47 +44,63 @@ public class AssetServiceImplTest {
     @InjectMocks
     private AssetServiceImpl assetService;
 
+    private Category category;
+    private Asset asset;
+    private Asset assignedAsset;
+    private UserDetailsDto userDetailsDto;
+    private CreateAssetRequest createAssetRequest;
+    private EditAssetRequest editAssetRequest;
+
     @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
-    }
+    void setUp() {
+        category = new Category();
+        category.setName("Electronics");
+        category.setPrefix("EL");
 
+        asset = new Asset();
+        asset.setAssetCode("EL000001");
+        asset.setName("Laptop");
+        asset.setCategory(category);
+        asset.setSpecification("Specs");
+        asset.setStatus(StatusConstant.AVAILABLE);
+        asset.setInstalledDate(LocalDate.now());
 
-    @Test
-    public void testSaveAsset_WhenRequestValid_ThenReturnSuccessMessage() {
-        CreateAssetRequest request = CreateAssetRequest.builder()
-                .categoryName("Laptop")
-                .assetName("Asset Laptop")
-                .specification("Specification")
-                .assetState(StatusConstant.NOT_AVAILABLE)
-                .installDate(LocalDate.now())
-                .build();
+        assignedAsset = new Asset();
+        assignedAsset.setAssetCode("EL000001");
+        assignedAsset.setName("Laptop");
+        assignedAsset.setCategory(category);
+        assignedAsset.setSpecification("Specs");
+        assignedAsset.setStatus(StatusConstant.ASSIGNED);
+        assignedAsset.setInstalledDate(LocalDate.now());
 
-        UserDetailsDto requestUser = UserDetailsDto.builder()
-                .roleName(RoleConstant.valueOf("ADMIN"))
+        userDetailsDto = UserDetailsDto.builder()
                 .location(LocationConstant.HCM)
                 .build();
 
-        Category category = new Category();
-        category.setPrefix("LA");
+        createAssetRequest = CreateAssetRequest.builder()
+                .assetName("Laptop")
+                .categoryName("Electronics")
+                .specification("Specs")
+                .installDate(LocalDate.now())
+                .assetState(StatusConstant.AVAILABLE)
+                .build();
 
+        editAssetRequest = EditAssetRequest.builder()
+                .assetName("Desktop")
+                .specification("Specs Updated")
+                .installDate(LocalDate.now())
+                .assetState(StatusConstant.AVAILABLE)
+                .build();
+    }
+
+    @Test
+    void testSaveAsset_WhenInputValid_ThenReturnResponseAndMessageSuccess() {
         when(categoryRepository.findCategoryByName(anyString())).thenReturn(category);
-        when(assetRepository.findFirstByOrderByIdDesc()).thenReturn(Optional.empty());
-
-        Asset asset = new Asset();
-        asset.setId(1);
-        asset.setAssetCode("LA000001");
-        asset.setName("Asset Laptop");
-        asset.setSpecification("Specification");
-        asset.setStatus(StatusConstant.NOT_AVAILABLE);
-        asset.setInstalledDate(LocalDate.now());
+        when(assetRepository.findFirstByOrderByIdDesc()).thenReturn(Optional.of(asset));
         when(assetRepository.saveAndFlush(any(Asset.class))).thenReturn(asset);
+        when(assetMapper.entityToDto(any(Asset.class))).thenReturn(new AssetResponseDto());
 
-        AssetResponseDto responseDto = new AssetResponseDto("LA000001", "Asset Laptop", category.getName(), "NOT_AVAILABLE");
-
-        when(assetMapper.entityToDto(any(Asset.class))).thenReturn(responseDto);
-
-        ResponseDto<AssetResponseDto> response = assetService.saveAsset(request, requestUser);
+        ResponseDto<AssetResponseDto> response = assetService.saveAsset(createAssetRequest, userDetailsDto);
 
         assertNotNull(response);
         assertEquals("Create Asset successfully.", response.getMessage());
@@ -91,52 +108,35 @@ public class AssetServiceImplTest {
     }
 
     @Test
-    public void testEditAsset_WhenRequestValid_ThenReturnSuccessMessage() {
-        Asset asset = Asset.builder()
-                .id(1)
-                .assetCode("LA000001")
-                .name("Laptop")
-                .build();
-
-        EditAssetRequest request = EditAssetRequest.builder()
-                .assetCode("LA000001")
-                .assetName("Personal Computer")
-                .specification("Specification")
-                .assetState(StatusConstant.NOT_AVAILABLE)
-                .installDate(LocalDate.now())
-                .build();
-
-        Category category = new Category();
-        category.setPrefix("LA");
-
-        when(categoryRepository.findCategoryByName(anyString())).thenReturn(category);
-        when(assetRepository.findAssetByAssetCode(request.getAssetCode())).thenReturn(Optional.of(asset));
+    void testEditAsset_WhenInputValid_ThenReturnResponseAndMessageSuccess() {
+        when(assetRepository.findAssetByAssetCode(asset.getAssetCode())).thenReturn(Optional.of(asset));
         when(assetRepository.saveAndFlush(any(Asset.class))).thenReturn(asset);
+        when(assetMapper.entityToDto(any(Asset.class))).thenReturn(new AssetResponseDto());
 
-        AssetResponseDto responseDto = new AssetResponseDto("LA000001", "Edited Asset", category.getName(), "NOT_AVAILABLE");
-
-        when(assetMapper.entityToDto(any(Asset.class))).thenReturn(responseDto);
-
-        ResponseDto<AssetResponseDto> response = assetService.editAsset(request);
+        ResponseDto<AssetResponseDto> response = assetService.editAsset("EL000001", editAssetRequest);
 
         assertNotNull(response);
         assertEquals("Update Asset successfully.", response.getMessage());
-        verify(assetRepository, times(1)).findAssetByAssetCode(anyString());
         verify(assetRepository, times(1)).saveAndFlush(any(Asset.class));
     }
 
     @Test
-    public void testSaveAsset_WhenAssetNotExist_ThenThrowResourceNotFoundException() {
-        EditAssetRequest request = new EditAssetRequest();
-        request.setAssetCode("LA00001");
+    void testEditAsset_WhenAssetNotFound_ThenThrowResourceNotFoundException() {
+        when(assetRepository.findAssetByAssetCode(asset.getAssetCode())).thenReturn(Optional.empty());
 
-        when(assetRepository.findAssetByAssetCode(anyString())).thenReturn(Optional.empty());
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> assetService.editAsset("EL000001", editAssetRequest));
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            assetService.editAsset(request);
-        });
+        assertEquals("Asset does not exists!", exception.getMessage());
+    }
 
-        verify(assetRepository, times(1)).findAssetByAssetCode(anyString());
-        verify(assetRepository, times(0)).saveAndFlush(any(Asset.class));
+    @Test
+    void testEditAsset_WhenAssignedStatus_ThenThrowResourceAlreadyExistException() {
+        when(assetRepository.findAssetByAssetCode(anyString())).thenReturn(Optional.of(assignedAsset));
+
+        ResourceAlreadyExistException exception = assertThrows(ResourceAlreadyExistException.class,
+                () -> assetService.editAsset("EL000001", editAssetRequest));
+
+        assertEquals("Asset is not available to edit!", exception.getMessage());
     }
 }
