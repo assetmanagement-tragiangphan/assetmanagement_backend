@@ -27,10 +27,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ResponseDto<CategoryResponse> saveCategory(CategoryRequest request) {
-        if (categoryRepository.existsByPrefix(request.getPrefix())) {
-            throw new ResourceAlreadyExistException("Prefix is already existed. Please enter a different prefix!");
-        } else if (categoryRepository.existsByName(request.getName())) {
-            throw new ResourceAlreadyExistException("Category is already existed. Please enter a different category!");
+        if (categoryRepository.existsByName(request.getName())) {
+            throw new ResourceAlreadyExistException("Category is already existed. Please enter a different category");
+        } else if (categoryRepository.existsByPrefix(request.getPrefix())) {
+            throw new ResourceAlreadyExistException("Prefix is already existed. Please enter a different prefix");
         } else {
             Category category = new Category();
             category.setPrefix(request.getPrefix());
