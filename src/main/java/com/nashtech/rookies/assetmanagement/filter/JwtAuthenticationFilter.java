@@ -1,5 +1,6 @@
 package com.nashtech.rookies.assetmanagement.filter;
 
+import com.nashtech.rookies.assetmanagement.config.CookieProperties;
 import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
 import com.nashtech.rookies.assetmanagement.service.JwtService;
 import com.nashtech.rookies.assetmanagement.service.UserService;
@@ -35,13 +36,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserService userService;
 
     private final HandlerExceptionResolver handleExceptionResolver;
+    private final CookieProperties cookieProperties;
 
     public JwtAuthenticationFilter(JwtService jwtService, TokenRepository tokenRepository, UserService userService,
-            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handleExceptionResolver) {
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handleExceptionResolver, CookieProperties cookieProperties) {
         this.jwtService = jwtService;
         this.tokenRepository = tokenRepository;
         this.userService = userService;
         this.handleExceptionResolver = handleExceptionResolver;
+        this.cookieProperties = cookieProperties;
     }
 
     @Value("${application.cookie.name}")
@@ -85,7 +88,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
             filterChain.doFilter(request, response);
-        } catch (Exception e) {
+        } 
+        catch (ExpiredJwtException e){
+            Cookie cookie = new Cookie(cookieProperties.getName(), null);
+            cookie.setMaxAge(0);
+            cookie.setPath(cookieProperties.getPath());
+            cookie.setSecure(cookieProperties.getSecure());
+            response.addCookie(cookie);
+            String cookieHeader = response.getHeader("Set-Cookie");
+            cookieHeader+= "; SameSite=" + cookieProperties.getSameSite();
+            response.setHeader("Set-Cookie", cookieHeader);
+            handleExceptionResolver.resolveException(request, response, null, e);
+        }
+        catch (Exception e) {
             handleExceptionResolver.resolveException(request, response, null, e);
         }
     }

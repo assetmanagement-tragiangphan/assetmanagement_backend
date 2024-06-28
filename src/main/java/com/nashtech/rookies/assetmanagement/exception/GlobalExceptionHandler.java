@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseDto<Void>> handleExpiredJwtException(ExpiredJwtException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 ResponseDto.<Void>builder()
-                        .message("JWT already expired.")
+                        .message("Your session is expired. Please login again.")
                         .build()
         );
     }
