@@ -27,6 +27,8 @@ public class Asset extends BaseEntity implements Auditable {
     @Column(unique = true)
     private String assetCode;
     private String name;
+    
+    @Column(length = 300)
     private String specification;
     @Enumerated(EnumType.STRING)
     private LocationConstant location;
@@ -43,4 +45,10 @@ public class Asset extends BaseEntity implements Auditable {
     @OneToMany(mappedBy = "asset")
             @JsonBackReference
     List<Assignment> assigments;
+
+    @Override
+    public String toString() {
+        return "Asset{" + "assetCode=" + assetCode + ", name=" + name + ", specification=" + specification + ", location=" + location + ", installedDate=" + installedDate + '}';
+    }
+    
 }

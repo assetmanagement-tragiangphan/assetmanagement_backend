@@ -22,4 +22,11 @@ public class Token extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
     private User user;
+
+    @Override
+    public String toString() {
+        return "Token{" + "token=" + token + ", user=" + user.getId() + '}';
+    }
+    
+    
 }

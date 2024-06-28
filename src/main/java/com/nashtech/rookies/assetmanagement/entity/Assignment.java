@@ -20,6 +20,7 @@ import java.time.LocalDate;
 @Entity
 @EntityListeners(AuditListener.class)
 public class Assignment extends BaseEntity implements Auditable {
+    
     private LocalDate assignedDate;
     private String note;
 
@@ -30,9 +31,19 @@ public class Assignment extends BaseEntity implements Auditable {
     @JoinColumn(name = "asset_id")
     @JsonManagedReference
     private Asset asset;
+    
     @ManyToOne
     @JoinColumn(name = "assignee_id")
     private User assignee;
+    
     @OneToOne(mappedBy = "assignment")
     private ReturnRequest returnRequest;
+
+    @Override
+    public String toString() {
+        return "Assignment{" + "assignedDate=" + assignedDate + ", note=" + note + ", asset=" + asset + ", assignee=" + assignee + ", returnRequest=" + returnRequest + '}';
+    }
+    
+    
+    
 }

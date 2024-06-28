@@ -61,5 +61,11 @@ public class User extends BaseEntity implements Auditable {
     @OneToMany(mappedBy = "auditMetadata.updatedBy")
     private List<Assignment> updatedAssignments;
 
+    @Override
+    public String toString() {
+        return "User{" + "staffCode=" + staffCode + ", firstName=" + firstName + ", lastName=" + lastName + ", username=" + username + ", password=" + password + ", gender=" + gender + ", location=" + location + ", joinedDate=" + joinedDate + ", dateOfBirth=" + dateOfBirth + ", isChangePassword=" + isChangePassword + ", auditMetadata=" + auditMetadata + ", role=" + role + ", assignments=" + assignments.size() + ", returnRequests=" + returnRequests.size() + ", tokens=" + tokens + ", createdAssets=" + createdAssets.size() + ", updatedAssets=" + updatedAssets.size() + ", createdUsers=" + createdUsers.size() + ", updatedUsers=" + updatedUsers.size() + ", createdAssignments=" + createdAssignments.size() + ", updatedAssignments=" + updatedAssignments.size() + '}';
+    }
+
+    
 }
 

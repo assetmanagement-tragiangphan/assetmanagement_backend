@@ -25,5 +25,10 @@ public class Role extends BaseEntity {
 
     @OneToMany(mappedBy = "role")
     private List<User> users;
+
+    @Override
+    public String toString() {
+        return "Role{" + "name=" + name + ", users=" + users.size() + '}';
+    }
 }
 

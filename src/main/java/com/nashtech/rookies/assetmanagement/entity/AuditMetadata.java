@@ -23,4 +23,11 @@ public class AuditMetadata {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updatedBy", insertable = false)
     private User updatedBy;
+
+    @Override
+    public String toString() {
+        return "AuditMetadata{" + "createdOn=" + createdOn + ", updatedOn=" + updatedOn + '}';
+    }
+    
+    
 }

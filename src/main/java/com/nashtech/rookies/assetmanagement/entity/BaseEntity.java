@@ -22,4 +22,9 @@ public class BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private StatusConstant status;
+
+    @Override
+    public String toString() {
+        return "BaseEntity{" + "id=" + id + ", status=" + status + '}';
+    } 
 }

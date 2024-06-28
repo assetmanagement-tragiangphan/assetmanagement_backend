@@ -32,4 +32,12 @@ public class Category extends BaseEntity implements Auditable {
     @OneToMany(mappedBy = "category")
     @JsonBackReference
     private List<Asset> assets;
+
+    @Override
+    public String toString() {
+        return "Category{" + "name=" + name + ", prefix=" + prefix + ", auditMetadata=" + auditMetadata + ", assets=" + assets.size() + '}';
+    }
+    
+    
+    
 }

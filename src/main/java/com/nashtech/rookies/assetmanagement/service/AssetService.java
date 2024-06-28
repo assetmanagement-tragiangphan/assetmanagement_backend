@@ -20,7 +20,10 @@ public interface AssetService {
 
     ResponseDto getAll(AssetRequestDTO requestParams, Pageable pageable, UserDetailsDto requestUser);
     ResponseDto getOne(String requestParams);
+    ResponseDto getOneWithHistory(String requestParams, int page);
     ResponseDto<AssetResponseDto> saveAsset(CreateAssetRequest request, UserDetailsDto requestUser);
     ResponseDto<AssetResponseDto> editAsset(String assetCode, EditAssetRequest request);
     ResponseDto deleteAsset(String assetCode);
+
+    public ResponseDto getHistoryOfOneAsset(String assetCode, Integer page);
 }

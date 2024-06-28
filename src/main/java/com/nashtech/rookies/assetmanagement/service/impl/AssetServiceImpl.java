@@ -8,7 +8,9 @@ import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CreateAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.AssetRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.EditAssetRequest;
+import com.nashtech.rookies.assetmanagement.dto.response.AssetHistoryDTO;
 import com.nashtech.rookies.assetmanagement.dto.response.AssetResponseDto;
+import com.nashtech.rookies.assetmanagement.dto.response.AssetWithHistoryResponseDTO;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
@@ -77,6 +79,24 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
+    public ResponseDto getOneWithHistory(String requestParams, int page) {
+        PageRequest pageRequest = PageRequest.of(page, 10);
+        Asset asset = repository.findAssetByAssetCode(requestParams).orElseThrow(() -> new ResourceNotFoundException("Asset does not exists!"));
+        Page<AssetHistoryDTO> historyList = repository.findAssetHistory(requestParams, pageRequest);
+        AssetResponseDto assetResponseDto = mapper.entityToDto(asset);
+        AssetWithHistoryResponseDTO response = new AssetWithHistoryResponseDTO(assetResponseDto, historyList.toList());
+        return new ResponseDto(response, "Get All Assets History Successfully");
+    }
+
+    @Override
+    public ResponseDto getHistoryOfOneAsset(String requestParams, Integer page) {
+        PageRequest pageRequest = PageRequest.of(page, 10);
+        Page<AssetHistoryDTO> historyList = repository.findAssetHistory(requestParams, pageRequest);
+        return new ResponseDto(historyList, "Get History of Asset Successfully");
+
+    }
+
+    @Override
     public ResponseDto<AssetResponseDto> saveAsset(CreateAssetRequest request, UserDetailsDto requestUser) {
         Asset asset = new Asset();
         Category category = categoryRepository.findCategoryByName(request.getCategoryName());
@@ -129,10 +149,10 @@ public class AssetServiceImpl implements AssetService {
     public ResponseDto deleteAsset(String assetCode) {
         Asset asset = repository.findAssetByAssetCode(assetCode).orElseThrow(() -> new ResourceNotFoundException("Asset does not exists!"));
         int assetId = asset.getId();
-        if(asset.getStatus().equals(StatusConstant.ASSIGNED)){
+        if (asset.getStatus().equals(StatusConstant.ASSIGNED)) {
             throw new BadRequestException("Cannot delete the asset because it's being assigned");
         }
-        if(assignmentRepository.existsByAssetId(assetId)){
+        if (assignmentRepository.existsByAssetId(assetId)) {
             throw new BadRequestException("Cannot delete the asset because it belongs to one or more historical assignments");
         }
         repository.delete(asset);
