@@ -27,7 +27,10 @@ public class UserSpecification {
     }
 
     public static Specification<User> likeStaffCode (String staffCode) {
-        return (root, query, builder) -> builder.like(root.get(User_.STAFF_CODE), "%" + staffCode + "%");
+        return (root, query, builder) -> builder.like(
+            builder.lower(root.get(User_.STAFF_CODE))
+            , "%" + staffCode.toLowerCase() + "%"
+        );
     }
 
     public static Specification<User> hasRole (List<Integer> roleIds) {

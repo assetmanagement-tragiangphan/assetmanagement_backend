@@ -49,7 +49,7 @@ public class CategoryControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        categoryResponse = new CategoryResponse(1, "CN", "CategoryName");
+        categoryResponse = new CategoryResponse(1, "CN", "Category Name");
 
         userDetailsDto = UserDetailsDto.builder()
                 .roleName(RoleConstant.ADMIN)
@@ -60,7 +60,7 @@ public class CategoryControllerTest {
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
     public void testCreateCategory_WhenValidInput_ThenReturnCategoryAndMessageSuccess() throws Exception {
-        CategoryRequest request = new CategoryRequest("CategoryName", "CN");
+        CategoryRequest request = new CategoryRequest("Category Name");
 
         ResponseDto<CategoryResponse> responseDto = ResponseDto.<CategoryResponse>builder()
                 .data(categoryResponse)
@@ -75,8 +75,8 @@ public class CategoryControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data.prefix").value("CN"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data.name").value("CategoryName"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.prefix").value(categoryResponse.getPrefix()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.name").value(categoryResponse.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Create Category successfully."));
     }
 
@@ -94,7 +94,7 @@ public class CategoryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].id").value(1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].prefix").value("CN"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].name").value("CategoryName"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].prefix").value(categoryResponse.getPrefix()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].name").value(categoryResponse.getName()));
     }
 }

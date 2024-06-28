@@ -53,7 +53,7 @@ public class AssetSpecification {
             if (code == null) {
                 return builder.conjunction();
             }
-            return builder.like(root.get(Asset_.ASSET_CODE), "%" + code + "%");
+            return builder.like(builder.lower(root.get(Asset_.ASSET_CODE)), "%" + code.toLowerCase() + "%");
         };
     }
 

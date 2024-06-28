@@ -11,4 +11,5 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     boolean existsByPrefix(String prefix);
     boolean existsByName(String name);
     Category findCategoryByName(String name);
+    Integer countByPrefixStartsWith(String prefix);
 }

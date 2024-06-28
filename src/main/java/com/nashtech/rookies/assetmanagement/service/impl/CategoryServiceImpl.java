@@ -25,23 +25,28 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
 
+    private String generatePrefixCategory(String categoryName){
+        String prefix = List.of(categoryName.split(" ")).stream().reduce("",(acc, item) -> acc + item.charAt(0)).toUpperCase();
+        Integer count = categoryRepository.countByPrefixStartsWith(prefix);
+        prefix = count == 0 ? prefix : prefix + count;
+        return prefix;
+    }
+
     @Override
     public ResponseDto<CategoryResponse> saveCategory(CategoryRequest request) {
         if (categoryRepository.existsByName(request.getName())) {
             throw new ResourceAlreadyExistException("Category is already existed. Please enter a different category");
-        } else if (categoryRepository.existsByPrefix(request.getPrefix())) {
-            throw new ResourceAlreadyExistException("Prefix is already existed. Please enter a different prefix");
-        } else {
-            Category category = new Category();
-            category.setPrefix(request.getPrefix());
-            category.setName(request.getName());
-            category.setStatus(StatusConstant.ACTIVE);
-            category = categoryRepository.saveAndFlush(category);
-            return ResponseDto.<CategoryResponse>builder()
-                    .data(categoryMapper.entityToDto(category))
-                    .message("Create Category successfully.")
-                    .build();
-        }
+        } 
+
+        Category category = new Category();
+        category.setPrefix(this.generatePrefixCategory(request.getName()));
+        category.setName(request.getName());
+        category.setStatus(StatusConstant.ACTIVE);
+        category = categoryRepository.saveAndFlush(category);
+        return ResponseDto.<CategoryResponse>builder()
+                .data(categoryMapper.entityToDto(category))
+                .message("Create Category successfully.")
+                .build();
     }
 
     @Override
