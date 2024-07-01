@@ -9,4 +9,5 @@ import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 public interface AssignmentService {
     ResponseDto<AssignmentResponse> saveAssignment(CreateAssignmentRequest request, UserDetailsDto requestUser);
     ResponseDto<AssignmentResponse> editAssignment(Integer id, EditAssignmentRequest request, UserDetailsDto requestUser);
+    ResponseDto deleteAssignment(Integer id);
 }

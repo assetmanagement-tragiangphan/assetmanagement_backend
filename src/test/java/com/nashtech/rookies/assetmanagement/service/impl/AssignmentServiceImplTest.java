@@ -8,6 +8,7 @@ import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.entity.Assignment;
 import com.nashtech.rookies.assetmanagement.entity.User;
+import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssignmentMapper;
@@ -26,6 +27,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -86,7 +88,6 @@ public class AssignmentServiceImplTest {
                 .note("Updated assignment")
                 .status(StatusConstant.WAITING_FOR_ACCEPTANCE)
                 .build();
-
 
         createRequest = CreateAssignmentRequest.builder()
                 .assetCode("LA000001")
@@ -227,6 +228,56 @@ public class AssignmentServiceImplTest {
         when(assetRepository.existsByAssetCodeAndStatus(assignedAsset.getAssetCode(), StatusConstant.ASSIGNED)).thenReturn(true);
 
         assertThrows(ResourceAlreadyExistException.class, () -> assignmentService.editAssignment(1, editRequest, userDetails));
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    void testDeleteAssignment_WhenNotFound_ThenThrowResourceNotFoundException() {
+        when(assignmentRepository.existsById(anyInt())).thenReturn(Boolean.FALSE);
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> assignmentService.deleteAssignment(1));
+        assertEquals("Assignment does not exist", exception.getMessage());
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    void testDeleteAssignment_WhenStatusIsNOTWaitingForAcceptanceOrDeclined_ThenThrowBadRequestException() {
+        Assignment notDeleteableAssignment = Assignment.builder()
+                .id(1)
+                .asset(asset)
+                .assignee(assignee)
+                .assignedDate(LocalDate.now())
+                .note("Test assignment")
+                .status(StatusConstant.ACTIVE)
+                .build();
+
+        when(assignmentRepository.existsById(anyInt())).thenReturn(Boolean.TRUE);
+        when(assignmentRepository.getReferenceById(anyInt())).thenReturn(notDeleteableAssignment);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> assignmentService.deleteAssignment(1));
+        assertEquals("Cannot delete assignment", exception.getMessage());
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    void testDeleteAssignment_WhenStatusIsWaitingForAcceptanceOrDeclined_ThenSucces() {
+        Assignment deletedAssignment = Assignment.builder()
+                .id(1)
+                .asset(asset)
+                .assignee(assignee)
+                .assignedDate(LocalDate.now())
+                .note("Test assignment")
+                .status(StatusConstant.INACTIVE)
+                .build();
+        when(assignmentRepository.existsById(anyInt())).thenReturn(Boolean.TRUE);
+        when(assignmentRepository.getReferenceById(anyInt())).thenReturn(assignment);
+        when(assignmentRepository.save(any(Assignment.class))).thenReturn(deletedAssignment);
+
+        ResponseDto response = assignmentService.deleteAssignment(1);
+        Assertions.assertNull(response.getData());
+        Assertions.assertNotNull(response.getMessage());
+        assertEquals(response.getMessage(), "Delete assignment successfully");
     }
 
     private AssignmentResponse mapToAssignmentResponse(Assignment assignment, UserDetailsDto userDetails) {

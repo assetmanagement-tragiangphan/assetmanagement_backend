@@ -29,4 +29,9 @@ public class AssignmentController {
         UserDetailsDto requestUser = (UserDetailsDto)authentication.getPrincipal();
         return ResponseEntity.status(HttpStatus.OK).body(assignmentService.editAssignment(id, request, requestUser));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteAssigment(@PathVariable("id") Integer id) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(assignmentService.deleteAssignment(id));
+    }
 }

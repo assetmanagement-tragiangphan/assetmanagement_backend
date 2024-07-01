@@ -84,7 +84,7 @@ public class AssetServiceImpl implements AssetService {
         Asset asset = repository.findAssetByAssetCode(requestParams).orElseThrow(() -> new ResourceNotFoundException("Asset does not exists!"));
         Page<AssetHistoryDTO> historyList = repository.findAssetHistory(requestParams, pageRequest);
         AssetResponseDto assetResponseDto = mapper.entityToDto(asset);
-        AssetWithHistoryResponseDTO response = new AssetWithHistoryResponseDTO(assetResponseDto, historyList.toList());
+        AssetWithHistoryResponseDTO response = new AssetWithHistoryResponseDTO(assetResponseDto, historyList);
         return new ResponseDto(response, "Get All Assets History Successfully");
     }
 

@@ -4,9 +4,9 @@
  */
 package com.nashtech.rookies.assetmanagement.dto.response;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.data.domain.Page;
 
 /**
  *
@@ -18,6 +18,6 @@ import lombok.Data;
 public class AssetWithHistoryResponseDTO {
 
     private AssetResponseDto asset;
-    private List<AssetHistoryDTO> history;
+    private Page<AssetHistoryDTO> history;
 
 }

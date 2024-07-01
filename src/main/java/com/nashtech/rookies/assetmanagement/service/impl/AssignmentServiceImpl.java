@@ -8,6 +8,7 @@ import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.entity.Assignment;
 import com.nashtech.rookies.assetmanagement.entity.User;
+import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.AssignmentMapper;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class AssignmentServiceImpl implements AssignmentService {
+
     private AssignmentRepository repository;
     private AssignmentMapper mapper;
     private AssetRepository assetRepository;
@@ -48,7 +50,6 @@ public class AssignmentServiceImpl implements AssignmentService {
         } else {
             throw new ResourceNotFoundException("Asset not found!");
         }
-
     }
 
     @Override
@@ -87,6 +88,26 @@ public class AssignmentServiceImpl implements AssignmentService {
             }
         } else {
             throw new ResourceNotFoundException("Assignment is not exist");
+        }
+    }
+
+    @Override
+    public ResponseDto deleteAssignment(Integer id) {
+        if (repository.existsById(id)) {
+            Assignment assignment = repository.getReferenceById(id);
+            if (assignment.getStatus().equals(StatusConstant.WAITING_FOR_ACCEPTANCE) || assignment.getStatus().equals(StatusConstant.DECLINED)) {
+                assignment.setStatus(StatusConstant.INACTIVE);
+                assignment.getAsset().setStatus(StatusConstant.AVAILABLE);
+                repository.save(assignment);
+                return ResponseDto.builder()
+                        .data(null)
+                        .message("Delete assignment successfully")
+                        .build();
+            } else {
+                throw new BadRequestException("Cannot delete assignment");
+            }
+        } else {
+            throw new ResourceNotFoundException("Assignment does not exist");
         }
     }
 }
