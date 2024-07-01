@@ -25,6 +25,11 @@ public class ReturnRequest extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "acceptedBy")
     private User acceptedBy;
+
+    @ManyToOne
+    @JoinColumn(name = "requestedBy")
+    private User requestedBy;
+
     @OneToOne
     @JoinColumn(name = "assignmentId")
     private Assignment assignment;
