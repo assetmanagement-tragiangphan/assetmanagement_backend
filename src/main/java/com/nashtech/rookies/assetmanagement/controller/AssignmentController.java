@@ -44,7 +44,12 @@ public class AssignmentController {
         UserDetailsDto requestUser = (UserDetailsDto) authentication.getPrincipal();
         return ResponseEntity.status(HttpStatus.OK).body(assignmentService.getOwnAssignmentDetails(requestUser, pageable));
     }
-    
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDto<AssignmentDetailResponse>> getAssignmentDetail(@PathVariable("id") Integer id) {
+        return ResponseEntity.status(HttpStatus.OK).body(assignmentService.getAssignmentDetail(id));
+    }
+
     @PostMapping()
     public ResponseEntity<ResponseDto<AssignmentResponse>> createAssignment(@RequestBody CreateAssignmentRequest request, Authentication authentication) {
         UserDetailsDto requestUser = (UserDetailsDto) authentication.getPrincipal();

@@ -268,4 +268,14 @@ public class AssignmentServiceImpl implements AssignmentService {
             throw new ResourceNotFoundException("Assignment does not exist");
         }
     }
+
+    @Override
+    public ResponseDto<AssignmentDetailResponse> getAssignmentDetail(Integer id) {
+        Assignment assignment = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Assignment does not exist."));
+        return ResponseDto.<AssignmentDetailResponse>builder()
+                .data(mapper.entityToDetailDto(assignment, assignment.getAuditMetadata().getCreatedBy(), assignment.getAsset()))
+                .message("Successfully retrieved assignment detail.")
+                .build();
+    }
 }
