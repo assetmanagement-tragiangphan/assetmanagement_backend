@@ -80,6 +80,6 @@ public class AssignmentSpecification {
     }
 
     public static Specification<Assignment> filterSpecs(AssignmentGetRequest request) {
-        return Specification.where(withUsername(request.getSearchKey()).or(withAssetCode(request.getSearchKey())).or(withAssetName(request.getSearchKey())).and(withState(request.getStatus())).and(withAssignedDate(request.getAssignedDate())));
+        return Specification.where(withUsername(request.getSearch()).or(withAssetCode(request.getSearch())).or(withAssetName(request.getSearch())).and(withState(request.getStatus())).and(withAssignedDate(request.getAssignedDate())));
     }
 }

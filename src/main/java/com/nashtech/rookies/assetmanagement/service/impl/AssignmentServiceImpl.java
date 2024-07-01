@@ -52,15 +52,12 @@ public class AssignmentServiceImpl implements AssignmentService {
         Specification<Assignment> specs = AssignmentSpecification.filterSpecs(request);
 
         PageRequest pageRequest = (PageRequest) pageable;
-        String sortField = pageRequest.getSort().toString().split(":")[0].trim().toLowerCase();
-        String sortType = pageRequest.getSort().toString().split(":")[1].trim();
-        log.info("field " + sortField);
-        log.info("type " + sortType);
-
         if (pageRequest.getSort().equals(Sort.unsorted())) {
-            log.info("1 " + sortField);
             pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
         }
+
+        String sortField = pageRequest.getSort().toString().split(":")[0].trim().toLowerCase();
+        String sortType = pageRequest.getSort().toString().split(":")[1].trim();
         if (sortType.equals("ASC")) {
             if (sortField.equals("assetcode")) {
                 log.info("2 " + sortField);
@@ -82,7 +79,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
 
         Page<AssignmentDetailResponse> assignmentDetails = repository.findAll(specs, pageRequest)
-                .map(res -> mapper.entityToDetailDto(res, res.getAuditMetadata().getCreatedBy(), res.getAsset()));
+                .map(assignment -> mapper.entityToDetailDto(assignment, assignment.getAuditMetadata().getCreatedBy(), assignment.getAsset()));
 
         PageableDto<List<AssignmentDetailResponse>> pages = PageableDto.<List<AssignmentDetailResponse>>builder()
                 .content(assignmentDetails.getContent())
@@ -102,9 +99,12 @@ public class AssignmentServiceImpl implements AssignmentService {
         Specification<Assignment> specs = AssignmentSpecification.ownSpecs(requestUser);
 
         PageRequest pageRequest = (PageRequest) pageable;
+        if (pageRequest.getSort().equals(Sort.unsorted())) {
+            pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
+        }
+        
         String sortField = pageRequest.getSort().toString().split(":")[0].trim().toLowerCase();
         String sortType = pageRequest.getSort().toString().split(":")[1].trim();
-
         if (sortType.equals("ASC")) {
             if (sortField.equals("assetcode")) {
                 log.info("2 " + sortField);
@@ -126,7 +126,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
 
         Page<AssignmentDetailResponse> assignmentDetails = repository.findAll(specs, pageRequest)
-                .map(res -> mapper.entityToDetailDto(res, res.getAuditMetadata().getCreatedBy(), res.getAsset()));
+                .map(assignment -> mapper.entityToDetailDto(assignment, assignment.getAuditMetadata().getCreatedBy(), assignment.getAsset()));
 
         PageableDto<List<AssignmentDetailResponse>> pages = PageableDto.<List<AssignmentDetailResponse>>builder()
                 .content(assignmentDetails.getContent())
@@ -137,7 +137,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         return ResponseDto.<PageableDto<List<AssignmentDetailResponse>>>builder()
                 .data(pages)
-                .message("Successfully retrieved assignment details.")
+                .message("Successfully retrieved your own assignment details.")
                 .build();
     }
 

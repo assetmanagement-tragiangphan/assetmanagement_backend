@@ -4,9 +4,10 @@
  */
 package com.nashtech.rookies.assetmanagement.dto.response;
 
+import org.springframework.data.domain.Page;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.domain.Page;
 
 /**
  *

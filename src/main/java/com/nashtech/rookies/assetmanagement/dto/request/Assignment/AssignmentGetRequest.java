@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AssignmentGetRequest {
-    private String searchKey;
+    private String search;
     private List<String> status; 
     private LocalDate assignedDate;
 }
