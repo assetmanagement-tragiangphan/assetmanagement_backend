@@ -12,6 +12,5 @@ import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 @Repository
 public interface AssignmentRepository extends JpaRepository<Assignment, Integer>, JpaSpecificationExecutor<Assignment> {
     Optional<Assignment> findByIdAndStatusEquals(Integer id, StatusConstant status);
-
     boolean existsByAssetId(Integer assetId);
 }

@@ -1,18 +1,8 @@
 package com.nashtech.rookies.assetmanagement.filter;
 
-import com.nashtech.rookies.assetmanagement.config.CookieProperties;
-import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
-import com.nashtech.rookies.assetmanagement.service.JwtService;
-import com.nashtech.rookies.assetmanagement.service.UserService;
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.util.Arrays;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
@@ -24,8 +14,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-import java.io.IOException;
-import java.util.Arrays;
+import com.nashtech.rookies.assetmanagement.config.CookieProperties;
+import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
+import com.nashtech.rookies.assetmanagement.service.JwtService;
+import com.nashtech.rookies.assetmanagement.service.UserService;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 
 @Component
 // @RequiredArgsConstructor

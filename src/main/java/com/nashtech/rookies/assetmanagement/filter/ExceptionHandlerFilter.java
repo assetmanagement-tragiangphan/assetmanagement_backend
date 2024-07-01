@@ -2,7 +2,6 @@ package com.nashtech.rookies.assetmanagement.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,13 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -51,7 +48,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
                             .message("You don't have permission to perform this action.")
                             .build()
             ));
-        } catch (Exception e) {
+        } catch (ServletException | IOException e) {
             log.error("Error occurred: {}", e.getMessage());
 
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());

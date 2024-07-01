@@ -4,7 +4,6 @@
  */
 package com.nashtech.rookies.assetmanagement.dto.request.Asset;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;

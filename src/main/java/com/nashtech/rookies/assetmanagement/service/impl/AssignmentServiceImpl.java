@@ -34,7 +34,6 @@ import com.nashtech.rookies.assetmanagement.service.AssignmentService;
 import com.nashtech.rookies.assetmanagement.specifications.AssignmentSpecification;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 
-import ch.qos.logback.core.status.Status;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -201,6 +200,52 @@ public class AssignmentServiceImpl implements AssignmentService {
             }
         } else {
             throw new ResourceNotFoundException("Assignment is not exist");
+        }
+    }
+
+    @Override
+    public ResponseDto<AssignmentResponse> responseAssignment(Integer id, StatusConstant status,
+            UserDetailsDto requestUser) {
+        Assignment assignment = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Assignment does not exist."));
+        switch (status) {
+            case ACCEPTED -> {
+                assignment.setStatus(StatusConstant.ACCEPTED);
+                assignment = repository.saveAndFlush(assignment);
+                return ResponseDto.<AssignmentResponse>builder()
+                        .data(mapper.entityToDto(assignment, requestUser))
+                        .message("Assignment accepted successfully.")
+                        .build();
+            }
+            case DECLINED -> {
+                assignment.setStatus(StatusConstant.DECLINED);
+                Asset asset = assignment.getAsset();
+                asset.setStatus(StatusConstant.AVAILABLE);
+                assignment = repository.saveAndFlush(assignment);
+                return ResponseDto.<AssignmentResponse>builder()
+                        .data(mapper.entityToDto(assignment, requestUser))
+                        .message("Assignment declined successfully.")
+                        .build();
+            }
+            case WAITING_FOR_ACCEPTANCE -> {
+                assignment.setStatus(StatusConstant.WAITING_FOR_ACCEPTANCE);
+                assignment = repository.saveAndFlush(assignment);
+                return ResponseDto.<AssignmentResponse>builder()
+                        .data(mapper.entityToDto(assignment, requestUser))
+                        .message("Assignment is waiting for returning.")
+                        .build();
+            }
+            case WAITING_FOR_RETURNING -> {
+                assignment.setStatus(StatusConstant.WAITING_FOR_RETURNING);
+                assignment = repository.saveAndFlush(assignment);
+                return ResponseDto.<AssignmentResponse>builder()
+                        .data(mapper.entityToDto(assignment, requestUser))
+                        .message("Assignment is waiting for returning.")
+                        .build();
+            }
+            default -> {
+                return null;
+            }
         }
     }
 

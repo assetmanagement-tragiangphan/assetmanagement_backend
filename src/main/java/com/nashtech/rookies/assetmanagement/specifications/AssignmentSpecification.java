@@ -76,7 +76,7 @@ public class AssignmentSpecification {
     }
 
     public static Specification<Assignment> ownSpecs(UserDetailsDto requestUser) {
-        return Specification.where(withUsername(requestUser.getUsername()));
+        return Specification.where(withUsername(requestUser.getUsername()).and(withState(List.of("ACCEPTED","WAITING_FOR_ACCEPTANCE"))));
     }
 
     public static Specification<Assignment> filterSpecs(AssignmentGetRequest request) {

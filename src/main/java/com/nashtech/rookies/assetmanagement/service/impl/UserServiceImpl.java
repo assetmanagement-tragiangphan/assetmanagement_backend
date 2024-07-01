@@ -55,7 +55,6 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
-    private final int AGE = 18;
 
     @Override
     public ResponseDto<PageableDto<List<UserDto>>> getAll(UserGetRequest requestParams, Pageable pageable, UserDetailsDto requestUser) {
@@ -161,6 +160,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToUserDetailsDto(user);
     }
 
+    @Override
     public ResponseDto<UserDto> updateUser(UpdateUserRequest request, String staffCode) {
         //Validate
         var user = userRepository.findByStaffCodeAndStatus(staffCode,StatusConstant.ACTIVE).orElseThrow(() -> new ResourceNotFoundException("User not found."));
@@ -189,7 +189,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if ("".equals(request.getOldPassword())) {
-            if (user.getIsChangePassword()) {
+            if (Boolean.TRUE.equals(user.getIsChangePassword())) {
                 throw new BadRequestException("You must provide your current password.");
             }
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -221,7 +221,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public ResponseDto<Void> disableUser (String staffCode) {
+    @Override
+    public ResponseDto<Void> disableUser(String staffCode) {
         var user = this.getUserEntityByStaffCode(staffCode);
         user.setStatus(StatusConstant.INACTIVE);
         tokenRepository.deleteAllByUserId(user.getId());

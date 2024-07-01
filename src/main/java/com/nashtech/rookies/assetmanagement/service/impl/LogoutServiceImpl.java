@@ -1,26 +1,23 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
 public class LogoutServiceImpl implements LogoutHandler {
 
-    private final ObjectMapper objectMapper;
     private final TokenRepository tokenRepository;
     @Value("${application.cookie.name}")
     private String cookieName;

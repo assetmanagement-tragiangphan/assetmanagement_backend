@@ -30,5 +30,6 @@ public interface AssignmentMapper {
     @Mapping(target = "status", source = "assignment.status")
     @Mapping(target = "category", source = "asset.category.name")
     @Mapping(target = "specification", source = "asset.specification")
+    @Mapping(target = "id", source = "assignment.id")
     AssignmentDetailResponse entityToDetailDto(Assignment assignment, User user, Asset asset);
 }

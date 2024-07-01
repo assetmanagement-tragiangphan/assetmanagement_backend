@@ -2,10 +2,13 @@ spring:
   application:
     name: assetmanagement
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    # url: ${DB_URL}
+    # username: ${DB_USERNAME}
+    # password: ${DB_PASSWORD}
 
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: 123456
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

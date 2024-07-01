@@ -1,7 +1,5 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
-import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
-import com.nashtech.rookies.assetmanagement.dto.UserDto;
 import com.nashtech.rookies.assetmanagement.dto.request.AuthenticationRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.LoginResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
@@ -9,7 +7,6 @@ import com.nashtech.rookies.assetmanagement.entity.Token;
 import com.nashtech.rookies.assetmanagement.entity.User;
 import com.nashtech.rookies.assetmanagement.exception.InvalidUserCredentialException;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
-import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
 import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.AuthenticationService;
@@ -18,7 +15,6 @@ import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
