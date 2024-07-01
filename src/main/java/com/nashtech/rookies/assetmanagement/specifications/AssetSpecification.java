@@ -9,7 +9,6 @@ import com.nashtech.rookies.assetmanagement.entity.Asset_;
 import com.nashtech.rookies.assetmanagement.entity.Category;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
-import jakarta.persistence.criteria.Path;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 

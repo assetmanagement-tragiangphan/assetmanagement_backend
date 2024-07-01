@@ -1,7 +1,6 @@
 package com.nashtech.rookies.assetmanagement.controller;
 
 import com.nashtech.rookies.assetmanagement.dto.response.CategoryResponse;
-import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CategoryRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.service.CategoryService;
@@ -10,7 +9,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

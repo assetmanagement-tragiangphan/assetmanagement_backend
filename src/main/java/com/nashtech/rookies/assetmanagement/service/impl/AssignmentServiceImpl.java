@@ -1,12 +1,27 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
+import com.nashtech.rookies.assetmanagement.dto.request.Assignment.AssignmentGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.Assignment.CreateAssignmentRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.Assignment.EditAssignmentRequest;
+import com.nashtech.rookies.assetmanagement.dto.response.AssignmentDetailResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.AssignmentResponse;
+import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
+import com.nashtech.rookies.assetmanagement.entity.Asset_;
 import com.nashtech.rookies.assetmanagement.entity.Assignment;
+import com.nashtech.rookies.assetmanagement.entity.Assignment_;
 import com.nashtech.rookies.assetmanagement.entity.User;
 import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
@@ -16,18 +31,116 @@ import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
 import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.AssignmentService;
+import com.nashtech.rookies.assetmanagement.specifications.AssignmentSpecification;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
+
+import ch.qos.logback.core.status.Status;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AssignmentServiceImpl implements AssignmentService {
 
-    private AssignmentRepository repository;
-    private AssignmentMapper mapper;
-    private AssetRepository assetRepository;
-    private UserRepository userRepository;
+    private final AssignmentRepository repository;
+    private final AssignmentMapper mapper;
+    private final AssetRepository assetRepository;
+    private final UserRepository userRepository;
+
+    @Override
+    public ResponseDto<PageableDto<List<AssignmentDetailResponse>>> getAssignmentDetails(AssignmentGetRequest request, Pageable pageable) {
+        Specification<Assignment> specs = AssignmentSpecification.filterSpecs(request);
+
+        PageRequest pageRequest = (PageRequest) pageable;
+        String sortField = pageRequest.getSort().toString().split(":")[0].trim().toLowerCase();
+        String sortType = pageRequest.getSort().toString().split(":")[1].trim();
+        log.info("field " + sortField);
+        log.info("type " + sortType);
+
+        if (pageRequest.getSort().equals(Sort.unsorted())) {
+            log.info("1 " + sortField);
+            pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
+        }
+        if (sortType.equals("ASC")) {
+            if (sortField.equals("assetcode")) {
+                log.info("2 " + sortField);
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
+            }
+            if (sortField.equals("assetname")) {
+                log.info("3 " + sortField);
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.NAME);
+            }
+        } else {
+            if (sortField.equals("assetcode")) {
+                log.info("2 " + sortField);
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
+            }
+            if (sortField.equals("assetname")) {
+                log.info("3 " + sortField);
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSET + "." + Asset_.NAME);
+            }
+        }
+
+        Page<AssignmentDetailResponse> assignmentDetails = repository.findAll(specs, pageRequest)
+                .map(res -> mapper.entityToDetailDto(res, res.getAuditMetadata().getCreatedBy(), res.getAsset()));
+
+        PageableDto<List<AssignmentDetailResponse>> pages = PageableDto.<List<AssignmentDetailResponse>>builder()
+                .content(assignmentDetails.getContent())
+                .currentPage(assignmentDetails.getNumber())
+                .totalPage(assignmentDetails.getTotalPages())
+                .totalElements(assignmentDetails.getTotalElements())
+                .build();
+
+        return ResponseDto.<PageableDto<List<AssignmentDetailResponse>>>builder()
+                .data(pages)
+                .message("Successfully retrieved assignment details.")
+                .build();
+    }
+
+    @Override
+    public ResponseDto<PageableDto<List<AssignmentDetailResponse>>> getOwnAssignmentDetails(UserDetailsDto requestUser, Pageable pageable) {
+        Specification<Assignment> specs = AssignmentSpecification.ownSpecs(requestUser);
+
+        PageRequest pageRequest = (PageRequest) pageable;
+        String sortField = pageRequest.getSort().toString().split(":")[0].trim().toLowerCase();
+        String sortType = pageRequest.getSort().toString().split(":")[1].trim();
+
+        if (sortType.equals("ASC")) {
+            if (sortField.equals("assetcode")) {
+                log.info("2 " + sortField);
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
+            }
+            if (sortField.equals("assetname")) {
+                log.info("3 " + sortField);
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.NAME);
+            }
+        } else {
+            if (sortField.equals("assetcode")) {
+                log.info("2 " + sortField);
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
+            }
+            if (sortField.equals("assetname")) {
+                log.info("3 " + sortField);
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSET + "." + Asset_.NAME);
+            }
+        }
+
+        Page<AssignmentDetailResponse> assignmentDetails = repository.findAll(specs, pageRequest)
+                .map(res -> mapper.entityToDetailDto(res, res.getAuditMetadata().getCreatedBy(), res.getAsset()));
+
+        PageableDto<List<AssignmentDetailResponse>> pages = PageableDto.<List<AssignmentDetailResponse>>builder()
+                .content(assignmentDetails.getContent())
+                .currentPage(assignmentDetails.getNumber())
+                .totalPage(assignmentDetails.getTotalPages())
+                .totalElements(assignmentDetails.getTotalElements())
+                .build();
+
+        return ResponseDto.<PageableDto<List<AssignmentDetailResponse>>>builder()
+                .data(pages)
+                .message("Successfully retrieved assignment details.")
+                .build();
+    }
 
     @Override
     public ResponseDto<AssignmentResponse> saveAssignment(CreateAssignmentRequest request, UserDetailsDto requestUser) {

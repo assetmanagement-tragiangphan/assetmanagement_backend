@@ -1,15 +1,14 @@
 package com.nashtech.rookies.assetmanagement.controller;
 
 import com.nashtech.rookies.assetmanagement.config.CookieProperties;
-import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
-import com.nashtech.rookies.assetmanagement.dto.UserDto;
 import com.nashtech.rookies.assetmanagement.dto.request.AuthenticationRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.LoginResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.service.AuthenticationService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;

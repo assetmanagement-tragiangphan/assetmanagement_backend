@@ -1,22 +1,30 @@
 package com.nashtech.rookies.assetmanagement.entity;
 
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.nashtech.rookies.assetmanagement.audit.AuditListener;
 import com.nashtech.rookies.assetmanagement.audit.Auditable;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDate;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@Data
+@Getter
+@Setter
 @Entity
 @EntityListeners(AuditListener.class)
 public class Assignment extends BaseEntity implements Auditable {
