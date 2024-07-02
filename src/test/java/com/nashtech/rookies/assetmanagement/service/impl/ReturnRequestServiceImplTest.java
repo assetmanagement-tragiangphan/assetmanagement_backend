@@ -96,9 +96,9 @@ public class ReturnRequestServiceImplTest {
         auditMetadata.setUpdatedBy(user);
         auditMetadata.setUpdatedOn(LocalDateTime.now());
 
-        returnRequest1 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, assignment, auditMetadata);
-        returnRequest2 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, assignment, auditMetadata);
-        returnRequest3 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, assignment, auditMetadata);
+        returnRequest1 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, user, assignment, auditMetadata);
+        returnRequest2 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, user, assignment, auditMetadata);
+        returnRequest3 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, user, assignment, auditMetadata);
 
         returnRequestRequestDTO = new ReturnRequestRequestDTO("", List.of(StatusConstant.ACTIVE), LocalDate.now());
 
