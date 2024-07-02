@@ -13,8 +13,8 @@ spring:
     show-sql: true
 
 application:
-#  pagination:
-#    size: 6
+  #  pagination:
+  #    size: 6
   security:
     jwt:
       secret-key: b7915faf4bedf5f50529aa2f564ff09cdcab8ec85ce654a897fe32afd65e0fe6

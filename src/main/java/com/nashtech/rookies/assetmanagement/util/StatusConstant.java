@@ -13,11 +13,4 @@ public enum StatusConstant {
     // Return Request
     COMPLETED, WAITING_FOR_RETURNING;
 
-    @Override
-    public String toString() {
-        return name().charAt(0) + name().substring(1).toLowerCase().replaceAll("/_/g", " ");
-    }
-    
-    
-    
 }
