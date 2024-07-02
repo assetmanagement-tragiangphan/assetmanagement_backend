@@ -11,5 +11,13 @@ public enum StatusConstant {
     ACCEPTED, WAITING_FOR_ACCEPTANCE, DECLINED,
     
     // Return Request
-    COMPLETED, WAITING_FOR_RETURNING
+    COMPLETED, WAITING_FOR_RETURNING;
+
+    @Override
+    public String toString() {
+        return name().charAt(0) + name().substring(1).toLowerCase().replaceAll("/_/g", " ");
+    }
+    
+    
+    
 }

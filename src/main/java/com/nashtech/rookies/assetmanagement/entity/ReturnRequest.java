@@ -1,6 +1,11 @@
 package com.nashtech.rookies.assetmanagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.nashtech.rookies.assetmanagement.audit.AuditListener;
+import com.nashtech.rookies.assetmanagement.audit.Auditable;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
@@ -18,7 +23,8 @@ import java.time.LocalDate;
 @SuperBuilder
 @Data
 @Entity
-public class ReturnRequest extends BaseEntity {
+@EntityListeners(AuditListener.class)
+public class ReturnRequest extends BaseEntity implements Auditable {
 
     private LocalDate returnedDate;
 
@@ -32,5 +38,17 @@ public class ReturnRequest extends BaseEntity {
 
     @OneToOne
     @JoinColumn(name = "assignmentId")
+    @JsonManagedReference
     private Assignment assignment;
+
+    @Embedded
+    private AuditMetadata auditMetadata;
+
+    @Override
+    public String toString() {
+//        return "ReturnRequest{" + "returnedDate=" + returnedDate + ", acceptedBy=" + acceptedBy.getUsername() + ", assignment=" + assignment.getId() + '}';
+        return "ReturnRequest{" + "returnedDate=" + returnedDate + ", assignment=" + assignment.getId() + '}';
+    }
+    
+    
 }

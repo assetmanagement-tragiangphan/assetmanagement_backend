@@ -1,7 +1,6 @@
 package com.nashtech.rookies.assetmanagement.entity;
 
-import java.time.LocalDate;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.nashtech.rookies.assetmanagement.audit.AuditListener;
 import com.nashtech.rookies.assetmanagement.audit.Auditable;
@@ -12,6 +11,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -45,12 +45,13 @@ public class Assignment extends BaseEntity implements Auditable {
     private User assignee;
     
     @OneToOne(mappedBy = "assignment")
+    @JsonBackReference
     private ReturnRequest returnRequest;
 
-    @Override
-    public String toString() {
-        return "Assignment{" + "assignedDate=" + assignedDate + ", note=" + note + ", asset=" + asset + ", assignee=" + assignee + ", returnRequest=" + returnRequest + '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "Assignment{" + "assignedDate=" + assignedDate + ", note=" + note + ", asset=" + asset + ", assignee=" + assignee + ", returnRequest=" + returnRequest + '}';
+//    }
     
     
     
