@@ -2,6 +2,7 @@ package com.nashtech.rookies.assetmanagement.service.impl;
 
 import java.util.List;
 
+import com.nashtech.rookies.assetmanagement.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,11 +19,6 @@ import com.nashtech.rookies.assetmanagement.dto.response.AssignmentDetailRespons
 import com.nashtech.rookies.assetmanagement.dto.response.AssignmentResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
-import com.nashtech.rookies.assetmanagement.entity.Asset;
-import com.nashtech.rookies.assetmanagement.entity.Asset_;
-import com.nashtech.rookies.assetmanagement.entity.Assignment;
-import com.nashtech.rookies.assetmanagement.entity.Assignment_;
-import com.nashtech.rookies.assetmanagement.entity.User;
 import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
@@ -60,21 +56,41 @@ public class AssignmentServiceImpl implements AssignmentService {
         String sortType = pageRequest.getSort().toString().split(":")[1].trim();
         if (sortType.equals("ASC")) {
             if (sortField.equals("assetcode")) {
-                log.info("2 " + sortField);
                 pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
             }
             if (sortField.equals("assetname")) {
-                log.info("3 " + sortField);
                 pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.NAME);
+            }
+            if (sortField.equals("assignedby")) {
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.AUDIT_METADATA + "." + AuditMetadata_.CREATED_BY);
+            }
+            if (sortField.equals("assignedto")) {
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSIGNEE + ".username");
+            }
+            if (sortField.equals("assigneddate")) {
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSIGNED_DATE);
+            }
+            if (sortField.equals("state")) {
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.STATUS);
             }
         } else {
             if (sortField.equals("assetcode")) {
-                log.info("2 " + sortField);
                 pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
             }
             if (sortField.equals("assetname")) {
-                log.info("3 " + sortField);
                 pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSET + "." + Asset_.NAME);
+            }
+            if (sortField.equals("assignedby")) {
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.AUDIT_METADATA + "." + AuditMetadata_.CREATED_BY);
+            }
+            if (sortField.equals("assignedto")) {
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSIGNEE + ".username");
+            }
+            if (sortField.equals("assigneddate")) {
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSIGNED_DATE);
+            }
+            if (sortField.equals("state")) {
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.STATUS);
             }
         }
 
@@ -107,21 +123,35 @@ public class AssignmentServiceImpl implements AssignmentService {
         String sortType = pageRequest.getSort().toString().split(":")[1].trim();
         if (sortType.equals("ASC")) {
             if (sortField.equals("assetcode")) {
-                log.info("2 " + sortField);
                 pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
             }
             if (sortField.equals("assetname")) {
-                log.info("3 " + sortField);
                 pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.NAME);
+            }
+            if (sortField.equals("assigneddate")) {
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSIGNED_DATE);
+            }
+            if (sortField.equals("category")) {
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.CATEGORY + "." + Category_.NAME);
+            }
+            if (sortField.equals("state")) {
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.STATUS);
             }
         } else {
             if (sortField.equals("assetcode")) {
-                log.info("2 " + sortField);
                 pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
             }
             if (sortField.equals("assetname")) {
-                log.info("3 " + sortField);
                 pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSET + "." + Asset_.NAME);
+            }
+            if (sortField.equals("category")) {
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSET + "." + Asset_.CATEGORY + "." + Category_.NAME);
+            }
+            if (sortField.equals("assigneddate")) {
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSIGNED_DATE);
+            }
+            if (sortField.equals("state")) {
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.STATUS);
             }
         }
 
