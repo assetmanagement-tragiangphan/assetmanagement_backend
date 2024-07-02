@@ -252,6 +252,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 Asset asset = assignment.getAsset();
                 asset.setStatus(StatusConstant.AVAILABLE);
                 assignment = repository.saveAndFlush(assignment);
+                asset = assetRepository.saveAndFlush(asset);
                 return ResponseDto.<AssignmentResponse>builder()
                         .data(mapper.entityToDto(assignment, requestUser))
                         .message("Assignment declined successfully.")

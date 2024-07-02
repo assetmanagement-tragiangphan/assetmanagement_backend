@@ -479,6 +479,7 @@ class AssignmentServiceImplTest {
                 .build();
         when(repository.findById(anyInt())).thenReturn(Optional.of(assignment));
         when(repository.saveAndFlush(any(Assignment.class))).thenReturn(assignment);
+        when(assetRepository.saveAndFlush(any(Asset.class))).thenReturn(asset);
         when(mapper.entityToDto(any(Assignment.class), any(UserDetailsDto.class))).thenReturn(mapToAssignmentResponse(declinedAssignment, userDetails));
 
         ResponseDto<AssignmentResponse> response = assignmentService.responseAssignment(1, StatusConstant.DECLINED, userDetails);
