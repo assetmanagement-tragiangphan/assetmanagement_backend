@@ -199,7 +199,7 @@ class AssignmentControllerTest {
     @WithMockUser(username = "test", roles = "ADMIN")
     void testEditAssignment_WhenInputValid_ThenReturnAssignmentAndMessageSuccess() throws Exception {
         EditAssignmentRequest request = EditAssignmentRequest.builder()
-                .staffCode("SD0001")
+                .username("test")
                 .assetCode("EL000001")
                 .note("Updated note")
                 .build();

@@ -143,7 +143,7 @@ class AssignmentServiceImplTest {
 
         editRequest = EditAssignmentRequest.builder()
                 .assetCode("LA000001")
-                .staffCode(assignee.getStaffCode())
+                .username(assignee.getUsername())
                 .note("Updated assignment")
                 .build();
 
@@ -306,7 +306,7 @@ class AssignmentServiceImplTest {
         when(repository.existsById(anyInt())).thenReturn(true);
         when(repository.findByIdAndStatusEquals(anyInt(), eq(StatusConstant.WAITING_FOR_ACCEPTANCE))).thenReturn(Optional.of(updateAssignment));
         when(assetRepository.findAssetByAssetCode(anyString())).thenReturn(Optional.of(asset));
-        when(userRepository.findByStaffCode(anyString())).thenReturn(Optional.of(assignee));
+        when(userRepository.findByUsernameAndStatus(editRequest.getUsername(), StatusConstant.ACTIVE)).thenReturn(Optional.of(assignee));
         when(repository.saveAndFlush(any(Assignment.class))).thenReturn(assignment);
         when(mapper.entityToDto(any(Assignment.class), any(UserDetailsDto.class))).thenReturn(mapToAssignmentResponse(updateAssignment, userDetails));
 
@@ -330,14 +330,14 @@ class AssignmentServiceImplTest {
 
         editRequest = EditAssignmentRequest.builder()
                 .assetCode(newAsset.getAssetCode())
-                .staffCode(assignee.getStaffCode())
+                .username(assignee.getUsername())
                 .note("Updated assignment")
                 .build();
 
         when(repository.existsById(anyInt())).thenReturn(true);
         when(repository.findByIdAndStatusEquals(anyInt(), eq(StatusConstant.WAITING_FOR_ACCEPTANCE))).thenReturn(Optional.of(updateAssignment));
         when(assetRepository.findAssetByAssetCode(anyString())).thenReturn(Optional.of(newAsset));
-        when(userRepository.findByStaffCode(anyString())).thenReturn(Optional.of(assignee));
+        when(userRepository.findByUsernameAndStatus(editRequest.getUsername(), StatusConstant.ACTIVE)).thenReturn(Optional.of(assignee));
         when(repository.saveAndFlush(any(Assignment.class))).thenReturn(assignment);
         when(mapper.entityToDto(any(Assignment.class), any(UserDetailsDto.class))).thenReturn(mapToAssignmentResponse(updateAssignment, userDetails));
 
@@ -380,12 +380,12 @@ class AssignmentServiceImplTest {
 
         editRequest = EditAssignmentRequest.builder()
                 .assetCode(assignedAsset.getAssetCode())
-                .staffCode("SD0009")
+                .username("user")
                 .note("Updated assignment")
                 .build();
 
         when(repository.existsById(anyInt())).thenReturn(true);
-        when(userRepository.findByStaffCode(editRequest.getStaffCode())).thenReturn(Optional.of(assignee));
+        when(userRepository.findByUsernameAndStatus(editRequest.getUsername(), StatusConstant.ACTIVE)).thenReturn(Optional.of(assignee));
         when(repository.findByIdAndStatusEquals(anyInt(), eq(StatusConstant.WAITING_FOR_ACCEPTANCE))).thenReturn(Optional.of(assignment));
         when(assetRepository.findAssetByAssetCode(anyString())).thenReturn(Optional.of(assignedAsset));
         when(assetRepository.existsByAssetCodeAndStatus(assignedAsset.getAssetCode(), StatusConstant.ASSIGNED)).thenReturn(true);

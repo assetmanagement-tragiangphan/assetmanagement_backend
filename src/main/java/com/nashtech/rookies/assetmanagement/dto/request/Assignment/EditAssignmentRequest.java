@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EditAssignmentRequest {
-    private String staffCode;
+    private String username;
     private String assetCode;
     private String note;
 }

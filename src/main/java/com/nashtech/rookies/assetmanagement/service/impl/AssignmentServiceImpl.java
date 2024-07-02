@@ -199,7 +199,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         if (repository.existsById(id)) {
             Assignment assignment = repository.findByIdAndStatusEquals(id, StatusConstant.WAITING_FOR_ACCEPTANCE).orElseThrow(() -> new ResourceAlreadyExistException("Assignment is unavailable to edit!"));
             Asset asset = assetRepository.findAssetByAssetCode(request.getAssetCode()).orElseThrow(() -> new ResourceNotFoundException("Asset Not Found!"));
-            User assignee = userRepository.findByStaffCode(request.getStaffCode()).orElseThrow(() -> new ResourceNotFoundException("Assignee Not Found"));
+            User assignee = userRepository.findByUsernameAndStatus(request.getUsername(), StatusConstant.ACTIVE).orElseThrow(() -> new ResourceNotFoundException("Assignee Not Found"));
             if (asset.getAssetCode().equals(assignment.getAsset().getAssetCode())) {
                 assignment.setNote(request.getNote());
                 assignment.setAssignee(assignee);
