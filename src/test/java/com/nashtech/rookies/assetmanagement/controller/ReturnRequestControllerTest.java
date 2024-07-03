@@ -8,6 +8,8 @@ import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ReturnRequestResponseDTO;
 import com.nashtech.rookies.assetmanagement.entity.ReturnRequest;
+import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
+import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.service.ReturnRequestService;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
@@ -18,7 +20,9 @@ import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -94,9 +98,9 @@ public class ReturnRequestControllerTest {
 
         ReturnRequestRequestDTO request = new ReturnRequestRequestDTO("user1", List.of(StatusConstant.ACTIVE), LocalDate.of(2021, 1, 1));
 
-        ReturnRequestResponseDTO returnRequestResponseDTO1 = new ReturnRequestResponseDTO("Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
-        ReturnRequestResponseDTO returnRequestResponseDTO2 = new ReturnRequestResponseDTO("Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
-        ReturnRequestResponseDTO returnRequestResponseDTO3 = new ReturnRequestResponseDTO("Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
+        ReturnRequestResponseDTO returnRequestResponseDTO1 = new ReturnRequestResponseDTO(1, "Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
+        ReturnRequestResponseDTO returnRequestResponseDTO2 = new ReturnRequestResponseDTO(2, "Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
+        ReturnRequestResponseDTO returnRequestResponseDTO3 = new ReturnRequestResponseDTO(3, "Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
 
         List<ReturnRequestResponseDTO> returnRequestList = Arrays.asList(returnRequestResponseDTO1, returnRequestResponseDTO2, returnRequestResponseDTO3);
 
@@ -134,4 +138,60 @@ public class ReturnRequestControllerTest {
                 .getAll(any(ReturnRequestRequestDTO.class), any(Pageable.class), any(UserDetailsDto.class));
     }
 
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testDeleteReturnRequest_WhenValidInput_ThenSuccess() throws Exception {
+        ResponseDto response = ResponseDto.builder().data(null).message("Cancel Return Request Succesfully").build();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        when(returnRequestService.cancelOne(1, userDetailsDto)).thenReturn(response);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/return-request/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data", Matchers.nullValue()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Cancel Return Request Succesfully")));
+        // Verify service method invocation
+        verify(returnRequestService, times(1))
+                .cancelOne(1, userDetailsDto);
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testDeleteReturnRequest_WhenNotFound_ThenThrowResourceNotFoundException() throws Exception {
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        when(returnRequestService.cancelOne(1, userDetailsDto)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/return-request/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto)))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+
+        // Verify service method invocation
+        verify(returnRequestService, times(1))
+                .cancelOne(1, userDetailsDto);
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testDeleteReturnRequest_WhenStatusIsWaitingForReturning_ThenThrowBadRequestException() throws Exception {
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        when(returnRequestService.cancelOne(1, userDetailsDto)).thenThrow(BadRequestException.class);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/return-request/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        // Verify service method invocation
+        verify(returnRequestService, times(1))
+                .cancelOne(1, userDetailsDto);
+    }
 }

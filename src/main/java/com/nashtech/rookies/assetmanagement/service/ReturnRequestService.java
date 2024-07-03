@@ -13,9 +13,10 @@ import org.springframework.data.domain.Pageable;
  *
  * @author HP
  */
-
 public interface ReturnRequestService {
 
     ResponseDto getAll(ReturnRequestRequestDTO requestParams, Pageable pageable, UserDetailsDto requestUser);
+
+    ResponseDto cancelOne(Integer id, UserDetailsDto requestUser);
 
 }

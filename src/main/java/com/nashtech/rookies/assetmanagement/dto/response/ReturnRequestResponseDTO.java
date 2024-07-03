@@ -17,6 +17,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ReturnRequestResponseDTO {
+    private Integer id;
     private String assetCode;
     private String assetName;
     private String requestedBy;

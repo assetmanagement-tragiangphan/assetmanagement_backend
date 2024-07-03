@@ -11,9 +11,12 @@ import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ReturnRequestResponseDTO;
 import com.nashtech.rookies.assetmanagement.entity.ReturnRequest;
 import com.nashtech.rookies.assetmanagement.entity.ReturnRequest_;
+import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
+import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.repository.ReturnRequestRepository;
 import com.nashtech.rookies.assetmanagement.service.ReturnRequestService;
 import com.nashtech.rookies.assetmanagement.specifications.ReturnRequestSpecification;
+import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -42,10 +45,11 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         if (pageRequest.getSort().equals(Sort.unsorted())) {
             pageRequest = pageRequest.withSort(Sort.Direction.ASC, ReturnRequest_.ID);
         }
-        Page<ReturnRequest> returnRequest = repository.findAll(specs,pageRequest);
+        Page<ReturnRequest> returnRequest = repository.findAll(specs, pageRequest);
         List<ReturnRequestResponseDTO> list = new ArrayList();
         for (ReturnRequest rr : returnRequest) {
             ReturnRequestResponseDTO response = new ReturnRequestResponseDTO(
+                    rr.getId(),
                     rr.getAssignment().getAsset().getAssetCode(),
                     rr.getAssignment().getAsset().getName(),
                     rr.getAuditMetadata().getCreatedBy().getUsername(),
@@ -57,6 +61,16 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         }
         PageableDto page = new PageableDto(list, returnRequest.getNumber(), returnRequest.getTotalPages(), returnRequest.getTotalElements());
         return ResponseDto.builder().data(page).message("Get All Return Request Succesfully").build();
+    }
+
+    @Override
+    public ResponseDto cancelOne(Integer id, UserDetailsDto requestUser) {
+        ReturnRequest returnRequest = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Return Request Does Not Exist"));
+        if (!returnRequest.getStatus().equals(StatusConstant.WAITING_FOR_RETURNING)) {
+            throw new BadRequestException("Cannot Cancel Return Request Because It Is Completed");
+        }
+        repository.delete(returnRequest);
+        return ResponseDto.builder().data(null).message("Cancel Return Request Succesfully").build();
     }
 
 }

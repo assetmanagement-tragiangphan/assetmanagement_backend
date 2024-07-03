@@ -14,6 +14,8 @@ import com.nashtech.rookies.assetmanagement.entity.Assignment;
 import com.nashtech.rookies.assetmanagement.entity.AuditMetadata;
 import com.nashtech.rookies.assetmanagement.entity.ReturnRequest;
 import com.nashtech.rookies.assetmanagement.entity.User;
+import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
+import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.repository.ReturnRequestRepository;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
@@ -21,13 +23,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,10 +40,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 /**
  *
  * @author HP
@@ -97,20 +105,22 @@ public class ReturnRequestServiceImplTest {
         auditMetadata.setUpdatedOn(LocalDateTime.now());
 
         returnRequest1 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, user, assignment, auditMetadata);
+        returnRequest1.setStatus(StatusConstant.WAITING_FOR_RETURNING);
         returnRequest2 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, user, assignment, auditMetadata);
+        returnRequest2.setStatus(StatusConstant.COMPLETED);
         returnRequest3 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, user, assignment, auditMetadata);
 
         returnRequestRequestDTO = new ReturnRequestRequestDTO("", List.of(StatusConstant.ACTIVE), LocalDate.now());
 
-        returnRequestResponseDTO1 = new ReturnRequestResponseDTO("Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
-        returnRequestResponseDTO2 = new ReturnRequestResponseDTO("Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
-        returnRequestResponseDTO3 = new ReturnRequestResponseDTO("Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
-        
+        returnRequestResponseDTO1 = new ReturnRequestResponseDTO(1, "Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
+        returnRequestResponseDTO2 = new ReturnRequestResponseDTO(2, "Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
+        returnRequestResponseDTO3 = new ReturnRequestResponseDTO(3, "Pc000001", "Personal Computer", "user1", "2020-01-01", "user1", "2021-01-01", StatusConstant.ACTIVE);
+
         returnRequestReponseList = new ArrayList();
         returnRequestReponseList.add(returnRequestResponseDTO1);
         returnRequestReponseList.add(returnRequestResponseDTO2);
         returnRequestReponseList.add(returnRequestResponseDTO3);
-        
+
         returnRequestList = new ArrayList();
         returnRequestList.add(returnRequest1);
         returnRequestList.add(returnRequest2);
@@ -126,11 +136,11 @@ public class ReturnRequestServiceImplTest {
 
     @Test
     void testGetAllReturnRequest_whenInputParameters_thenReturnPage() {
-        
+
         PageRequest pageRequest = PageRequest.of(0, 3, Sort.unsorted());
-        
+
         Page<ReturnRequest> page = new PageImpl<>(returnRequestList, pageRequest, returnRequestList.size());
-        
+
         PageableDto PageResult = new PageableDto(returnRequestReponseList, page.getNumber(), page.getTotalPages(), page.getTotalElements());
 
         when(returnRequestRepository.findAll(any(Specification.class), any(PageRequest.class))).thenReturn(page);
@@ -145,6 +155,34 @@ public class ReturnRequestServiceImplTest {
         assertEquals(result.getMessage(), "Get All Return Request Succesfully");
 
         verify(returnRequestRepository, times(1)).findAll(any(Specification.class), any(PageRequest.class));
+    }
+
+    @Test
+    void testCancelReturnRequest_WhenStatusIsWaitingForReturning_ThenSuccess() {
+        when(returnRequestRepository.findById(anyInt())).thenReturn(Optional.of(returnRequest1));
+        doNothing().when(returnRequestRepository).delete(any(ReturnRequest.class));
+        
+        ResponseDto response = returnRequestService.cancelOne(1, userDetails);
+        Assertions.assertNotNull(response);
+        assertEquals("Cancel Return Request Succesfully", response.getMessage());
+        verify(returnRequestRepository, times(1)).delete(any(ReturnRequest.class));
+    }
+
+    @Test
+    void testCancelReturnRequest_WhenNotFound_ThenThrowResourceNotFoundException() {
+        when(returnRequestRepository.findById(anyInt())).thenReturn(Optional.empty());
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> returnRequestService.cancelOne(1, userDetails));
+        assertEquals("Return Request Does Not Exist", exception.getMessage());
+    }
+//
+    @Test
+    void testCancelReturnRequest_WhenWaitingForReturnedStatus_ThenThrowBadRequestException() {
+        when(returnRequestRepository.findById(anyInt())).thenReturn(Optional.of(returnRequest2));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            returnRequestService.cancelOne(1, userDetails);
+        });
+        assertEquals("Cannot Cancel Return Request Because It Is Completed", exception.getMessage());
     }
 
 }
