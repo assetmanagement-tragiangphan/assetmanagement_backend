@@ -72,6 +72,6 @@ public class AssignmentController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity deleteAssigment(@PathVariable("id") Integer id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(assignmentService.deleteAssignment(id));
+        return ResponseEntity.status(HttpStatus.OK).body(assignmentService.deleteAssignment(id));
     }
 }

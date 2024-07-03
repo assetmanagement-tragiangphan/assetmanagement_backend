@@ -302,7 +302,7 @@ class AssignmentControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/assignments/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(user(userDetailsDto)))
-                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data", Matchers.nullValue()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Delete assignment successfully")));
