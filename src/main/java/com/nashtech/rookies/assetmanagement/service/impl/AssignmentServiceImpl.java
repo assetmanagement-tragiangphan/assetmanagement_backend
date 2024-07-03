@@ -38,7 +38,6 @@ import com.nashtech.rookies.assetmanagement.specifications.AssignmentSpecificati
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
@@ -68,7 +67,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.NAME);
             }
             if (sortField.equals("assignedby")) {
-                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.AUDIT_METADATA + "." + AuditMetadata_.CREATED_BY + "." + User_.USERNAME);
+                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.AUDIT_METADATA + "." + AuditMetadata_.CREATED_BY + "." + User_.USERNAME);
             }
             if (sortField.equals("assignedto")) {
                 pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSIGNEE + ".username");
