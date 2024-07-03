@@ -1,6 +1,8 @@
 package com.nashtech.rookies.assetmanagement.specifications;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -11,6 +13,7 @@ import com.nashtech.rookies.assetmanagement.entity.Assignment;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 
 public class AssignmentSpecification {
+
     public static Specification<Assignment> withUsername(String username) {
         return (root, query, builder) -> {
             if (username == null) {
@@ -47,8 +50,8 @@ public class AssignmentSpecification {
                 return builder.conjunction();
             }
             return builder.like(
-                builder.lower(root.join("asset").get("assetCode")),
-                "%" + assetCode.toLowerCase() + "%"
+                    builder.lower(root.join("asset").get("assetCode")),
+                    "%" + assetCode.toLowerCase() + "%"
             );
             // return root.<Assignment>get("asset").get("assetCode").in(assetName);
         };
@@ -60,10 +63,22 @@ public class AssignmentSpecification {
                 return builder.conjunction();
             }
             return builder.like(
-                builder.lower(root.join("asset").get("name")),
-                "%" + assetName.toLowerCase() + "%"
+                    builder.lower(root.join("asset").get("name")),
+                    "%" + assetName.toLowerCase() + "%"
             );
             // return root.<Assignment>get("asset").get("name").in(assetName);
+        };
+    }
+
+    public static Specification<Assignment> withAssignedDate() {
+        return (root, query, builder) -> {
+            Date now = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            return builder.lessThanOrEqualTo(
+                    root.get("assignedDate"),
+                    now
+            );
+            // return root.<Assignment>get("assignedDate").lessThan(LocalDate.now());
+            // return root.<Assignment>get("assignee").get("username").in(username);
         };
     }
 
@@ -73,8 +88,8 @@ public class AssignmentSpecification {
                 return builder.conjunction();
             }
             return builder.like(
-                builder.lower(root.join("assignee").get("username")),
-                "%" + username.toLowerCase() + "%"
+                    builder.lower(root.join("assignee").get("username")),
+                    "%" + username.toLowerCase() + "%"
             );
             // return root.<Assignment>get("user").get("username").in(username);
             // return root.<Assignment>get("assignee").get("username").in(username);
@@ -92,7 +107,7 @@ public class AssignmentSpecification {
     }
 
     public static Specification<Assignment> ownSpecs(UserDetailsDto requestUser) {
-        return Specification.where(withUsername(requestUser.getUsername()).and(withState(List.of("ACCEPTED","WAITING_FOR_ACCEPTANCE"))));
+        return Specification.where(withUsername(requestUser.getUsername()).and(withState(List.of("ACCEPTED", "WAITING_FOR_ACCEPTANCE"))).and(withAssignedDate()));
     }
 
     public static Specification<Assignment> filterSpecs(AssignmentGetRequest request, LocationConstant location) {
