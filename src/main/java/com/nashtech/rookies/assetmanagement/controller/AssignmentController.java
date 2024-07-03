@@ -37,8 +37,9 @@ public class AssignmentController {
     private final AssignmentService assignmentService;
 
     @GetMapping()
-    public ResponseEntity<ResponseDto<PageableDto<List<AssignmentDetailResponse>>>> getAssignmentsDetails(AssignmentGetRequest request, Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(assignmentService.getAssignmentDetails(request, pageable));
+    public ResponseEntity<ResponseDto<PageableDto<List<AssignmentDetailResponse>>>> getAssignmentsDetails(AssignmentGetRequest request, Pageable pageable, Authentication authentication) {
+        UserDetailsDto requestUser = (UserDetailsDto) authentication.getPrincipal();
+        return ResponseEntity.status(HttpStatus.OK).body(assignmentService.getAssignmentDetails(requestUser, request, pageable));
     }
 
     @GetMapping("/own")

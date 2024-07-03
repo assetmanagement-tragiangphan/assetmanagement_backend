@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.Assignment.AssignmentGetRequest;
 import com.nashtech.rookies.assetmanagement.entity.Assignment;
+import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 
 public class AssignmentSpecification {
     public static Specification<Assignment> withUsername(String username) {
@@ -71,7 +72,22 @@ public class AssignmentSpecification {
             if (username == null) {
                 return builder.conjunction();
             }
-            return root.<Assignment>get("user").get("username").in(username);
+            return builder.like(
+                builder.lower(root.join("assignee").get("username")),
+                "%" + username.toLowerCase() + "%"
+            );
+            // return root.<Assignment>get("user").get("username").in(username);
+            // return root.<Assignment>get("assignee").get("username").in(username);
+        };
+    }
+
+    public static Specification<Assignment> withLocation(LocationConstant location) {
+        return (root, query, builder) -> {
+            if (location == null) {
+                return builder.conjunction();
+            }
+
+            return root.<Assignment>get("auditMetadata").get("createdBy").get("location").in(location);
         };
     }
 
@@ -79,7 +95,7 @@ public class AssignmentSpecification {
         return Specification.where(withUsername(requestUser.getUsername()).and(withState(List.of("ACCEPTED","WAITING_FOR_ACCEPTANCE"))));
     }
 
-    public static Specification<Assignment> filterSpecs(AssignmentGetRequest request) {
-        return Specification.where(withUsername(request.getSearch()).or(withAssetCode(request.getSearch())).or(withAssetName(request.getSearch())).and(withState(request.getStatus())).and(withAssignedDate(request.getAssignedDate())));
+    public static Specification<Assignment> filterSpecs(AssignmentGetRequest request, LocationConstant location) {
+        return Specification.where(withAssigneeUsername(request.getSearch()).or(withAssetCode(request.getSearch())).or(withAssetName(request.getSearch())).and(withState(request.getStatus())).and(withAssignedDate(request.getAssignedDate())).and(withLocation(location)));
     }
 }

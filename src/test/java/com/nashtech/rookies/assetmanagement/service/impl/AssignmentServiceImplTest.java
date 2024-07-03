@@ -50,6 +50,7 @@ import com.nashtech.rookies.assetmanagement.mapper.AssignmentMapper;
 import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
 import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
+import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import org.junit.jupiter.api.Assertions;
@@ -89,6 +90,7 @@ class AssignmentServiceImplTest {
                 .username("test")
                 .roleName(RoleConstant.ADMIN)
                 .status(StatusConstant.ACTIVE)
+                .location(LocationConstant.HCM)
                 .build();
 
         auditMetadata = new AuditMetadata();
@@ -97,6 +99,7 @@ class AssignmentServiceImplTest {
                 .username("test")
                 .role(Role.builder().name(RoleConstant.ADMIN).build())
                 .status(StatusConstant.ACTIVE)
+                .location(LocationConstant.HCM)
                 .build());
 
         Category category = Category.builder()
@@ -113,6 +116,7 @@ class AssignmentServiceImplTest {
         assignee = User.builder()
                 .staffCode("SD0009")
                 .username("test")
+                .location(LocationConstant.HCM)
                 .build();
 
         assignment = Assignment.builder()
@@ -217,7 +221,7 @@ class AssignmentServiceImplTest {
         when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(assignmentPage);
         when(mapper.entityToDetailDto(any(Assignment.class), any(User.class), any(Asset.class)))
                 .thenReturn(mapToAssignmentDetail(assignment, userDetails));
-        ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getAssignmentDetails(request, pageable);
+        ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getAssignmentDetails(userDetails, request, pageable);
 
         assertEquals("Successfully retrieved assignment details.", response.getMessage());
         assertEquals(1, response.getData().getTotalElements());
@@ -237,7 +241,7 @@ class AssignmentServiceImplTest {
         when(mapper.entityToDetailDto(any(Assignment.class), any(User.class), any(Asset.class)))
                 .thenReturn(mapToAssignmentDetail(assignment, userDetails));
 
-        ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getAssignmentDetails(request, pageable);
+        ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getAssignmentDetails(userDetails, request, pageable);
 
         assertEquals("Successfully retrieved assignment details.", response.getMessage());
         assertEquals(1, response.getData().getTotalElements());
@@ -257,7 +261,7 @@ class AssignmentServiceImplTest {
         when(mapper.entityToDetailDto(any(Assignment.class), any(User.class), any(Asset.class)))
                 .thenReturn(mapToAssignmentDetail(assignment, userDetails));
 
-        ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getAssignmentDetails(request, pageable);
+        ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getAssignmentDetails(userDetails, request, pageable);
 
         assertEquals("Successfully retrieved assignment details.", response.getMessage());
         assertEquals(1, response.getData().getTotalElements());

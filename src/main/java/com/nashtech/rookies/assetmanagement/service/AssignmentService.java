@@ -15,7 +15,7 @@ import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 
 public interface AssignmentService {
-    ResponseDto<PageableDto<List<AssignmentDetailResponse>>> getAssignmentDetails(AssignmentGetRequest request, Pageable pageable);
+    ResponseDto<PageableDto<List<AssignmentDetailResponse>>> getAssignmentDetails(UserDetailsDto requestUser, AssignmentGetRequest request, Pageable pageable);
     ResponseDto<PageableDto<List<AssignmentDetailResponse>>> getOwnAssignmentDetails(UserDetailsDto requestUser, Pageable pageable);
     ResponseDto<AssignmentDetailResponse> getAssignmentDetail(Integer id);
     ResponseDto<AssignmentResponse> saveAssignment(CreateAssignmentRequest request, UserDetailsDto requestUser);

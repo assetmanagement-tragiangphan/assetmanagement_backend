@@ -149,7 +149,7 @@ class AssignmentControllerTest {
                 .build();
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
-        when(assignmentService.getAssignmentDetails(any(AssignmentGetRequest.class), any(Pageable.class))).thenReturn(responseDto);
+        when(assignmentService.getAssignmentDetails(eq(userDetailsDto), any(AssignmentGetRequest.class), any(Pageable.class))).thenReturn(responseDto);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/assignments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -160,7 +160,7 @@ class AssignmentControllerTest {
 
         // Verify service method invocation
         verify(assignmentService, times(1))
-                .getAssignmentDetails(any(AssignmentGetRequest.class), any(Pageable.class));
+                .getAssignmentDetails(eq(userDetailsDto), any(AssignmentGetRequest.class), any(Pageable.class));
     }
 
     @Test

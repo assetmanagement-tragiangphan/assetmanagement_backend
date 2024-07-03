@@ -2,7 +2,6 @@ package com.nashtech.rookies.assetmanagement.service.impl;
 
 import java.util.List;
 
-import com.nashtech.rookies.assetmanagement.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +18,14 @@ import com.nashtech.rookies.assetmanagement.dto.response.AssignmentDetailRespons
 import com.nashtech.rookies.assetmanagement.dto.response.AssignmentResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
+import com.nashtech.rookies.assetmanagement.entity.Asset;
+import com.nashtech.rookies.assetmanagement.entity.Asset_;
+import com.nashtech.rookies.assetmanagement.entity.Assignment;
+import com.nashtech.rookies.assetmanagement.entity.Assignment_;
+import com.nashtech.rookies.assetmanagement.entity.AuditMetadata_;
+import com.nashtech.rookies.assetmanagement.entity.Category_;
+import com.nashtech.rookies.assetmanagement.entity.User;
+import com.nashtech.rookies.assetmanagement.entity.User_;
 import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
@@ -35,7 +42,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
-@Slf4j
 public class AssignmentServiceImpl implements AssignmentService {
 
     private final AssignmentRepository repository;
@@ -44,8 +50,8 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final UserRepository userRepository;
 
     @Override
-    public ResponseDto<PageableDto<List<AssignmentDetailResponse>>> getAssignmentDetails(AssignmentGetRequest request, Pageable pageable) {
-        Specification<Assignment> specs = AssignmentSpecification.filterSpecs(request);
+    public ResponseDto<PageableDto<List<AssignmentDetailResponse>>> getAssignmentDetails(UserDetailsDto requestUser, AssignmentGetRequest request, Pageable pageable) {
+        Specification<Assignment> specs = AssignmentSpecification.filterSpecs(request, requestUser.getLocation());
 
         PageRequest pageRequest = (PageRequest) pageable;
         if (pageRequest.getSort().equals(Sort.unsorted())) {
@@ -62,7 +68,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.NAME);
             }
             if (sortField.equals("assignedby")) {
-                pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.AUDIT_METADATA + "." + AuditMetadata_.CREATED_BY);
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.AUDIT_METADATA + "." + AuditMetadata_.CREATED_BY + "." + User_.USERNAME);
             }
             if (sortField.equals("assignedto")) {
                 pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSIGNEE + ".username");
@@ -81,7 +87,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSET + "." + Asset_.NAME);
             }
             if (sortField.equals("assignedby")) {
-                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.AUDIT_METADATA + "." + AuditMetadata_.CREATED_BY);
+                pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.AUDIT_METADATA + "." + AuditMetadata_.CREATED_BY + "." + User_.USERNAME);
             }
             if (sortField.equals("assignedto")) {
                 pageRequest = pageRequest.withSort(Direction.DESC, Assignment_.ASSIGNEE + ".username");
