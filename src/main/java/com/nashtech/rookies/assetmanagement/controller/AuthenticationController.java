@@ -37,7 +37,7 @@ public class AuthenticationController {
                 .build();
 
         var dto = resData.getData();
-        dto.setToken(null);
+        //dto.setToken(null);
         resData.setData(dto);
 
         return ResponseEntity.ok()
