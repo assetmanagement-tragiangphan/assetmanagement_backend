@@ -81,7 +81,6 @@ class AssignmentServiceImplTest {
     private User assignee;
     private Assignment assignment;
     private Assignment updateAssignment;
-    private AuditMetadata auditMetadata;
 
     @BeforeEach
     void setUp() {
@@ -93,7 +92,7 @@ class AssignmentServiceImplTest {
                 .location(LocationConstant.HCM)
                 .build();
 
-        auditMetadata = new AuditMetadata();
+        AuditMetadata auditMetadata = new AuditMetadata();
         auditMetadata.setCreatedBy(User.builder()
                 .id(1)
                 .username("test")
@@ -154,7 +153,6 @@ class AssignmentServiceImplTest {
     }
 
     @Test
-    @WithMockUser(username = "test", roles = "ADMIN")
     void testOwnAssignmentDetails_Unsorted() {
         Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
         List<Assignment> assignments = List.of(assignment);
