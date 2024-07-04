@@ -194,4 +194,61 @@ public class ReturnRequestControllerTest {
         verify(returnRequestService, times(1))
                 .cancelOne(1, userDetailsDto);
     }
+    
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testCompleteReturnRequest_WhenValidInput_ThenSuccess() throws Exception {
+        ResponseDto response = ResponseDto.builder().data(null).message("Complete Return Request Succesfully").build();
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        when(returnRequestService.completeOne(1, userDetailsDto)).thenReturn(response);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/return-request/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data", Matchers.nullValue()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Complete Return Request Succesfully")));
+        // Verify service method invocation
+        verify(returnRequestService, times(1))
+                .completeOne(1, userDetailsDto);
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testCompleteReturnRequest_WhenNotFound_ThenThrowResourceNotFoundException() throws Exception {
+        
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        when(returnRequestService.completeOne(1, userDetailsDto)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/return-request/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto)))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+
+        // Verify service method invocation
+        verify(returnRequestService, times(1))
+                .completeOne(1, userDetailsDto);
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testCompleteReturnRequest_WhenStatusIsNOTWaitingForReturning_ThenThrowBadRequestException() throws Exception {
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        when(returnRequestService.completeOne(1, userDetailsDto)).thenThrow(BadRequestException.class);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/return-request/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        // Verify service method invocation
+        verify(returnRequestService, times(1))
+                .completeOne(1, userDetailsDto);
+    }
 }

@@ -19,4 +19,6 @@ public interface ReturnRequestService {
 
     ResponseDto cancelOne(Integer id, UserDetailsDto requestUser);
 
+    public ResponseDto completeOne(Integer id, UserDetailsDto requestUser);
+
 }

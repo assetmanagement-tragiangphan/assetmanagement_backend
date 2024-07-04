@@ -25,7 +25,7 @@ public interface AssetRepository extends JpaRepository<Asset, Integer>, JpaSpeci
 
     Optional<Asset> findFirstByOrderByIdDesc(); 
     
-    @Query(value = "select new com.nashtech.rookies.assetmanagement.dto.response.AssetHistoryDTO(a.assignedDate, a.assignee.username, a.auditMetadata.createdBy.username, rr.returnedDate) from Assignment a join fetch ReturnRequest rr on a.id = rr.assignment.id where a.asset.assetCode = ?1")
+    @Query(value = "select new com.nashtech.rookies.assetmanagement.dto.response.AssetHistoryDTO(a.assignedDate, a.assignee.username, a.auditMetadata.createdBy.username, rr.returnedDate) from Assignment a left join fetch ReturnRequest rr on a.id = rr.assignment.id where a.asset.assetCode = ?1")
 //    List<AssetHistoryDTO> findAssetHistory(String assetCode);
     public Page<AssetHistoryDTO> findAssetHistory(String requestParams, PageRequest pageRequest);
 

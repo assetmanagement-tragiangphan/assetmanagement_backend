@@ -14,9 +14,11 @@ import com.nashtech.rookies.assetmanagement.entity.ReturnRequest_;
 import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.repository.ReturnRequestRepository;
+import com.nashtech.rookies.assetmanagement.service.AssignmentService;
 import com.nashtech.rookies.assetmanagement.service.ReturnRequestService;
 import com.nashtech.rookies.assetmanagement.specifications.ReturnRequestSpecification;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Service;
 public class ReturnRequestServiceImpl implements ReturnRequestService {
 
     public ReturnRequestRepository repository;
+    public AssignmentService assignmentService;
 
     @Override
     public ResponseDto getAll(ReturnRequestRequestDTO requestParams, Pageable pageable, UserDetailsDto requestUser) {
@@ -71,6 +74,20 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         }
         repository.delete(returnRequest);
         return ResponseDto.builder().data(null).message("Cancel Return Request Succesfully").build();
+    }
+
+    @Override
+    public ResponseDto completeOne(Integer id, UserDetailsDto requestUser) {
+        ReturnRequest returnRequest = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Return Request Does Not Exist"));
+        if (!returnRequest.getStatus().equals(StatusConstant.WAITING_FOR_RETURNING)) {
+            throw new BadRequestException("Cannot Completed Return Request Because It Is Completed");
+        }
+        returnRequest.setStatus(StatusConstant.COMPLETED);
+        returnRequest.setReturnedDate(LocalDate.now());
+        returnRequest.getAssignment().setStatus(StatusConstant.INACTIVE);
+        returnRequest.getAssignment().getAsset().setStatus(StatusConstant.AVAILABLE);
+        repository.save(returnRequest);
+        return ResponseDto.builder().data(null).message("Copmlete Return Request Succesfully").build();
     }
 
 }

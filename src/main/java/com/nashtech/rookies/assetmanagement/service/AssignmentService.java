@@ -12,6 +12,7 @@ import com.nashtech.rookies.assetmanagement.dto.response.AssignmentDetailRespons
 import com.nashtech.rookies.assetmanagement.dto.response.AssignmentResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
+import com.nashtech.rookies.assetmanagement.entity.Assignment;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 
 public interface AssignmentService {

@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,6 +37,13 @@ public class ReturnRequestController {
     public ResponseEntity getAll(@Valid ReturnRequestRequestDTO requestParams, Pageable pageable, Authentication authentication) {
         UserDetailsDto requestUser = (UserDetailsDto) authentication.getPrincipal();
         ResponseDto returnRequests = service.getAll(requestParams, pageable, requestUser);
+        return ResponseEntity.ok().body(returnRequests);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity completedOne(@PathVariable("id") Integer id, Authentication authentication) {
+        UserDetailsDto requestUser = (UserDetailsDto) authentication.getPrincipal();
+        ResponseDto returnRequests = service.completeOne(id, requestUser);
         return ResponseEntity.ok().body(returnRequests);
     }
 

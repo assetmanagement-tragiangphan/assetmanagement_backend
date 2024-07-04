@@ -47,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+
 /**
  *
  * @author HP
@@ -106,8 +107,10 @@ public class ReturnRequestServiceImplTest {
 
         returnRequest1 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, user, assignment, auditMetadata);
         returnRequest1.setStatus(StatusConstant.WAITING_FOR_RETURNING);
+        
         returnRequest2 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, user, assignment, auditMetadata);
         returnRequest2.setStatus(StatusConstant.COMPLETED);
+        
         returnRequest3 = new ReturnRequest(LocalDate.of(2021, 1, 1), user, user, assignment, auditMetadata);
 
         returnRequestRequestDTO = new ReturnRequestRequestDTO("", List.of(StatusConstant.ACTIVE), LocalDate.now());
@@ -161,7 +164,7 @@ public class ReturnRequestServiceImplTest {
     void testCancelReturnRequest_WhenStatusIsWaitingForReturning_ThenSuccess() {
         when(returnRequestRepository.findById(anyInt())).thenReturn(Optional.of(returnRequest1));
         doNothing().when(returnRequestRepository).delete(any(ReturnRequest.class));
-        
+
         ResponseDto response = returnRequestService.cancelOne(1, userDetails);
         Assertions.assertNotNull(response);
         assertEquals("Cancel Return Request Succesfully", response.getMessage());
@@ -176,6 +179,7 @@ public class ReturnRequestServiceImplTest {
         assertEquals("Return Request Does Not Exist", exception.getMessage());
     }
 //
+
     @Test
     void testCancelReturnRequest_WhenWaitingForReturnedStatus_ThenThrowBadRequestException() {
         when(returnRequestRepository.findById(anyInt())).thenReturn(Optional.of(returnRequest2));
@@ -185,4 +189,33 @@ public class ReturnRequestServiceImplTest {
         assertEquals("Cannot Cancel Return Request Because It Is Completed", exception.getMessage());
     }
 
+    @Test
+    void testCompleteReturnRequest_WhenStatusIsWaitingForReturning_ThenSuccess() {
+        when(returnRequestRepository.findById(anyInt())).thenReturn(Optional.of(returnRequest1));
+        when(returnRequestRepository.save(any(ReturnRequest.class))).thenReturn(returnRequest1);
+
+        ResponseDto response = returnRequestService.completeOne(1, userDetails);
+
+        Assertions.assertNotNull(response);
+        assertEquals("Copmlete Return Request Succesfully", response.getMessage());
+        verify(returnRequestRepository, times(1)).save(any(ReturnRequest.class));
+    }
+
+    @Test
+    void testCompleteReturnRequest_WhenNotFound_ThenThrowResourceNotFoundException() {
+        when(returnRequestRepository.findById(anyInt())).thenReturn(Optional.empty());
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> returnRequestService.completeOne(1, userDetails));
+        assertEquals("Return Request Does Not Exist", exception.getMessage());
+    }
+//
+
+    @Test
+    void testCompleteReturnRequest_WhenCopmletedStatus_ThenThrowBadRequestException() {
+        when(returnRequestRepository.findById(anyInt())).thenReturn(Optional.of(returnRequest2));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            returnRequestService.completeOne(1, userDetails);
+        });
+        assertEquals("Cannot Completed Return Request Because It Is Completed", exception.getMessage());
+    }
 }
