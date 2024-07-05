@@ -5,5 +5,5 @@ import com.nashtech.rookies.assetmanagement.dto.response.LoginResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 
 public interface AuthenticationService {
-    ResponseDto<LoginResponse> authenticate(AuthenticationRequest request);
+    ResponseDto<LoginResponse> authenticate(AuthenticationRequest request, String jwtToken);
 }

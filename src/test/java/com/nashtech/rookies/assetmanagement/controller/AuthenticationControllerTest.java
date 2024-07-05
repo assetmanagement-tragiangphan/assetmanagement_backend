@@ -6,6 +6,7 @@ import com.nashtech.rookies.assetmanagement.dto.request.AuthenticationRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.LoginResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.service.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,7 +47,7 @@ class AuthenticationControllerTest {
 
     @Test
     public void testSignIn_whenValidRequest_thenSuccess() throws Exception {
-        when(authenticationService.authenticate(any(AuthenticationRequest.class)))
+        when(authenticationService.authenticate(any(AuthenticationRequest.class), anyString()))
                 .thenReturn(ResponseDto.<LoginResponse>builder()
                         .data(LoginResponse.builder().username("username").token("token").build())
                         .message("Success")

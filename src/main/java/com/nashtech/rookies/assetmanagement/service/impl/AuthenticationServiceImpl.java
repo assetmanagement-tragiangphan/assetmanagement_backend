@@ -28,7 +28,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserMapper userMapper;
 
     @Override
-    public ResponseDto<LoginResponse> authenticate(AuthenticationRequest request) {
+    public ResponseDto<LoginResponse> authenticate(AuthenticationRequest request, String jwtToken ) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -39,8 +39,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .orElseThrow(() -> new InvalidUserCredentialException("Username or password is incorrect. Please try again."));
 
         var userDetailsDto = userMapper.entityToUserDetailsDto(user);
-
-        var accessToken = jwtService.generateToken(userDetailsDto);
+        var isTokenValid = tokenRepository.findByToken(jwtToken).isPresent();
+        var accessToken = isTokenValid ? jwtToken : jwtService.generateToken(userDetailsDto) ;
         //TODO: not returning refresh token
 //        var refreshToken = jwtService.generateRefreshToken(userDetailsDto);
 

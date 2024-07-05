@@ -75,7 +75,7 @@ class AuthenticationServiceImplTest {
         when(userMapper.entityToLoginResponse(any(User.class)))
                 .thenReturn(LoginResponse.builder().username(username).build());
 
-        var resData = authenticationService.authenticate(request);
+        var resData = authenticationService.authenticate(request, "");
 
         assertThat(resData.getMessage()).isEqualTo("User login successfully.");
         assertThat(resData.getData().getToken()).isEqualTo(accessToken);
@@ -92,7 +92,7 @@ class AuthenticationServiceImplTest {
                 .thenReturn(Optional.empty());
 
         var ex = assertThrows(InvalidUserCredentialException.class, () ->
-                authenticationService.authenticate(request));
+                authenticationService.authenticate(request, ""));
 
         assertThat(ex.getMessage()).isEqualTo("Username or password is incorrect. Please try again.");
     }

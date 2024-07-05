@@ -6,6 +6,7 @@ import com.nashtech.rookies.assetmanagement.dto.response.LoginResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
 import com.nashtech.rookies.assetmanagement.service.AuthenticationService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -25,8 +26,12 @@ public class AuthenticationController {
     private final CookieProperties cookieProperties;
 
     @PostMapping("/signIn")
-    public ResponseEntity<ResponseDto<LoginResponse>> signIn(@RequestBody @Valid AuthenticationRequest request) {
-        var resData = authenticationService.authenticate(request);
+    public ResponseEntity<ResponseDto<LoginResponse>> signIn(@RequestBody @Valid AuthenticationRequest request, HttpServletRequest servletRequest) {
+
+        var tokenHeader = servletRequest.getHeader("Authorization");
+        var accessToken = (tokenHeader== null) ? "" :tokenHeader.substring(7);
+
+        var resData = authenticationService.authenticate(request, accessToken);
         final ResponseCookie responseCookie = ResponseCookie
                 .from(cookieProperties.getName(), resData.getData().getToken())
                 .httpOnly(cookieProperties.getHttpOnly())
