@@ -17,6 +17,7 @@ import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.ReturnAssetMapper;
+import com.nashtech.rookies.assetmanagement.mapper.ReturnRequestMapper;
 import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.ReturnRequestRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
@@ -46,6 +47,7 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
 
     public ReturnRequestRepository repository;
     public AssignmentService assignmentService;
+    private ReturnRequestMapper mapper;
     private final AssignmentRepository assignmentRepository;
     private final UserRepository userRepository;
     private final ReturnAssetMapper returnAssetMapper;
@@ -60,15 +62,7 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         Page<ReturnRequest> returnRequest = repository.findAll(specs, pageRequest);
         List<ReturnRequestResponseDTO> list = new ArrayList();
         for (ReturnRequest rr : returnRequest) {
-            ReturnRequestResponseDTO response = new ReturnRequestResponseDTO(
-                    rr.getId(),
-                    rr.getAssignment().getAsset().getAssetCode(),
-                    rr.getAssignment().getAsset().getName(),
-                    rr.getAuditMetadata().getCreatedBy().getUsername(),
-                    rr.getAuditMetadata().getCreatedOn().toLocalDate().toString(),
-                    rr.getAcceptedBy().getUsername(),
-                    rr.getReturnedDate().toString(),
-                    rr.getStatus());
+            ReturnRequestResponseDTO response = mapper.entityToDto(rr);
             list.add(response);
         }
         PageableDto page = new PageableDto(list, returnRequest.getNumber(), returnRequest.getTotalPages(), returnRequest.getTotalElements());
@@ -104,7 +98,9 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         var assignment = assignmentService.updateAssignmentStatus(request.getAssignmentId(), StatusConstant.WAITING_FOR_RETURNING);
         var requestedUser = userRepository.findById(requestUser.getId()).orElseThrow(() -> new ResourceNotFoundException("User not found."));
         var isRequested = repository.findByAssignmentId(request.getAssignmentId());
-        if (isRequested.isPresent()) throw new ResourceAlreadyExistException("Assignment is requested");
+        if (isRequested.isPresent()) {
+            throw new ResourceAlreadyExistException("Assignment is requested");
+        }
         var returnRequest = ReturnRequest.builder()
                 .requestedBy(requestedUser)
                 .assignment(assignment)

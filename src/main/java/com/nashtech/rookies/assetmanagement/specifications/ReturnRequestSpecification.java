@@ -12,6 +12,7 @@ import com.nashtech.rookies.assetmanagement.entity.ReturnRequest_;
 import com.nashtech.rookies.assetmanagement.entity.User_;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
+import jakarta.persistence.criteria.JoinType;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,7 +27,7 @@ public class ReturnRequestSpecification {
     public static Specification<ReturnRequest> withStatesIn(List<StatusConstant> states) {
         return (root, query, builder) -> {
             if (states == null) {
-                return builder.conjunction();
+                return builder.disjunction();
             }
             return root.<StatusConstant>get(ReturnRequest_.STATUS).in(states);
         };
@@ -67,11 +68,27 @@ public class ReturnRequestSpecification {
 
     public static Specification<ReturnRequest> dateEquals(LocalDate date) {
         return (root, query, builder) -> {
+            if (date == null) {
+                return builder.conjunction();
+            }
             return builder.equal(root.get(ReturnRequest_.RETURNED_DATE), date);
         };
     }
 
+    public static Specification<ReturnRequest> join() {
+        return (root, query, builder) -> {
+
+            if (Long.class != query.getResultType()) {
+                root.fetch(ReturnRequest_.REQUESTED_BY, JoinType.LEFT);
+                root.fetch(ReturnRequest_.ACCEPTED_BY, JoinType.LEFT);
+                root.fetch(ReturnRequest_.ASSIGNMENT, JoinType.LEFT);
+            }
+            return builder.conjunction();
+
+        };
+    }
+
     public static Specification<ReturnRequest> filterSpecs(LocationConstant location, String search, LocalDate date, List<StatusConstant> states) {
-        return Specification.where(locationAt(location)).and(dateEquals(date)).and(withStatesIn(states)).and(nameLike(search).or(assetCodeLike(search)).or(requesterUsernameLike(search)));
+        return join().and(locationAt(location)).and(dateEquals(date)).and(withStatesIn(states)).and(nameLike(search).or(assetCodeLike(search)).or(requesterUsernameLike(search)));
     }
 }

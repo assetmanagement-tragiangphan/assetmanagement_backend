@@ -16,6 +16,7 @@ import com.nashtech.rookies.assetmanagement.entity.ReturnRequest;
 import com.nashtech.rookies.assetmanagement.entity.User;
 import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
+import com.nashtech.rookies.assetmanagement.mapper.ReturnRequestMapper;
 import com.nashtech.rookies.assetmanagement.repository.ReturnRequestRepository;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
@@ -32,7 +33,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.anyInt;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,7 +45,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -61,7 +60,9 @@ public class ReturnRequestServiceImplTest {
 
     @InjectMocks
     private ReturnRequestServiceImpl returnRequestService;
-
+    @Mock
+    private ReturnRequestMapper returnRequestMapper;
+    
     private UserDetailsDto userDetails;
 
     private ReturnRequest returnRequest1;

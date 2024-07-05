@@ -17,12 +17,14 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface ReturnRequestMapper {
 
-//    @Mapping(target = "assetCode", source = "returnRequest.assignment.asset.assetCode")
-//    @Mapping(target = "assetCode", source = "returnRequest.assignment.asset.name")
-//    @Mapping(target = "requestedBy", source = "returnRequest.acceptedBy.username")
-//    @Mapping(target = "assignedDate", source = "returnRequest.acceptedBy.username")
-//    @Mapping(target = "acceptedBy", source = "returnRequest.acceptedBy.username")
-//    @Mapping(target = "returnedDate", source = "returnRequest.acceptedBy.username")
-//    ReturnRequestResponseDTO entityToDto(ReturnRequest returnRequest);
+    @Mapping(target = "id", source = "returnRequest.id")
+    @Mapping(target = "assetCode", source = "returnRequest.assignment.asset.assetCode")
+    @Mapping(target = "assetName", source = "returnRequest.assignment.asset.name")
+    @Mapping(target = "requestedBy", source = "returnRequest.acceptedBy.username")
+    @Mapping(target = "assignedDate", source = "returnRequest.auditMetadata.createdOn")
+    @Mapping(target = "acceptedBy", source = "returnRequest.acceptedBy.username")
+    @Mapping(target = "returnedDate", source = "returnRequest.returnedDate")
+    @Mapping(target = "state", source = "returnRequest.status")
+    ReturnRequestResponseDTO entityToDto(ReturnRequest returnRequest);
 
 }
