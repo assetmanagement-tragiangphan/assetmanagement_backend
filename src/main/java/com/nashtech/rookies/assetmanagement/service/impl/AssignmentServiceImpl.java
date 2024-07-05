@@ -1,6 +1,6 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
-import java.lang.constant.Constable;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -8,7 +8,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
@@ -51,8 +50,6 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public ResponseDto<PageableDto<List<AssignmentDetailResponse>>> getAssignmentDetails(UserDetailsDto requestUser, AssignmentGetRequest request, Pageable pageable) {
-        Specification<Assignment> specs = AssignmentSpecification.filterSpecs(request, requestUser.getLocation());
-
         PageRequest pageRequest = (PageRequest) pageable;
         if (pageRequest.getSort().equals(Sort.unsorted())) {
             pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
@@ -100,8 +97,12 @@ public class AssignmentServiceImpl implements AssignmentService {
             }
         }
 
-        Page<AssignmentDetailResponse> assignmentDetails = repository.findAll(specs, pageRequest)
-                .map(assignment -> mapper.entityToDetailDto(assignment, assignment.getAuditMetadata().getCreatedBy(), assignment.getAsset()));
+        Page<AssignmentDetailResponse> assignmentDetails = repository.findAllAssignmentDetails(request.getSearch(), 
+                                                                                                request.getStatus(), 
+                                                                                                request.getAssignedDate(), 
+                                                                                                requestUser.getLocation(), 
+                                                                                                pageRequest);
+
 
         PageableDto<List<AssignmentDetailResponse>> pages = PageableDto.<List<AssignmentDetailResponse>>builder()
                 .content(assignmentDetails.getContent())
@@ -118,7 +119,6 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public ResponseDto<PageableDto<List<AssignmentDetailResponse>>> getOwnAssignmentDetails(UserDetailsDto requestUser, Pageable pageable) {
-        Specification<Assignment> specs = AssignmentSpecification.ownSpecs(requestUser);
 
         PageRequest pageRequest = (PageRequest) pageable;
         if (pageRequest.getSort().equals(Sort.unsorted())) {
@@ -161,8 +161,9 @@ public class AssignmentServiceImpl implements AssignmentService {
             }
         }
 
-        Page<AssignmentDetailResponse> assignmentDetails = repository.findAll(specs, pageRequest)
-                .map(assignment -> mapper.entityToDetailDto(assignment, assignment.getAuditMetadata().getCreatedBy(), assignment.getAsset()));
+        List<String> status = List.of("ACCEPTED", "WAITING_FOR_ACCEPTANCE");
+
+        Page<AssignmentDetailResponse> assignmentDetails = repository.findOwnAssignmentDetails(requestUser.getUsername(), LocalDate.now(), status, pageRequest);
 
         PageableDto<List<AssignmentDetailResponse>> pages = PageableDto.<List<AssignmentDetailResponse>>builder()
                 .content(assignmentDetails.getContent())

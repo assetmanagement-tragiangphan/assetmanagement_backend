@@ -155,12 +155,10 @@ class AssignmentServiceImplTest {
     @Test
     void testOwnAssignmentDetails_Unsorted() {
         Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
-        List<Assignment> assignments = List.of(assignment);
-        Page<Assignment> assignmentPage = new PageImpl<>(assignments, pageable, assignments.size());
+        List<AssignmentDetailResponse> assignmentDetailResponses = List.of(mapToAssignmentDetail(assignment, userDetails));
+        Page<AssignmentDetailResponse> assignmentDetailResponsePage = new PageImpl<>(assignmentDetailResponses, pageable, assignmentDetailResponses.size());
 
-        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(assignmentPage);
-        when(mapper.entityToDetailDto(any(Assignment.class), any(User.class), any(Asset.class)))
-                .thenReturn(mapToAssignmentDetail(assignment, userDetails));
+        when(repository.findOwnAssignmentDetails(any(String.class), any(LocalDate.class), anyList(), any(Pageable.class))).thenReturn(assignmentDetailResponsePage);
 
         ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getOwnAssignmentDetails(userDetails, pageable);
 
@@ -174,12 +172,10 @@ class AssignmentServiceImplTest {
     @WithMockUser(username = "test", roles = "ADMIN")
     void testGetOwnAssignmentDetails_SortingByAssetCodeAscending() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "assetCode"));
-        List<Assignment> assignments = List.of(assignment);
-        Page<Assignment> assignmentPage = new PageImpl<>(assignments, pageable, assignments.size());
+        List<AssignmentDetailResponse> assignmentDetailResponses = List.of(mapToAssignmentDetail(assignment, userDetails));
+        Page<AssignmentDetailResponse> assignmentDetailResponsePage = new PageImpl<>(assignmentDetailResponses, pageable, assignmentDetailResponses.size());
 
-        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(assignmentPage);
-        when(mapper.entityToDetailDto(any(Assignment.class), any(User.class), any(Asset.class)))
-                .thenReturn(mapToAssignmentDetail(assignment, userDetails));
+        when(repository.findOwnAssignmentDetails(any(String.class), any(LocalDate.class), anyList(), any(Pageable.class))).thenReturn(assignmentDetailResponsePage);
 
         ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getOwnAssignmentDetails(userDetails, pageable);
 
@@ -193,12 +189,10 @@ class AssignmentServiceImplTest {
     @WithMockUser(username = "test", roles = "ADMIN")
     void testGetOwnAssignmentDetails_SortingByAssetNameDescending() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "assetName"));
-        List<Assignment> assignments = List.of(assignment);
-        Page<Assignment> assignmentPage = new PageImpl<>(assignments, pageable, assignments.size());
+        List<AssignmentDetailResponse> assignmentDetailResponses = List.of(mapToAssignmentDetail(assignment, userDetails));
+        Page<AssignmentDetailResponse> assignmentDetailResponsePage = new PageImpl<>(assignmentDetailResponses, pageable, assignmentDetailResponses.size());
 
-        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(assignmentPage);
-        when(mapper.entityToDetailDto(any(Assignment.class), any(User.class), any(Asset.class)))
-                .thenReturn(mapToAssignmentDetail(assignment, userDetails));
+        when(repository.findOwnAssignmentDetails(any(String.class), any(LocalDate.class), anyList(), any(Pageable.class))).thenReturn(assignmentDetailResponsePage);
 
         ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getOwnAssignmentDetails(userDetails, pageable);
 
@@ -212,13 +206,14 @@ class AssignmentServiceImplTest {
     @WithMockUser(username = "test", roles = "ADMIN")
     void testGetAssignmentDetails_SortingByAssetCodeAscending() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "assetCode"));
-        List<Assignment> assignments = List.of(assignment);
-        Page<Assignment> assignmentPage = new PageImpl<>(assignments, pageable, assignments.size());
-        AssignmentGetRequest request = new AssignmentGetRequest();
+        List<AssignmentDetailResponse> assignmentDetailResponses = List.of(mapToAssignmentDetail(assignment, userDetails));
+        Page<AssignmentDetailResponse> assignmentDetailResponsePage = new PageImpl<>(assignmentDetailResponses, pageable, assignmentDetailResponses.size());
+        AssignmentGetRequest request = AssignmentGetRequest.builder().search("search")
+                                                                        .status(List.of("ACCEPTED", "WAITING_FOR_ACCEPTANCE"))
+                                                                        .assignedDate(LocalDate.now()).build();
 
-        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(assignmentPage);
-        when(mapper.entityToDetailDto(any(Assignment.class), any(User.class), any(Asset.class)))
-                .thenReturn(mapToAssignmentDetail(assignment, userDetails));
+        when(repository.findAllAssignmentDetails(anyString(), anyList(), any(LocalDate.class), any(LocationConstant.class), any(Pageable.class))).thenReturn(assignmentDetailResponsePage);
+        
         ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getAssignmentDetails(userDetails, request, pageable);
 
         assertEquals("Successfully retrieved assignment details.", response.getMessage());
@@ -231,14 +226,14 @@ class AssignmentServiceImplTest {
     @WithMockUser(username = "test", roles = "ADMIN")
     void testGetAssignmentDetails_SortingByAssetNameDescending() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "assetName"));
-        List<Assignment> assignments = List.of(assignment);
-        Page<Assignment> assignmentPage = new PageImpl<>(assignments, pageable, assignments.size());
-        AssignmentGetRequest request = new AssignmentGetRequest();
+        List<AssignmentDetailResponse> assignmentDetailResponses = List.of(mapToAssignmentDetail(assignment, userDetails));
+        Page<AssignmentDetailResponse> assignmentDetailResponsePage = new PageImpl<>(assignmentDetailResponses, pageable, assignmentDetailResponses.size());
+        AssignmentGetRequest request = AssignmentGetRequest.builder().search("search")
+                                                                        .status(List.of("ACCEPTED", "WAITING_FOR_ACCEPTANCE"))
+                                                                        .assignedDate(LocalDate.now()).build();
 
-        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(assignmentPage);
-        when(mapper.entityToDetailDto(any(Assignment.class), any(User.class), any(Asset.class)))
-                .thenReturn(mapToAssignmentDetail(assignment, userDetails));
-
+        when(repository.findAllAssignmentDetails(anyString(), anyList(), any(LocalDate.class), any(LocationConstant.class), any(Pageable.class))).thenReturn(assignmentDetailResponsePage);
+        
         ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getAssignmentDetails(userDetails, request, pageable);
 
         assertEquals("Successfully retrieved assignment details.", response.getMessage());
@@ -251,14 +246,14 @@ class AssignmentServiceImplTest {
     @WithMockUser(username = "test", roles = "ADMIN")
     void testGetAssignmentDetails_Unsorted() {
         Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
-        List<Assignment> assignments = List.of(assignment);
-        Page<Assignment> assignmentPage = new PageImpl<>(assignments, pageable, assignments.size());
-        AssignmentGetRequest request = new AssignmentGetRequest();
+        List<AssignmentDetailResponse> assignmentDetailResponses = List.of(mapToAssignmentDetail(assignment, userDetails));
+        Page<AssignmentDetailResponse> assignmentDetailResponsePage = new PageImpl<>(assignmentDetailResponses, pageable, assignmentDetailResponses.size());
+        AssignmentGetRequest request = AssignmentGetRequest.builder().search("search")
+                                                                        .status(List.of("ACCEPTED", "WAITING_FOR_ACCEPTANCE"))
+                                                                        .assignedDate(LocalDate.now()).build();
 
-        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(assignmentPage);
-        when(mapper.entityToDetailDto(any(Assignment.class), any(User.class), any(Asset.class)))
-                .thenReturn(mapToAssignmentDetail(assignment, userDetails));
-
+        when(repository.findAllAssignmentDetails(anyString(), anyList(), any(LocalDate.class), any(LocationConstant.class), any(Pageable.class))).thenReturn(assignmentDetailResponsePage);
+        
         ResponseDto<PageableDto<List<AssignmentDetailResponse>>> response = assignmentService.getAssignmentDetails(userDetails, request, pageable);
 
         assertEquals("Successfully retrieved assignment details.", response.getMessage());
