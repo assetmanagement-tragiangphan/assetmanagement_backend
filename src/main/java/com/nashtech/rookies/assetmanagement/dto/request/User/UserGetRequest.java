@@ -18,4 +18,5 @@ import lombok.Setter;
 public class UserGetRequest {
     private String search;
     private List<Integer> types;
+    private Boolean self=false;
 }

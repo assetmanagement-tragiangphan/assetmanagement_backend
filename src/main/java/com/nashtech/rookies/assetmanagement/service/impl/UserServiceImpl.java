@@ -60,7 +60,9 @@ public class UserServiceImpl implements UserService {
     public ResponseDto<PageableDto<List<UserDto>>> getAll(UserGetRequest requestParams, Pageable pageable, UserDetailsDto requestUser) {
 
         LocationConstant requestUserLocation = requestUser.getLocation();
-        Specification<User> spec = UserSpecification.userListFilter(requestParams.getSearch(), requestParams.getTypes(), requestUserLocation, requestUser.getId());
+        Specification<User> spec = requestParams.getSelf() ?
+                UserSpecification.userListFilter(requestParams.getSearch(), requestParams.getTypes(), requestUserLocation, null) :
+                UserSpecification.userListFilter(requestParams.getSearch(), requestParams.getTypes(), requestUserLocation, requestUser.getId());
 
         PageRequest pageRequest = (PageRequest) pageable;
         if (pageRequest.getSort().equals(Sort.unsorted())) {

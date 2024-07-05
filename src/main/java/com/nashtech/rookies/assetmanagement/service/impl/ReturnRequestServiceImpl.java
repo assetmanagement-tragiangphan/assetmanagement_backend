@@ -5,15 +5,21 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
+import com.nashtech.rookies.assetmanagement.dto.request.ReturnAsset.ReturnAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.ReturnRequest.ReturnRequestRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
+import com.nashtech.rookies.assetmanagement.dto.response.ReturnAssetRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.response.ReturnRequestResponseDTO;
 import com.nashtech.rookies.assetmanagement.entity.ReturnRequest;
 import com.nashtech.rookies.assetmanagement.entity.ReturnRequest_;
 import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
+import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
+import com.nashtech.rookies.assetmanagement.mapper.ReturnAssetMapper;
+import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.ReturnRequestRepository;
+import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.AssignmentService;
 import com.nashtech.rookies.assetmanagement.service.ReturnRequestService;
 import com.nashtech.rookies.assetmanagement.specifications.ReturnRequestSpecification;
@@ -40,6 +46,9 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
 
     public ReturnRequestRepository repository;
     public AssignmentService assignmentService;
+    private final AssignmentRepository assignmentRepository;
+    private final UserRepository userRepository;
+    private final ReturnAssetMapper returnAssetMapper;
 
     @Override
     public ResponseDto getAll(ReturnRequestRequestDTO requestParams, Pageable pageable, UserDetailsDto requestUser) {
@@ -88,6 +97,24 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         returnRequest.getAssignment().getAsset().setStatus(StatusConstant.AVAILABLE);
         repository.save(returnRequest);
         return ResponseDto.builder().data(null).message("Copmlete Return Request Succesfully").build();
+    }
+
+    @Override
+    public ResponseDto createReturnRequest(ReturnAssetRequest request, UserDetailsDto requestUser) {
+        var assignment = assignmentRepository.findById(request.getAssignmentId()).orElseThrow(() -> new ResourceNotFoundException("Assignment is not exist"));
+        var requestedUser = userRepository.findById(requestUser.getId()).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+        var isRequested = repository.findByAssignmentId(request.getAssignmentId());
+        if (isRequested.isPresent()) throw new ResourceAlreadyExistException("Assignment is requested");
+        var returnRequest = ReturnRequest.builder()
+                .requestedBy(requestedUser)
+                .assignment(assignment)
+                .status(StatusConstant.WAITING_FOR_ACCEPTANCE)
+                .build();
+        returnRequest = repository.save(returnRequest);
+        return ResponseDto.<ReturnAssetRequestDTO>builder()
+                .data(returnAssetMapper.entityToDto(returnRequest))
+                .message("Create request successfully.")
+                .build();
     }
 
 }

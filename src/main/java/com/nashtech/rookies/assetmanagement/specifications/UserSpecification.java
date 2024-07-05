@@ -46,7 +46,7 @@ public class UserSpecification {
     }
 
     public static Specification<User> userListFilter (String search, List<Integer> roleIds, LocationConstant location, Integer excludeUserId) {
-        Specification<User> spec = Specification.where(hasStatus(StatusConstant.ACTIVE).and(notHasUserId(excludeUserId)));
+        Specification<User> spec = excludeUserId == null ? Specification.where(hasStatus(StatusConstant.ACTIVE)) :Specification.where(hasStatus(StatusConstant.ACTIVE).and(notHasUserId(excludeUserId)));
         if (search != null) {
             spec = spec.and(likeName(search).or(likeStaffCode(search)));
         }
