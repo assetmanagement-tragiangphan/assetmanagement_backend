@@ -1,5 +1,6 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
+import java.lang.constant.Constable;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -315,4 +316,10 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .build();
     }
 
+    public Assignment updateAssignmentStatus(Integer id, StatusConstant status) {
+        Assignment assignment = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Assignment does not exist."));
+        assignment.setStatus(status);
+        return repository.save(assignment);
+    }
 }

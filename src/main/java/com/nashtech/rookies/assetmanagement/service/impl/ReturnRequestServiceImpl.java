@@ -101,7 +101,7 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
 
     @Override
     public ResponseDto createReturnRequest(ReturnAssetRequest request, UserDetailsDto requestUser) {
-        var assignment = assignmentRepository.findById(request.getAssignmentId()).orElseThrow(() -> new ResourceNotFoundException("Assignment is not exist"));
+        var assignment = assignmentService.updateAssignmentStatus(request.getAssignmentId(), StatusConstant.WAITING_FOR_RETURNING);
         var requestedUser = userRepository.findById(requestUser.getId()).orElseThrow(() -> new ResourceNotFoundException("User not found."));
         var isRequested = repository.findByAssignmentId(request.getAssignmentId());
         if (isRequested.isPresent()) throw new ResourceAlreadyExistException("Assignment is requested");

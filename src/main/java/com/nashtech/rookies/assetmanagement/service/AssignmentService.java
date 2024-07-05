@@ -23,4 +23,6 @@ public interface AssignmentService {
     ResponseDto<AssignmentResponse> editAssignment(Integer id, EditAssignmentRequest request, UserDetailsDto requestUser);
     ResponseDto<AssignmentResponse> responseAssignment(Integer id, StatusConstant status, UserDetailsDto requestUser);
     ResponseDto deleteAssignment(Integer id);
+
+    Assignment updateAssignmentStatus(Integer id, StatusConstant status);
 }
