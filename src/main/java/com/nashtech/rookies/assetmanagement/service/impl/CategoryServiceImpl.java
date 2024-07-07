@@ -3,9 +3,6 @@ package com.nashtech.rookies.assetmanagement.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -54,8 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ResponseDto<List<CategoryResponse>> getAllCategory() {
         Sort sort = Sort.by(Sort.Direction.ASC, "auditMetadata.createdOn");
-        Pageable pageable = PageRequest.of(0, categoryRepository.findAll().isEmpty() ? 1 : categoryRepository.findAll().size(), sort);
-        Page<Category> categories = categoryRepository.findAll(pageable);
+        List<Category> categories = categoryRepository.findAll(sort);
         List<CategoryResponse> categoryResponses = new ArrayList<>();
         categories.forEach(category -> categoryResponses.add(categoryMapper.entityToDto(category)));
         return ResponseDto.<List<CategoryResponse>>builder()

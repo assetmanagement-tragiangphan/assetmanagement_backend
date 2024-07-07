@@ -59,7 +59,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Integer>
             + "a.status, "
             + "a.note) "
             + "FROM Assignment a"
-            + " WHERE (LOWER(a.auditMetadata.createdBy.username) LIKE LOWER(:username))"
+            + " WHERE (LOWER(a.assignee.username) LIKE LOWER(:username))"
             + " AND (COALESCE(:toAssignedDate, NULL) IS NULL OR a.assignedDate <= :toAssignedDate)"
             + " AND (:status IS NULL OR a.status IN :status)")
     Page<AssignmentDetailResponse> findOwnAssignmentDetails(@Param("username") String username,

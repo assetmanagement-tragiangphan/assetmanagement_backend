@@ -4,6 +4,17 @@
  */
 package com.nashtech.rookies.assetmanagement.service.impl;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.ReturnAsset.ReturnAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.ReturnRequest.ReturnRequestRequestDTO;
@@ -18,23 +29,14 @@ import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistExcept
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.ReturnAssetMapper;
 import com.nashtech.rookies.assetmanagement.mapper.ReturnRequestMapper;
-import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.ReturnRequestRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.AssignmentService;
 import com.nashtech.rookies.assetmanagement.service.ReturnRequestService;
 import com.nashtech.rookies.assetmanagement.specifications.ReturnRequestSpecification;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
 
 /**
  *
@@ -45,10 +47,9 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class ReturnRequestServiceImpl implements ReturnRequestService {
 
-    public ReturnRequestRepository repository;
-    public AssignmentService assignmentService;
-    private ReturnRequestMapper mapper;
-    private final AssignmentRepository assignmentRepository;
+    private final ReturnRequestRepository repository;
+    private final AssignmentService assignmentService;
+    private final ReturnRequestMapper mapper;
     private final UserRepository userRepository;
     private final ReturnAssetMapper returnAssetMapper;
 

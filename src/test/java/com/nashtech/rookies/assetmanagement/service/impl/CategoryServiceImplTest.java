@@ -1,5 +1,26 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
+
 import com.nashtech.rookies.assetmanagement.dto.request.Asset.CategoryRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.CategoryResponse;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
@@ -8,26 +29,9 @@ import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistExcept
 import com.nashtech.rookies.assetmanagement.mapper.CategoryMapper;
 import com.nashtech.rookies.assetmanagement.repository.CategoryRepository;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CategoryServiceImplTest {
+class CategoryServiceImplTest {
 
     @Mock
     private CategoryRepository categoryRepository;
@@ -43,7 +47,7 @@ public class CategoryServiceImplTest {
     private CategoryResponse categoryResponse2;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         categoryServiceImpl = new CategoryServiceImpl(categoryRepository, categoryMapper);
         categoryRequest = new CategoryRequest();
         categoryRequest.setName("Category Name");
@@ -72,7 +76,7 @@ public class CategoryServiceImplTest {
     }
 
     @Test
-    public void testSaveCategory_WhenPrefixAndNameNotExists_thenSuccess() {
+    void testSaveCategory_WhenPrefixAndNameNotExists_thenSuccess() {
         Integer existPrefixCount = 2;
         when(categoryRepository.existsByName(categoryRequest.getName())).thenReturn(false);
         when(categoryRepository.countByPrefixStartsWith(any(String.class))).thenReturn(existPrefixCount);
@@ -97,7 +101,7 @@ public class CategoryServiceImplTest {
     }
 
     @Test
-    public void testSaveCategory_WhenNameExists_ThenThrowResourceAlreadyExistException() {
+    void testSaveCategory_WhenNameExists_ThenThrowResourceAlreadyExistException() {
         when(categoryRepository.existsByName(categoryRequest.getName())).thenReturn(true);
 
         ResourceAlreadyExistException exception = assertThrows(ResourceAlreadyExistException.class, () ->
@@ -110,14 +114,11 @@ public class CategoryServiceImplTest {
     }
 
     @Test
-    public void testGetAllCategory_WhenSuccess_ThenReturnListCategory() {
+    void testGetAllCategory_WhenSuccess_ThenReturnListCategory() {
         List<Category> categoryList = Arrays.asList(category1, category2);
         Sort sort = Sort.by(Sort.Direction.ASC, "auditMetadata.createdOn");
-        Pageable pageable = PageRequest.of(0, categoryList.size(), sort);
-        Page<Category> categories = new PageImpl<>(categoryList, pageable, categoryList.size());
 
-        when(categoryRepository.findAll()).thenReturn(categoryList);
-        when(categoryRepository.findAll(pageable)).thenReturn(categories);
+        when(categoryRepository.findAll(sort)).thenReturn(categoryList);
 
         ResponseDto<List<CategoryResponse>> response = categoryServiceImpl.getAllCategory();
 
@@ -127,6 +128,6 @@ public class CategoryServiceImplTest {
         assertEquals("LA", response.getData().get(0).getPrefix());
         assertEquals("MO", response.getData().get(1).getPrefix());
 
-        // verify(categoryRepository).findAll();
+        verify(categoryRepository, times(1)).findAll(any(Sort.class));
     }
 }

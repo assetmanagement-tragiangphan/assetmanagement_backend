@@ -34,16 +34,16 @@ public class ReportController {
 
     private final ReportService service;
 
-    @GetMapping("/export")
-    public ResponseEntity<ResponseDto<List<ReportResponse>>> getReport(Authentication authentication) {
-        UserDetailsDto requestUser = (UserDetailsDto) authentication.getPrincipal();
-        return ResponseEntity.status(HttpStatus.OK).body(service.getReport(requestUser));
-    }
-
     @GetMapping("/view")
     public ResponseEntity<ResponseDto<PageableDto<List<ReportResponse>>>> getReportWithPagination(Pageable pageable, Authentication authentication) {
         UserDetailsDto requestUser = (UserDetailsDto) authentication.getPrincipal();
         return ResponseEntity.status(HttpStatus.OK).body(service.getReportWithPagination(pageable, requestUser));
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<ResponseDto<List<ReportResponse>>> getReport(Authentication authentication) {
+        UserDetailsDto requestUser = (UserDetailsDto) authentication.getPrincipal();
+        return ResponseEntity.status(HttpStatus.OK).body(service.getReport(requestUser));
     }
 
 }

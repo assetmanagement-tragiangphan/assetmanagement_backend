@@ -11,6 +11,8 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -30,6 +32,7 @@ import lombok.experimental.SuperBuilder;
 public class Assignment extends BaseEntity implements Auditable {
     
     private LocalDate assignedDate;
+    @Size(max = 300, message = "Note cannot exceed 300 characters")
     private String note;
 
     @Embedded

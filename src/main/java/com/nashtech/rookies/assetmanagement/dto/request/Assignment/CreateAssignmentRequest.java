@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.Max;
+
 @Builder
 @Data
 @NoArgsConstructor
@@ -15,5 +17,6 @@ public class CreateAssignmentRequest {
     private String staffCode;
     private String assetCode;
     private LocalDate assignedDate;
+    @Max(value = 300, message = "Note cannot exceed 300 characters")
     private String note;
 }

@@ -1,10 +1,42 @@
 package com.nashtech.rookies.assetmanagement.controller;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import org.hamcrest.Matchers;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.UserDto;
-import com.nashtech.rookies.assetmanagement.dto.request.User.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.ChangePasswordRequest;
+import com.nashtech.rookies.assetmanagement.dto.request.User.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
@@ -19,42 +51,10 @@ import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.PrefixConstant;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-
 //@WebMvcTest(controllers = UserController.class)
 @AutoConfigureMockMvc
 @SpringBootTest
-public class UserControllerTest {
+class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
@@ -91,7 +91,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testGetAll_whenRequestUserRoleAdmin_thenReturnUserList() throws Exception{
+    void testGetAll_whenRequestUserRoleAdmin_thenReturnUserList() throws Exception{
         PageableDto<List<UserDto>> usersPageDto = PageableDto.<List<UserDto>>builder()
                 .content(userDtoList)
                 .currentPage(0)
@@ -123,7 +123,7 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
-    public void testGetUserByStaffCode_WhenUserIdIsValid_thenReturnUser() throws Exception {
+    void testGetUserByStaffCode_WhenUserIdIsValid_thenReturnUser() throws Exception {
         String staffCode = "SD001";
         var sampleResponse = ResponseDto.<UserDto>builder()
                 .data(userMapper.entityToDto(getUser()))
@@ -140,7 +140,7 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
-    public void testGetUserByStaffCode_WhenUserIdNotExist_thenThrowResourceNotFoundException() throws Exception {
+    void testGetUserByStaffCode_WhenUserIdNotExist_thenThrowResourceNotFoundException() throws Exception {
         String staffCode = "SD001";
 
         when(userService.getUserByStaffCode(staffCode)).thenThrow(new ResourceNotFoundException("User not found"));
@@ -153,7 +153,7 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
-    public void testUpdateUser_WhenUserIdIsValid_thenReturnUser() throws Exception {
+    void testUpdateUser_WhenUserIdIsValid_thenReturnUser() throws Exception {
         var sampleResponse = ResponseDto.<UserDto>builder()
                 .data(userMapper.entityToDto(getUser()))
                 .message("Update user successfully")
@@ -177,7 +177,7 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
-    public void testUpdateUser_whenUserIdInvalid_thenThrow() throws Exception {
+    void testUpdateUser_whenUserIdInvalid_thenThrow() throws Exception {
         UpdateUserRequest request = UpdateUserRequest.builder()
                 .type(1)
                 .joinedDate(LocalDate.parse("2024-06-12"))
@@ -196,7 +196,7 @@ public class UserControllerTest {
 
 
     @Test
-    public void testChangePassword_whenRequestUserRoleAdmin_thenSuccess() throws Exception{
+    void testChangePassword_whenRequestUserRoleAdmin_thenSuccess() throws Exception{
         changePasswordRequest = ChangePasswordRequest.builder()
                 .newPassword("Duy@10102001")
                 .oldPassword("Old Password")
@@ -217,7 +217,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testChangePassword_whenInvalidPasswordFormat_thenSuccess() throws Exception{
+    void testChangePassword_whenInvalidPasswordFormat_thenSuccess() throws Exception{
         changePasswordRequest = ChangePasswordRequest.builder()
                 .newPassword("New Password")
                 .oldPassword("Old Password")
@@ -234,7 +234,7 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
-    public void testDisableUser_whenUserIdIsValid_thenReturnResponseDtoSucess() throws Exception {
+    void testDisableUser_whenUserIdIsValid_thenReturnResponseDtoSucess() throws Exception {
         var sampleResponse = ResponseDto.<Void>builder()
                 .message("Disable user successfully")
                 .build();
@@ -249,7 +249,7 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
-    public void testDisableUser_whenUserIdInvalid_thenReturnStatusNotFound() throws Exception {
+    void testDisableUser_whenUserIdInvalid_thenReturnStatusNotFound() throws Exception {
         when(userService.disableUser(any(String.class))).thenThrow(new ResourceNotFoundException("User not found"));
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/users/SD001")
@@ -260,7 +260,7 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
-    public void testCreateUser_whenRequestIsValid_thenReturnUser() throws Exception {
+    void testCreateUser_whenRequestIsValid_thenReturnUser() throws Exception {
         CreateUserRequest sampleRequest = CreateUserRequest.builder()
                 .roleId(1)
                 .gender(GenderConstant.MALE)
@@ -287,7 +287,7 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
-    public void testCreateUser_whenInvalidDate_thenThrow() throws Exception {
+    void testCreateUser_whenInvalidDate_thenThrow() throws Exception {
         CreateUserRequest sampleRequest = CreateUserRequest.builder()
                 .roleId(1)
                 .gender(GenderConstant.MALE)
@@ -306,7 +306,7 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test", roles = "ADMIN")
-    public void testCreateUser_whenInvalidRole_thenThrow() throws Exception {
+    void testCreateUser_whenInvalidRole_thenThrow() throws Exception {
         CreateUserRequest sampleRequest = CreateUserRequest.builder()
                 .roleId(1)
                 .gender(GenderConstant.MALE)

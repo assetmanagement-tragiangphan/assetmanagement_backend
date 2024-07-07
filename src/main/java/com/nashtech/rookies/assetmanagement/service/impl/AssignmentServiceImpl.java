@@ -34,7 +34,6 @@ import com.nashtech.rookies.assetmanagement.repository.AssetRepository;
 import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.service.AssignmentService;
-import com.nashtech.rookies.assetmanagement.specifications.AssignmentSpecification;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 
 import lombok.AllArgsConstructor;
