@@ -5,6 +5,7 @@
 package com.nashtech.rookies.assetmanagement.service.impl;
 
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
+import com.nashtech.rookies.assetmanagement.dto.request.ReturnAsset.ReturnAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.ReturnRequest.ReturnRequestRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
@@ -15,9 +16,13 @@ import com.nashtech.rookies.assetmanagement.entity.AuditMetadata;
 import com.nashtech.rookies.assetmanagement.entity.ReturnRequest;
 import com.nashtech.rookies.assetmanagement.entity.User;
 import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
+import com.nashtech.rookies.assetmanagement.exception.ResourceAlreadyExistException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
+import com.nashtech.rookies.assetmanagement.mapper.ReturnAssetMapper;
 import com.nashtech.rookies.assetmanagement.mapper.ReturnRequestMapper;
+import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.ReturnRequestRepository;
+import com.nashtech.rookies.assetmanagement.repository.UserRepository;
 import com.nashtech.rookies.assetmanagement.util.RoleConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import java.time.LocalDate;
@@ -37,11 +42,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,10 +65,19 @@ public class ReturnRequestServiceImplTest {
     @Mock
     private ReturnRequestRepository returnRequestRepository;
 
+    @Mock
+    private AssignmentRepository assignmentRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private ReturnRequestServiceImpl returnRequestService;
     @Mock
     private ReturnRequestMapper returnRequestMapper;
+
+    @Mock
+    private ReturnAssetMapper returnAssetMapper;
     
     private UserDetailsDto userDetails;
 
@@ -72,6 +88,8 @@ public class ReturnRequestServiceImplTest {
     private User user;
     private User assignee;
     private Assignment assignment;
+    private Assignment assignment2;
+    private Assignment assignment3;
     private Asset asset;
     List<ReturnRequest> returnRequestList;
     List<ReturnRequestResponseDTO> returnRequestReponseList;
@@ -99,6 +117,22 @@ public class ReturnRequestServiceImplTest {
                 .assignedDate(LocalDate.now())
                 .note("Test assignment")
                 .status(StatusConstant.WAITING_FOR_ACCEPTANCE)
+                .build();
+        assignment2 = Assignment.builder()
+                .id(1)
+                .asset(asset)
+                .assignee(assignee)
+                .assignedDate(LocalDate.now())
+                .note("Test assignment")
+                .status(StatusConstant.ACCEPTED)
+                .build();
+        assignment3 = Assignment.builder()
+                .id(1)
+                .asset(asset)
+                .assignee(assignee)
+                .assignedDate(LocalDate.now())
+                .note("Test assignment")
+                .status(StatusConstant.DECLINED)
                 .build();
         auditMetadata = new AuditMetadata();
         auditMetadata.setCreatedBy(user);
@@ -218,5 +252,32 @@ public class ReturnRequestServiceImplTest {
             returnRequestService.completeOne(1, userDetails);
         });
         assertEquals("Cannot Completed Return Request Because It Is Completed", exception.getMessage());
+    }
+
+    @Test
+    void testCreateReturnRequest_WhenAcceptedAssignment_ThenSuccess() {
+        when(assignmentRepository.findById(anyInt())).thenReturn(Optional.ofNullable(assignment2));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.ofNullable(user));
+
+        var createRequest = ReturnAssetRequest.builder().assignmentId(1).build();
+        var actual = returnRequestService.createReturnRequest(createRequest,userDetails);
+        assertEquals(actual.getMessage(),"Create request successfully.");
+    }
+
+    @Test
+    void testCreateReturnRequest_WhenInvalidAssignment_ThenThrow() {
+        when(assignmentRepository.findById(anyInt())).thenReturn(Optional.ofNullable(assignment3));
+
+        var createRequest = ReturnAssetRequest.builder().assignmentId(1).build();
+        assertThrows(BadRequestException.class, () -> returnRequestService.createReturnRequest(createRequest,userDetails));
+    }
+
+    @Test
+    void testCreateReturnRequest_WhenAlreadyRequested_ThenThrow() {
+        when(assignmentRepository.findById(anyInt())).thenReturn(Optional.ofNullable(assignment2));
+        when(returnRequestRepository.findByAssignmentId(anyInt())).thenReturn(Optional.ofNullable(returnRequest1));
+
+        var createRequest = ReturnAssetRequest.builder().assignmentId(1).build();
+        assertThrows(ResourceAlreadyExistException.class, () -> returnRequestService.createReturnRequest(createRequest,userDetails));
     }
 }

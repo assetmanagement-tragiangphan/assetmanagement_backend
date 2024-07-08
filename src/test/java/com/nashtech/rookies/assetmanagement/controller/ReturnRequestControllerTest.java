@@ -1,11 +1,14 @@
 package com.nashtech.rookies.assetmanagement.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
+import com.nashtech.rookies.assetmanagement.dto.request.ReturnAsset.ReturnAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.ReturnRequest.ReturnRequestRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
+import com.nashtech.rookies.assetmanagement.dto.response.ReturnAssetRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.response.ReturnRequestResponseDTO;
 import com.nashtech.rookies.assetmanagement.entity.ReturnRequest;
 import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
@@ -17,6 +20,8 @@ import com.nashtech.rookies.assetmanagement.util.StatusConstant;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+
+import lombok.With;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +46,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.test.context.support.WithMockUser;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -131,7 +138,7 @@ public class ReturnRequestControllerTest {
                 .with(user(userDetailsDto))
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Get All Return Request Succesfully")));
+                .andExpect(jsonPath("$.message", Matchers.is("Get All Return Request Succesfully")));
 
         // Verify service method invocation
         verify(returnRequestService, times(1))
@@ -152,8 +159,8 @@ public class ReturnRequestControllerTest {
                 .with(user(userDetailsDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data", Matchers.nullValue()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Cancel Return Request Succesfully")));
+                .andExpect(jsonPath("$.data", Matchers.nullValue()))
+                .andExpect(jsonPath("$.message", Matchers.is("Cancel Return Request Succesfully")));
         // Verify service method invocation
         verify(returnRequestService, times(1))
                 .cancelOne(1, userDetailsDto);
@@ -209,8 +216,8 @@ public class ReturnRequestControllerTest {
                 .with(user(userDetailsDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data", Matchers.nullValue()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Complete Return Request Succesfully")));
+                .andExpect(jsonPath("$.data", Matchers.nullValue()))
+                .andExpect(jsonPath("$.message", Matchers.is("Complete Return Request Succesfully")));
         // Verify service method invocation
         verify(returnRequestService, times(1))
                 .completeOne(1, userDetailsDto);
@@ -250,5 +257,45 @@ public class ReturnRequestControllerTest {
         // Verify service method invocation
         verify(returnRequestService, times(1))
                 .completeOne(1, userDetailsDto);
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = "ADMIN")
+    public void testCreateReturnRequest_whenValidRequest_thenSuccess() throws Exception{
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        var request = ReturnAssetRequest.builder().assignmentId(1).build();
+
+        var returnAsset =ReturnAssetRequestDTO.builder().id(1).build();
+        var response = ResponseDto.builder().data(returnAsset).message("Complete Return Request Succesfully").build();
+        when(returnRequestService.createReturnRequest(request, userDetailsDto)).thenReturn(response);
+
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/return-request")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(userDetailsDto))
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(jsonPath("$.data.id",Matchers.is(1)));
+
+        verify(returnRequestService, times(1))
+                .createReturnRequest(request, userDetailsDto);
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles= "ADMIN")
+    public void testCreateReturnRequest_whenInvalidRequest_thenThrow() throws Exception {
+        when(authentication.getPrincipal()).thenReturn(user(userDetailsDto));
+        var request = ReturnAssetRequest.builder().assignmentId(1).build();
+        when(returnRequestService.createReturnRequest(request, userDetailsDto)).thenThrow(new BadRequestException("Assignment not yet accepted or inactive right now"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/return-request")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(user(userDetailsDto))
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(jsonPath("$.message", Matchers.is("Assignment not yet accepted or inactive right now")));
+
+        verify(returnRequestService, times(1))
+                .createReturnRequest(request, userDetailsDto);
     }
 }
