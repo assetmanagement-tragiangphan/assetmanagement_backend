@@ -160,7 +160,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             }
         }
 
-        List<String> status = List.of("ACCEPTED", "WAITING_FOR_ACCEPTANCE");
+        List<String> status = List.of("ACCEPTED", "WAITING_FOR_ACCEPTANCE", "WAITING_FOR_RETURNING");
 
         Page<AssignmentDetailResponse> assignmentDetails = repository.findOwnAssignmentDetails(requestUser.getUsername(), LocalDate.now(), status, pageRequest);
 

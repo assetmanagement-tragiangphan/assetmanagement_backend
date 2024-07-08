@@ -106,7 +106,7 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         var returnRequest = ReturnRequest.builder()
                 .requestedBy(requestedUser)
                 .assignment(assignment)
-                .status(StatusConstant.WAITING_FOR_ACCEPTANCE)
+                .status(StatusConstant.WAITING_FOR_RETURNING)
                 .build();
         returnRequest = repository.save(returnRequest);
         return ResponseDto.<ReturnAssetRequestDTO>builder()
