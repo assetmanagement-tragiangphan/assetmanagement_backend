@@ -227,12 +227,13 @@ public class ReturnRequestServiceImplTest {
     @Test
     void testCompleteReturnRequest_WhenStatusIsWaitingForReturning_ThenSuccess() {
         when(returnRequestRepository.findById(anyInt())).thenReturn(Optional.of(returnRequest1));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
         when(returnRequestRepository.save(any(ReturnRequest.class))).thenReturn(returnRequest1);
 
         ResponseDto response = returnRequestService.completeOne(1, userDetails);
 
         Assertions.assertNotNull(response);
-        assertEquals("Copmlete Return Request Succesfully", response.getMessage());
+        assertEquals("Complete Return Request Succesfully", response.getMessage());
         verify(returnRequestRepository, times(1)).save(any(ReturnRequest.class));
     }
 

@@ -77,6 +77,7 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         if (!returnRequest.getStatus().equals(StatusConstant.WAITING_FOR_RETURNING)) {
             throw new BadRequestException("Cannot Cancel Return Request Because It Is Completed");
         }
+        returnRequest.getAssignment().setStatus(StatusConstant.ACCEPTED);
         repository.delete(returnRequest);
         return ResponseDto.builder().data(null).message("Cancel Return Request Succesfully").build();
     }
@@ -87,12 +88,14 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         if (!returnRequest.getStatus().equals(StatusConstant.WAITING_FOR_RETURNING)) {
             throw new BadRequestException("Cannot Completed Return Request Because It Is Completed");
         }
+        var acceptedUser = userRepository.findById(requestUser.getId()).orElseThrow(() -> new ResourceNotFoundException("User not found."));
         returnRequest.setStatus(StatusConstant.COMPLETED);
+        returnRequest.setAcceptedBy(acceptedUser);
         returnRequest.setReturnedDate(LocalDate.now());
         returnRequest.getAssignment().setStatus(StatusConstant.INACTIVE);
         returnRequest.getAssignment().getAsset().setStatus(StatusConstant.AVAILABLE);
         repository.save(returnRequest);
-        return ResponseDto.builder().data(null).message("Copmlete Return Request Succesfully").build();
+        return ResponseDto.builder().data(null).message("Complete Return Request Succesfully").build();
     }
 
     @Override
