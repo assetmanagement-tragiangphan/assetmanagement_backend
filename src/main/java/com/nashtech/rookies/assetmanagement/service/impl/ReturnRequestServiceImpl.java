@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -48,10 +49,10 @@ import lombok.AllArgsConstructor;
 public class ReturnRequestServiceImpl implements ReturnRequestService {
 
     private final ReturnRequestRepository repository;
-    private final AssignmentService assignmentService;
     private final ReturnRequestMapper mapper;
     private final UserRepository userRepository;
     private final ReturnAssetMapper returnAssetMapper;
+    private final AssignmentRepository assignmentRepository;
 
     @Override
     public ResponseDto getAll(ReturnRequestRequestDTO requestParams, Pageable pageable, UserDetailsDto requestUser) {
@@ -96,12 +97,12 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
 
     @Override
     public ResponseDto createReturnRequest(ReturnAssetRequest request, UserDetailsDto requestUser) {
-        var assignment = assignmentService.updateAssignmentStatus(request.getAssignmentId(), StatusConstant.WAITING_FOR_RETURNING);
-        var requestedUser = userRepository.findById(requestUser.getId()).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+        var assignment = assignmentRepository.findById(request.getAssignmentId()).orElseThrow(() -> new ResourceNotFoundException("Assignment not Found"));
         var isRequested = repository.findByAssignmentId(request.getAssignmentId());
-        if (isRequested.isPresent()) {
-            throw new ResourceAlreadyExistException("Assignment is requested");
-        }
+        if (isRequested.isPresent()) throw new ResourceAlreadyExistException("Assignment is requested");
+        if (assignment.getStatus()!= StatusConstant.ACCEPTED) throw new BadRequestException("Assignment not yet accepted or inactive right now");
+        assignment.setStatus(StatusConstant.WAITING_FOR_RETURNING);
+        var requestedUser = userRepository.findById(requestUser.getId()).orElseThrow(() -> new ResourceNotFoundException("User not found."));
         var returnRequest = ReturnRequest.builder()
                 .requestedBy(requestedUser)
                 .assignment(assignment)

@@ -316,10 +316,4 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .build();
     }
 
-    public Assignment updateAssignmentStatus(Integer id, StatusConstant status) {
-        Assignment assignment = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Assignment does not exist."));
-        assignment.setStatus(status);
-        return repository.save(assignment);
-    }
 }

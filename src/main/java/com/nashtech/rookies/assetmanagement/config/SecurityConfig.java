@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -41,6 +42,9 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/api/v1/auth/**",
             "/hello",
+            "/h2-console/**",
+            "/favicon.ico/**",
+            "/console/**"
     };
 
 
@@ -71,6 +75,9 @@ public class SecurityConfig {
 
                 }))
                 .csrf(AbstractHttpConfigurer::disable)
+                .headers(httpSecurityHeadersConfigurer -> {
+                    httpSecurityHeadersConfigurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable);
+                })
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(WHITE_LIST_URL).permitAll()
 
