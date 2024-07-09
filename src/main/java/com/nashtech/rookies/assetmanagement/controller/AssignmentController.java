@@ -75,4 +75,9 @@ public class AssignmentController {
     public ResponseEntity deleteAssigment(@PathVariable("id") Integer id) {
         return ResponseEntity.status(HttpStatus.OK).body(assignmentService.deleteAssignment(id));
     }
+
+    @GetMapping("/valid/{staffCode}")
+    public ResponseEntity<ResponseDto<Boolean>> checkUserHaveValidAssignment(@PathVariable("staffCode") String staffCode) {
+        return ResponseEntity.status(HttpStatus.OK).body(assignmentService.checkUserHaveValidAssignmentDto(staffCode));
+    }
 }

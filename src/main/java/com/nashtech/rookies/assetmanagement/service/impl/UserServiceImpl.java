@@ -19,6 +19,7 @@ import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
 import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
+import com.nashtech.rookies.assetmanagement.service.AssignmentService;
 import com.nashtech.rookies.assetmanagement.service.UserService;
 import com.nashtech.rookies.assetmanagement.specifications.UserSpecification;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
@@ -58,6 +59,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
     private final AssignmentRepository assignmentRepository;
+    private final AssignmentService assignmentService;
 
     @Override
     public ResponseDto<PageableDto<List<UserDto>>> getAll(UserGetRequest requestParams, Pageable pageable, UserDetailsDto requestUser) {
@@ -239,6 +241,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseDto<Void> disableUser(String staffCode) {
         var user = this.getUserEntityByStaffCode(staffCode);
+        if (assignmentService.checkUserHaveValidAssignment(staffCode)){
+            throw new BadRequestException("There are valid assignments belonging to this user. Please close all assignments before disabling user.");
+        }
         user.setStatus(StatusConstant.INACTIVE);
         tokenRepository.deleteAllByUserId(user.getId());
         userRepository.save(user);

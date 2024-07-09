@@ -316,4 +316,18 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .build();
     }
 
+    @Override
+    public boolean checkUserHaveValidAssignment(String staffCode) {
+        List<StatusConstant> status = List.of(StatusConstant.ACCEPTED, StatusConstant.WAITING_FOR_ACCEPTANCE, StatusConstant.WAITING_FOR_RETURNING);
+        return repository.existsByUserStaffCodeAndStatusIn(staffCode, status);
+    }
+
+    @Override
+    public ResponseDto<Boolean> checkUserHaveValidAssignmentDto(String staffCode) {
+        return ResponseDto.<Boolean>builder()
+                .data(checkUserHaveValidAssignment(staffCode))
+                .message("There are valid assignments belonging to this user. Please close all assignments before disabling user.")
+                .build();
+    }
+
 }
