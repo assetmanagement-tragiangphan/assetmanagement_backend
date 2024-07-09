@@ -19,6 +19,7 @@ import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
 import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
+import com.nashtech.rookies.assetmanagement.service.AssignmentService;
 import com.nashtech.rookies.assetmanagement.util.*;
 
 import io.jsonwebtoken.lang.Assert;
@@ -64,6 +65,9 @@ public class UserServiceImplTest {
     @Mock
     private AssignmentRepository assignmentRepository;
 
+    @Mock 
+    private AssignmentService assignmentService;
+
     private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
     private UserServiceImpl userService;
     @Mock
@@ -76,7 +80,7 @@ public class UserServiceImplTest {
 
     @BeforeEach
     public void reset_mock() throws Exception {
-        userService = new UserServiceImpl(userRepository, userMapper, roleRepository, passwordEncoder, tokenRepository, assignmentRepository);
+        userService = new UserServiceImpl(userRepository, userMapper, roleRepository, passwordEncoder, tokenRepository, assignmentRepository, assignmentService);
 
         Token token = Token.builder().id(1).token("token1").build();
 
