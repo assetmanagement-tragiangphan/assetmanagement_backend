@@ -15,6 +15,7 @@ import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.InvalidDateException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
+import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
 import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
@@ -60,6 +61,9 @@ public class UserServiceImplTest {
     @Mock
     private TokenRepository tokenRepository;
 
+    @Mock
+    private AssignmentRepository assignmentRepository;
+
     private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
     private UserServiceImpl userService;
     @Mock
@@ -72,7 +76,7 @@ public class UserServiceImplTest {
 
     @BeforeEach
     public void reset_mock() throws Exception {
-        userService = new UserServiceImpl(userRepository, userMapper, roleRepository, passwordEncoder, tokenRepository);
+        userService = new UserServiceImpl(userRepository, userMapper, roleRepository, passwordEncoder, tokenRepository, assignmentRepository);
 
         Token token = Token.builder().id(1).token("token1").build();
 

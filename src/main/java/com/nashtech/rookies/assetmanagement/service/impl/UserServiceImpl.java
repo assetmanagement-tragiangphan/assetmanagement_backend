@@ -7,6 +7,7 @@ import com.nashtech.rookies.assetmanagement.dto.request.User.CreateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UpdateUserRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.User.UserGetRequest;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
+import com.nashtech.rookies.assetmanagement.entity.Assignment;
 import com.nashtech.rookies.assetmanagement.exception.InvalidDateException;
 import com.nashtech.rookies.assetmanagement.dto.response.PageableDto;
 import com.nashtech.rookies.assetmanagement.entity.User;
@@ -14,6 +15,7 @@ import com.nashtech.rookies.assetmanagement.entity.User_;
 import com.nashtech.rookies.assetmanagement.exception.BadRequestException;
 import com.nashtech.rookies.assetmanagement.exception.ResourceNotFoundException;
 import com.nashtech.rookies.assetmanagement.mapper.UserMapper;
+import com.nashtech.rookies.assetmanagement.repository.AssignmentRepository;
 import com.nashtech.rookies.assetmanagement.repository.RoleRepository;
 import com.nashtech.rookies.assetmanagement.repository.TokenRepository;
 import com.nashtech.rookies.assetmanagement.repository.UserRepository;
@@ -55,6 +57,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
+    private final AssignmentRepository assignmentRepository;
 
     @Override
     public ResponseDto<PageableDto<List<UserDto>>> getAll(UserGetRequest requestParams, Pageable pageable, UserDetailsDto requestUser) {
@@ -162,6 +165,11 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToUserDetailsDto(user);
     }
 
+    LocalDate compareDate(LocalDate A, LocalDate B) {
+        if (A.isAfter(B)) return A;
+        return B;
+    }
+
     @Override
     public ResponseDto<UserDto> updateUser(UpdateUserRequest request, String staffCode) {
         //Validate
@@ -174,9 +182,14 @@ public class UserServiceImpl implements UserService {
         if (isWeekend(request.getJoinedDate()))
             throw new InvalidDateException("joined date is Saturday or Sunday. Please select a different date");
         //Update
+        var userAssignments = assignmentRepository.findByAssigneeId(user.getId());
+        for (Assignment assignment : userAssignments) {
+            assignment.setAssignedDate(compareDate(assignment.getAssignedDate(),request.getJoinedDate()));
+        }
         User updatedUser = userMapper.updateUserRequestToEntity(user, request);
         updatedUser.setRole(role);
         var returnUser = userRepository.save(updatedUser);
+        assignmentRepository.saveAll(userAssignments);
         return ResponseDto.<UserDto>builder()
                 .data(userMapper.entityToDto(returnUser))
                 .message("Update user successfully")

@@ -24,7 +24,8 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Integer>
     Optional<Assignment> findByIdAndStatusEquals(Integer id, StatusConstant status);
 
     boolean existsByAssetId(Integer assetId);
-
+     List<Assignment> findByAssigneeId(Integer assigneeId);
+     
     @Query(value = "SELECT new com.nashtech.rookies.assetmanagement.dto.response.AssignmentDetailResponse("
             + "a.id, "
             + "a.asset.assetCode, "
