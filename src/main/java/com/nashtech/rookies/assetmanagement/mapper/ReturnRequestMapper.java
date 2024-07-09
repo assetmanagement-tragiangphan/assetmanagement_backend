@@ -21,7 +21,7 @@ public interface ReturnRequestMapper {
     @Mapping(target = "assetCode", source = "returnRequest.assignment.asset.assetCode")
     @Mapping(target = "assetName", source = "returnRequest.assignment.asset.name")
     @Mapping(target = "requestedBy", source = "returnRequest.requestedBy.username")
-    @Mapping(target = "assignedDate", source = "returnRequest.auditMetadata.createdOn",dateFormat = "yyyy-MM-dd")
+    @Mapping(target = "assignedDate", source = "returnRequest.assignment.assignedDate")
     @Mapping(target = "acceptedBy", source = "returnRequest.acceptedBy.username")
     @Mapping(target = "returnedDate", source = "returnRequest.returnedDate")
     @Mapping(target = "state", source = "returnRequest.status")

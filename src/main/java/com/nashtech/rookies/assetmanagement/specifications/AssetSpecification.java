@@ -9,6 +9,7 @@ import com.nashtech.rookies.assetmanagement.entity.Asset_;
 import com.nashtech.rookies.assetmanagement.entity.Category;
 import com.nashtech.rookies.assetmanagement.util.LocationConstant;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
+import jakarta.persistence.criteria.JoinType;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -61,8 +62,16 @@ public class AssetSpecification {
             return builder.equal(root.get(Asset_.LOCATION), location);
         };
     }
+    public static Specification<Asset> join() {
+        return (root, query, builder) -> {
+            if (Long.class != query.getResultType()) {
+                root.fetch(Asset_.CATEGORY, JoinType.LEFT);
+            }
+            return builder.conjunction();
 
+        };
+    }
     public static Specification<Asset> filterSpecs(LocationConstant location, List<Long> category_id, String search, List<String> states) {
-        return Specification.where(locationAt(location)).and(nameLike(search).or(assetCodeLike(search))).and(withCategoryIn(category_id)).and(withStatesIn(states));
+        return join().and(locationAt(location)).and(nameLike(search).or(assetCodeLike(search))).and(withCategoryIn(category_id)).and(withStatesIn(states));
     }
 }

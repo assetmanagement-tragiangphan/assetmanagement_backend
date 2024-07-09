@@ -8,7 +8,6 @@ import com.nashtech.rookies.assetmanagement.dto.UserDetailsDto;
 import com.nashtech.rookies.assetmanagement.dto.request.ReturnAsset.ReturnAssetRequest;
 import com.nashtech.rookies.assetmanagement.dto.request.ReturnRequest.ReturnRequestRequestDTO;
 import com.nashtech.rookies.assetmanagement.dto.response.ResponseDto;
-import com.nashtech.rookies.assetmanagement.dto.response.ReturnAssetRequestDTO;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -21,7 +20,7 @@ public interface ReturnRequestService {
 
     ResponseDto cancelOne(Integer id, UserDetailsDto requestUser);
 
-    public ResponseDto completeOne(Integer id, UserDetailsDto requestUser);
+    ResponseDto completeOne(Integer id, UserDetailsDto requestUser);
 
     ResponseDto createReturnRequest(ReturnAssetRequest request, UserDetailsDto requestUser);
 
