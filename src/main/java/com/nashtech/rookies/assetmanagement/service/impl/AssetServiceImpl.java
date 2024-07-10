@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.nashtech.rookies.assetmanagement.specifications.AssetSpecification.filterSpecs;
+import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -81,19 +82,12 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ResponseDto getOneWithHistory(String requestParams, int page) {
         PageRequest pageRequest = PageRequest.of(page, 10);
+        List<StatusConstant> status = List.of(StatusConstant.ACCEPTED, StatusConstant.COMPLETED, StatusConstant.WAITING_FOR_RETURNING);
         Asset asset = repository.findAssetByAssetCode(requestParams).orElseThrow(() -> new ResourceNotFoundException("Asset does not exists!"));
-        Page<AssetHistoryDTO> historyList = repository.findAssetHistory(requestParams, pageRequest);
+        Page<AssetHistoryDTO> historyList = repository.findAssetHistory(requestParams, status, pageRequest);
         AssetResponseDto assetResponseDto = mapper.entityToDto(asset);
         AssetWithHistoryResponseDTO response = new AssetWithHistoryResponseDTO(assetResponseDto, historyList);
         return new ResponseDto(response, "Get All Assets History Successfully");
-    }
-
-    @Override
-    public ResponseDto getHistoryOfOneAsset(String requestParams, Integer page) {
-        PageRequest pageRequest = PageRequest.of(page, 10);
-        Page<AssetHistoryDTO> historyList = repository.findAssetHistory(requestParams, pageRequest);
-        return new ResponseDto(historyList, "Get History of Asset Successfully");
-
     }
 
     @Override

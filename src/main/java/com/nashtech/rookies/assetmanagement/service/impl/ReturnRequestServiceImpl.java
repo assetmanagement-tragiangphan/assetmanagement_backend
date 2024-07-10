@@ -92,7 +92,7 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         returnRequest.setStatus(StatusConstant.COMPLETED);
         returnRequest.setAcceptedBy(acceptedUser);
         returnRequest.setReturnedDate(LocalDate.now());
-        returnRequest.getAssignment().setStatus(StatusConstant.INACTIVE);
+        returnRequest.getAssignment().setStatus(StatusConstant.COMPLETED);
         returnRequest.getAssignment().getAsset().setStatus(StatusConstant.AVAILABLE);
         repository.save(returnRequest);
         return ResponseDto.builder().data(null).message("Complete Return Request Succesfully").build();

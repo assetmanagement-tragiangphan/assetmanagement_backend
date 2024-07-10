@@ -49,12 +49,6 @@ public class AssetController {
         ResponseDto assets = assetService.getOneWithHistory(assetCode, page);
         return ResponseEntity.ok().body(assets);
     }
-    
-    @GetMapping("/history/only/{assetCode}")
-    public ResponseEntity getHistoryOfOneAsset(@PathVariable("assetCode") String assetCode, @RequestParam("page") Integer page) {
-        ResponseDto assets = assetService.getHistoryOfOneAsset(assetCode, page);
-        return ResponseEntity.ok().body(assets);
-    }
 
     @PostMapping()
     public ResponseEntity<ResponseDto<AssetResponseDto>> createAsset(@RequestBody CreateAssetRequest request, Authentication authentication) {

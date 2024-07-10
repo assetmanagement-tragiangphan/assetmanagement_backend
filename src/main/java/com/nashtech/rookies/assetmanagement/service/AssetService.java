@@ -25,5 +25,4 @@ public interface AssetService {
     ResponseDto<AssetResponseDto> editAsset(String assetCode, EditAssetRequest request);
     ResponseDto deleteAsset(String assetCode);
 
-    public ResponseDto getHistoryOfOneAsset(String assetCode, Integer page);
 }

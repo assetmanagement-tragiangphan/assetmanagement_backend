@@ -3,6 +3,7 @@ package com.nashtech.rookies.assetmanagement.repository;
 import com.nashtech.rookies.assetmanagement.dto.response.AssetHistoryDTO;
 import com.nashtech.rookies.assetmanagement.entity.Asset;
 import com.nashtech.rookies.assetmanagement.util.StatusConstant;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -22,9 +23,11 @@ public interface AssetRepository extends JpaRepository<Asset, Integer>, JpaSpeci
 
     Optional<Asset> findByAssetCodeAndStatus(String assetCode, StatusConstant statusConstant);
 
-    Optional<Asset> findFirstByOrderByIdDesc(); 
-    
-    @Query(value = "select new com.nashtech.rookies.assetmanagement.dto.response.AssetHistoryDTO(a.assignedDate, a.assignee.username, a.auditMetadata.createdBy.username, rr.returnedDate) from Assignment a left join fetch ReturnRequest rr on a.id = rr.assignment.id where a.asset.assetCode = ?1")
-    public Page<AssetHistoryDTO> findAssetHistory(String requestParams, PageRequest pageRequest);
+    Optional<Asset> findFirstByOrderByIdDesc();
+
+    @Query(value = "select new com.nashtech.rookies.assetmanagement.dto.response.AssetHistoryDTO(a.assignedDate, a.assignee.username, a.auditMetadata.createdBy.username, rr.returnedDate) "
+            + "from Assignment a left join fetch ReturnRequest rr on a.id = rr.assignment.id "
+            + "where a.asset.assetCode = ?1 and a.status in ?2")
+    public Page<AssetHistoryDTO> findAssetHistory(String requestParams, List<StatusConstant> status, PageRequest pageRequest);
 
 }
