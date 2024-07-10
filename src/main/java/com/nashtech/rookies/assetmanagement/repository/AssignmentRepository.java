@@ -27,7 +27,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Integer>
      List<Assignment> findByAssigneeId(Integer assigneeId);
      
     @Query(value = "SELECT CASE WHEN COUNT(a) > 0 THEN TRUE ELSE FALSE END FROM Assignment a WHERE a.assignee.staffCode = :staffCode AND a.status IN :status")
-    boolean existsByUserStaffCodeAndStatusIn(String staffCode, List<StatusConstant> status);
+    boolean existsByUserStaffCodeAndStatusIn(@Param("staffCode") String staffCode,@Param("status") List<StatusConstant> status);
 
     @Query(value = "SELECT new com.nashtech.rookies.assetmanagement.dto.response.AssignmentDetailResponse("
             + "a.id, "
