@@ -96,11 +96,11 @@ public class AssignmentServiceImpl implements AssignmentService {
             }
         }
 
-        Page<AssignmentDetailResponse> assignmentDetails = repository.findAllAssignmentDetails(request.getSearch(), 
-                                                                                                request.getStatus(), 
-                                                                                                request.getAssignedDate(), 
-                                                                                                requestUser.getLocation(), 
-                                                                                                pageRequest);
+        Page<AssignmentDetailResponse> assignmentDetails = repository.findAllAssignmentDetails(request.getSearch(),
+                request.getStatus(),
+                request.getAssignedDate(),
+                requestUser.getLocation(),
+                pageRequest);
 
 
         PageableDto<List<AssignmentDetailResponse>> pages = PageableDto.<List<AssignmentDetailResponse>>builder()
@@ -123,7 +123,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         if (pageRequest.getSort().equals(Sort.unsorted())) {
             pageRequest = pageRequest.withSort(Direction.ASC, Assignment_.ASSET + "." + Asset_.ASSET_CODE);
         }
-        
+
         String sortField = pageRequest.getSort().toString().split(":")[0].trim().toLowerCase();
         String sortType = pageRequest.getSort().toString().split(":")[1].trim();
         if (sortType.equals("ASC")) {
@@ -204,8 +204,8 @@ public class AssignmentServiceImpl implements AssignmentService {
     public ResponseDto<AssignmentResponse> editAssignment(Integer id, EditAssignmentRequest request, UserDetailsDto requestUser) {
         if (repository.existsById(id)) {
             Assignment assignment = repository.findByIdAndStatusEquals(id, StatusConstant.WAITING_FOR_ACCEPTANCE).orElseThrow(() -> new ResourceAlreadyExistException("Assignment is unavailable to edit!"));
+            User assignee = userRepository.findByUsernameAndStatus(request.getUsername(), StatusConstant.ACTIVE).orElseThrow(() -> new ResourceNotFoundException("Assignee " + request.getUsername() + " Not Found"));
             Asset asset = assetRepository.findAssetByAssetCode(request.getAssetCode()).orElseThrow(() -> new ResourceNotFoundException("Asset Not Found!"));
-            User assignee = userRepository.findByUsernameAndStatus(request.getUsername(), StatusConstant.ACTIVE).orElseThrow(() -> new ResourceNotFoundException("Assignee Not Found"));
             if (asset.getAssetCode().equals(assignment.getAsset().getAssetCode())) {
                 assignment.setNote(request.getNote());
                 assignment.setAssignee(assignee);
@@ -241,7 +241,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public ResponseDto<AssignmentResponse> responseAssignment(Integer id, StatusConstant status,
-            UserDetailsDto requestUser) {
+                                                              UserDetailsDto requestUser) {
         Assignment assignment = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment does not exist."));
         switch (status) {
